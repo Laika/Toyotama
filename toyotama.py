@@ -1,12 +1,17 @@
-from typing import *
+from functools import reduce
 from gmpy2 import is_square, isqrt
 from math import gcd, ceil, sqrt
-from functools import reduce
 from random import choice
+from re import compile, findall
 from string import ascii_letters, digits
 from subprocess import PIPE, run
-from re import compile, findall
+from typing import *
+from pwn import *
 
+
+def connect(command: str):
+    host, port = command.split()[1:]
+    return remote(host, port)
 
 def extract_flag(s: str, head: str, tail: str = '') -> List[str]:
     try:
