@@ -8,7 +8,6 @@ from subprocess import PIPE, run
 from typing import *
 from pwn import *
 
-
 def connect(command: str):
     host, port = command.split()[1:]
     return remote(host, port)
@@ -49,6 +48,54 @@ def mod_inverse(a: int, n: int) -> int:
     return s % n
 
 
+def mod_sqrt(a, p):
+    if legendre_symbol(a, p) != 1:
+        return 0
+    elif a == 0:
+        return 0
+    elif p == 2:
+        return 0
+    elif p % 4 == 3:
+        return pow(a, (p + 1) / 4, p)
+
+    s = p - 1
+    e = 0
+    while s % 2 == 0:
+        s >>= 1
+        e += 1
+
+    n = 2
+    while legendre_symbol(n, p) != -1:
+        n += 1
+
+    x = pow(a, (s + 1) / 2, p)
+    b = pow(a, s, p)
+    g = pow(n, s, p)
+    r = e
+
+    while True:
+        t = b
+        m = 0
+        for m in range(r):
+            if t == 1:
+                break
+            t = pow(t, 2, p)
+
+        if m == 0:
+            return x
+
+        gs = pow(g, 2 ** (r-m-1), p)
+        g = (gs * gs) % p
+        x = (x * gs) % p
+        b = (b * g) % p
+        r = m
+
+
+def legendre_symbol(a, p):
+    ls = pow(a, (p - 1) / 2, p)
+    return -1 if ls == p-1 else ls
+
+
 def int_to_string(x: int, byte=False) -> str:
     sb = x.to_bytes((x.bit_length() + 7) // 8, byteorder='big')
     if byte:
@@ -85,21 +132,6 @@ def xor_string(s: str, t: str) -> str:
 
 def get_secretkey(e: int, p: int, q: int) -> int:
     return inv(e, (p - 1) * (q - 1))
-
-
-def get_param(filename: str) -> Tuple[int]:
-    args = 'openssl rsa -text -pubin < {}'.format(filename)
-    res = run(args, stdout=PIPE,
-                         stderr=PIPE, shell=True)
-
-    s = res.stdout.decode()
-    n, e = s.split('Modulus:')[1].split(
-        '-----BEGIN PUBLIC KEY-----')[0].split('Exponent:')
-    n, e = n.replace(':', '').replace(' ', '').replace(
-        '\n', ''), e.replace(':', '').replace(' ', '').replace('\n', '')
-    n, e = int(n, 16), int(e, 16)
-
-    return e, n
 
 
 def chinese_remainder(a: List[int], p: List[int]) -> int:
