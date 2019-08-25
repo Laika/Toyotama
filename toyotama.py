@@ -7,10 +7,6 @@ import string
 import subprocess
 import re
 
-def logprint(str, head='+'):
-    print('['+head+']', +str)
-
-
 
 def extract_flag(s, head, tail=''):
     try:
