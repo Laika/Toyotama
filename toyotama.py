@@ -2,23 +2,23 @@ from typing import *
 from gmpy2 import is_square, isqrt
 from math import gcd, ceil, sqrt
 from functools import reduce
-import random
-import string
-import subprocess
-import re
+from random import choice
+from string import ascii_letters, digits
+from subprocess import PIPE, run
+from re import compile, findall
 
 
 def extract_flag(s: str, head: str, tail: str = '') -> List[str]:
     try:
-        comp = re.compile(rf'{head}.*?{tail}')
-        return re.findall(comp, s)
+        comp = compile(rf'{head}.*?{tail}')
+        return findall(comp, s)
     except:
         patt = f'{head}.*?{tail}'
-        comp = re.compile(patt.encode())
-        return re.findall(comp, s)
+        comp = compile(patt.encode())
+        return findall(comp, s)
 
 def random_string(n: int) -> str:
-    return ''.join([random.choice(string.ascii_letters + string.digits) for _ in range(n)])
+    return ''.join([choice(ascii_letters + digits) for _ in range(n)])
 
 
 def lcm(x: int, y: int) -> int:
@@ -84,8 +84,8 @@ def get_secretkey(e: int, p: int, q: int) -> int:
 
 def get_param(filename: str) -> Tuple[int]:
     args = 'openssl rsa -text -pubin < {}'.format(filename)
-    res = subprocess.run(args, stdout=subprocess.PIPE,
-                         stderr=subprocess.PIPE, shell=True)
+    res = run(args, stdout=PIPE,
+                         stderr=PIPE, shell=True)
 
     s = res.stdout.decode()
     n, e = s.split('Modulus:')[1].split(
@@ -111,7 +111,7 @@ def vigenere(cipher: str, key: str) -> str:
     ans = ''
     i = 0
     for c in cipher:
-        if not c in string.ascii_letters:
+        if not c in ascii_letters:
             ans += c
             i += 1
         else:
