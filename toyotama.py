@@ -4,13 +4,18 @@ from math import gcd, ceil, sqrt
 from random import choice
 from re import compile, findall
 from string import ascii_letters, digits
-from subprocess import PIPE, run
+from subprocess import Popen, PIPE, run
 from typing import *
 from pwn import remote
+import sys
+
+# Utils
+
 
 def connect(command: str):
     host, port = command.split()[1:]
     return remote(host, port)
+
 
 def extract_flag(s: str, head: str, tail: str = '', unique: bool = True) -> List[str]:
     try:
@@ -27,10 +32,35 @@ def extract_flag(s: str, head: str, tail: str = '', unique: bool = True) -> List
             flags = set(flags)
         return flags
 
+
 def random_string(n: int) -> str:
     return ''.join([choice(ascii_letters + digits) for _ in range(n)])
 
 
+def int_to_string(x: int, byte: bool = False) -> str:
+    sb = x.to_bytes((x.bit_length() + 7) // 8, byteorder='big')
+    if byte:
+        return sb
+    else:
+        return sb.decode()
+
+
+def string_to_int(s: str) -> int:
+    return int.from_bytes(s.encode(), 'big')
+
+
+def run_proc(filename: str):
+    return Popen([f'./{filename}'], stdin=PIPE, stdout=PIPE, stderr=PIPE)
+
+def send_query(proc, args: List) -> str:
+    args = map(str, args)
+    query = ' '.join(args)
+    return proc.communicate(query.encode())[0].decode()
+
+
+
+# Crypto
+## Utils
 def lcm(x: int, y: int) -> int:
     return x * y // gcd(x, y)
 
@@ -46,7 +76,6 @@ def extended_gcd(a: int, b: int) -> Tuple[int, int, int]:
         a0, a1 = a1, (a0 - q * a1)
         b0, b1 = b1, (b0 - q * b1)
     return a0, b0, c0
-
 
 
 def mod_inverse(a: int, n: int) -> int:
@@ -90,7 +119,7 @@ def mod_sqrt(a: int, p: int) -> int:
         if m == 0:
             return x
 
-        gs = pow(g, 2 ** (r-m-1), p)
+        gs = pow(g, 2 ** (r - m - 1), p)
         g = (gs * gs) % p
         x = (x * gs) % p
         b = (b * g) % p
@@ -99,20 +128,7 @@ def mod_sqrt(a: int, p: int) -> int:
 
 def legendre_symbol(a: int, p: int) -> int:
     ls = pow(a, (p - 1) / 2, p)
-    return -1 if ls == p-1 else ls
-
-
-def int_to_string(x: int, byte: bool = False) -> str:
-    sb = x.to_bytes((x.bit_length() + 7) // 8, byteorder='big')
-    if byte:
-        return sb
-    else:
-        return sb.decode()
-
-
-
-def string_to_int(s: str) -> int:
-    return int.from_bytes(s.encode(), 'big')
+    return -1 if ls == p - 1 else ls
 
 
 def rot(n: int, s: str) -> str:
@@ -145,7 +161,6 @@ def chinese_remainder(a: List[int], p: List[int]) -> int:
     x = sum([ai * mod_inverse(P // pi, pi) * P // pi for ai, pi in zip(a, p)])
     return x % P
 
-# Crypto
 
 ## Vigenere
 def vigenere(cipher: str, key: str) -> str:
@@ -177,7 +192,6 @@ def common_modulus_attack(e1: int, e2: int, c1: int, c2: int, n: int) -> int:
 
 
 ## Wiener's Attack
-
 def rat_to_cfrac(a: int, b: int) -> Iterator[int]:
     while b > 0:
         x = a // b
@@ -215,11 +229,11 @@ def wieners_attack(e: int, n: int) -> Optional[int]:
             return dg // g
     return None
 
+
 ## Discrete Logarithm Problem
 ## find x s.t. pow(g, x, p) == y
 
-
-### Baby-step Giant-step algorithm
+## Baby-step Giant-step algorithm
 def baby_giant(g: int, y: int, p: int) -> int:
     m = ceil(isqrt(p))
     table = {}
@@ -239,6 +253,7 @@ def baby_giant(g: int, y: int, p: int) -> int:
             gmm %= p
 
     return -1
+
 
 ## Pohlig-Hellman algorithm
 def pohlig_hellman(g: int, y: int, p: int, phi_p: List[int]) -> int:
