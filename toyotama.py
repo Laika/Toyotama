@@ -6,21 +6,26 @@ from re import compile, findall
 from string import ascii_letters, digits
 from subprocess import PIPE, run
 from typing import *
-import pwn
+from pwn import remote
 
 def connect(command: str):
     host, port = command.split()[1:]
-    return pwn.remote(host, port)
+    return remote(host, port)
 
-def extract_flag(s: str, head: str, tail: str = '') -> List[str]:
+def extract_flag(s: str, head: str, tail: str = '', unique: bool = True) -> List[str]:
     try:
         comp = compile(rf'{head}.*?{tail}')
-        return findall(comp, s)
+        flags = findall(comp, s)
+        if unique:
+            flags = set(flags)
+        return flags
     except:
         patt = f'{head}.*?{tail}'
         comp = compile(patt.encode())
-        return findall(comp, s)
-
+        flags = findall(comp, s)
+        if unique:
+            flags = set(flags)
+        return flags
 
 def random_string(n: int) -> str:
     return ''.join([choice(ascii_letters + digits) for _ in range(n)])
