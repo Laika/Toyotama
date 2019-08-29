@@ -6,11 +6,11 @@ from re import compile, findall
 from string import ascii_letters, digits
 from subprocess import PIPE, run
 from typing import *
-from pwn import *
+import pwn
 
 def connect(command: str):
     host, port = command.split()[1:]
-    return remote(host, port)
+    return pwn.remote(host, port)
 
 def extract_flag(s: str, head: str, tail: str = '') -> List[str]:
     try:
@@ -20,6 +20,7 @@ def extract_flag(s: str, head: str, tail: str = '') -> List[str]:
         patt = f'{head}.*?{tail}'
         comp = compile(patt.encode())
         return findall(comp, s)
+
 
 def random_string(n: int) -> str:
     return ''.join([choice(ascii_letters + digits) for _ in range(n)])
@@ -44,11 +45,11 @@ def extended_gcd(a: int, b: int) -> Tuple[int, int, int]:
 
 
 def mod_inverse(a: int, n: int) -> int:
-    s, _, _ = extgcd(a, n)
+    s, _, _ = extended_gcd(a, n)
     return s % n
 
 
-def mod_sqrt(a, p):
+def mod_sqrt(a: int, p: int) -> int:
     if legendre_symbol(a, p) != 1:
         return 0
     elif a == 0:
@@ -91,12 +92,12 @@ def mod_sqrt(a, p):
         r = m
 
 
-def legendre_symbol(a, p):
+def legendre_symbol(a: int, p: int) -> int:
     ls = pow(a, (p - 1) / 2, p)
     return -1 if ls == p-1 else ls
 
 
-def int_to_string(x: int, byte=False) -> str:
+def int_to_string(x: int, byte: bool = False) -> str:
     sb = x.to_bytes((x.bit_length() + 7) // 8, byteorder='big')
     if byte:
         return sb
@@ -131,12 +132,12 @@ def xor_string(s: str, t: str) -> str:
 
 
 def get_secretkey(e: int, p: int, q: int) -> int:
-    return inv(e, (p - 1) * (q - 1))
+    return mod_inverse(e, (p - 1) * (q - 1))
 
 
 def chinese_remainder(a: List[int], p: List[int]) -> int:
     P = reduce(lambda x, y: x * y, p)
-    x = sum([ai * inv(P // pi, pi) * P // pi for ai, pi in zip(a, p)])
+    x = sum([ai * mod_inverse(P // pi, pi) * P // pi for ai, pi in zip(a, p)])
     return x % P
 
 # Crypto
@@ -159,12 +160,12 @@ def vigenere(cipher: str, key: str) -> str:
 
 ## Common Modulus Attack
 def common_modulus_attack(e1: int, e2: int, c1: int, c2: int, n: int) -> int:
-    s1, s2, _ = extgcd(e1, e2)
+    s1, s2, _ = extended_gcd(e1, e2)
     if s1 < 0:
-        c1 = inv(c1, n)
+        c1 = mod_inverse(c1, n)
         s1 *= -1
     if s2 < 0:
-        c2 = inv(c2, n)
+        c2 = mod_inverse(c2, n)
         s2 *= -1
 
     return (pow(c1, s1, n) * pow(c2, s2, n)) % n
@@ -222,7 +223,7 @@ def baby_giant(g: int, y: int, p: int) -> int:
         table[b] = i
         b = (b * g) % p
 
-    gim = inv(pow(g, m), p)
+    gim = mod_inverse(pow(g, m), p)
     gmm = y
 
     for i in range(m):
