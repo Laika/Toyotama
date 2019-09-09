@@ -1,21 +1,23 @@
 from functools import reduce
-from gmpy2 import is_square, isqrt
+from gmpy2 import is_square, isqrt, jacobi
 from math import gcd, ceil, sqrt
 from random import choice
 from re import compile, findall
-from string import ascii_letters, digits
+from string import ascii_letters, digits, ascii_uppercase, ascii_lowercase
 from subprocess import Popen, PIPE, run
 from typing import *
 from pwn import remote
 import sys
+import code
+
 
 # Utils
-
-
 def connect(command: str):
     host, port = command.split()[1:]
     return remote(host, port)
 
+def interact():
+    code.interact(local=locals())
 
 def extract_flag(s: str, head: str, tail: str = '', unique: bool = True) -> List[str]:
     try:
@@ -38,7 +40,7 @@ def random_string(n: int) -> str:
 
 
 def int_to_string(x: int, byte: bool = False) -> str:
-    sb = x.to_bytes((x.bit_length() + 7) // 8, byteorder='big')
+    sb = x.to_bytes((x.bit_length()+7)//8, byteorder='big')
     if byte:
         return sb
     else:
@@ -126,19 +128,16 @@ def mod_sqrt(a: int, p: int) -> int:
         r = m
 
 
-def legendre_symbol(a: int, p: int) -> int:
-    ls = pow(a, (p - 1) / 2, p)
-    return -1 if ls == p - 1 else ls
 
 
 def rot(n: int, s: str) -> str:
     n %= 26
     r = ''
     for c in s:
-        if 'A' <= c <= 'Z':
+        if c in string.ascii_uppercase:
             r += chr((ord(c) - ord('A') + n) % 26 + ord('A'))
 
-        elif 'a' <= c <= 'z':
+        elif c in string.ascii_lowercase:
             r += chr((ord(c) - ord('a') + n) % 26 + ord('a'))
         else:
             r += c
