@@ -12,9 +12,10 @@ import code
 import time
 from colored import fg, attr
 
+
 reset = attr(0)
 col1 = fg(128)
-col2 = fg(57)
+col2 = fg(93)
 bold = attr(1)
 
 # Utils
@@ -25,7 +26,7 @@ def connect(command: str):
 def interact(symboltable):
     code.interact(local=symboltable)
 
-def show_parameters(symboltable, *args):
+def show_variables(symboltable, *args):
     def getVarsNames( _vars, symboltable ) :
         return [ getVarName( var, symboltable ) for var in _vars ]
 
@@ -41,7 +42,10 @@ def show_parameters(symboltable, *args):
     names = getVarsNames(args, symboltable)
     maxlength = max([len(name) for name in names])
     for name, value in zip(names, args):
-        print(f'[{col1}*{reset}] {col2}{bold}{name.rjust(maxlength)}: {value}{reset}')
+        if name.endswith('_addr'):
+            print(f'[{col1}*{reset}] {col2}{bold}{name.rjust(maxlength)}: {value:#x}{reset}')
+        else:
+            print(f'[{col1}*{reset}] {col2}{bold}{name.rjust(maxlength)}: {value}{reset}')
 
 
 
