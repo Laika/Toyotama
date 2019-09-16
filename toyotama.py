@@ -43,9 +43,9 @@ def show_variables(symboltable, *args):
     maxlength = max([len(name) for name in names])
     for name, value in zip(names, args):
         if name.endswith('_addr'):
-            print(f'[{col1}*{reset}] {col2}{bold}{name.rjust(maxlength)}: {value:#x}{reset}')
+            print(f'[{col1}#{reset}] {col2}{bold}{name.rjust(maxlength)}: {value:#x}{reset}')
         else:
-            print(f'[{col1}*{reset}] {col2}{bold}{name.rjust(maxlength)}: {value}{reset}')
+            print(f'[{col1}#{reset}] {col2}{bold}{name.rjust(maxlength)}: {value}{reset}')
 
 
 
