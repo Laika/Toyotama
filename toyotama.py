@@ -9,15 +9,43 @@ from typing import *
 from pwn import remote
 import sys
 import code
+import time
+from colored import fg, attr
 
+reset = attr(0)
+col1 = fg(128)
+col2 = fg(57)
+bold = attr(1)
 
 # Utils
 def connect(command: str):
     host, port = command.split()[1:]
     return remote(host, port)
 
-def interact():
-    code.interact(local=locals())
+def interact(symboltable):
+    code.interact(local=symboltable)
+
+def show_parameters(symboltable, *args):
+    def getVarsNames( _vars, symboltable ) :
+        return [ getVarName( var, symboltable ) for var in _vars ]
+
+    def getVarName( var, symboltable, error=None ) :
+        for k,v in symboltable.items() :
+            if id(v) == id(var) :
+                return k
+        else :
+            if error == "exception" :
+                raise ValueError("Undefined function is mixed in subspace?")
+            else:
+                return error
+    names = getVarsNames(args, symboltable)
+    maxlength = max([len(name) for name in names])
+    for name, value in zip(names, args):
+        print(f'[{col1}*{reset}] {col2}{bold}{name.rjust(maxlength)}: {value}{reset}')
+
+
+
+
 
 def extract_flag(s: str, head: str, tail: str = '', unique: bool = True) -> List[str]:
     try:
@@ -58,6 +86,11 @@ def send_query(proc, args: List) -> str:
     args = map(str, args)
     query = ' '.join(args)
     return proc.communicate(query.encode())[0].decode()
+
+# Pwn
+## Utils
+
+
 
 
 
@@ -156,6 +189,7 @@ def get_secretkey(e: int, p: int, q: int) -> int:
 
 
 def chinese_remainder(a: List[int], p: List[int]) -> int:
+    assert len(a) == len(p)
     P = reduce(lambda x, y: x * y, p)
     x = sum([ai * mod_inverse(P // pi, pi) * P // pi for ai, pi in zip(a, p)])
     return x % P
