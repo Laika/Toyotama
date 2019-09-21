@@ -51,7 +51,7 @@ def show_variables(symboltable, *args):
 
 
 
-def extract_flag(s: str, head: str, tail: str = '', unique: bool = True) -> List[str]:
+def extract_flag(s: str, head: str, tail: str = '', unique: bool = True) -> Set[str]:
     try:
         comp = compile(rf'{head}.*?{tail}')
         flags = findall(comp, s)
@@ -90,6 +90,23 @@ def send_query(proc, args: List) -> str:
     args = map(str, args)
     query = ' '.join(args)
     return proc.communicate(query.encode())[0].decode()
+
+def hexlify(x):
+    try:
+        y = x.encode()
+    except:
+        y = x
+    return binascii.hexlify(y).decode()
+
+def unhexlify(x):
+    try:
+        y = x.encode()
+    except:
+        y = x
+    return binascii.unhexlify(y).decode()
+
+
+
 
 # Pwn
 ## Utils
