@@ -11,7 +11,7 @@ import sys
 import code
 import time
 from colored import fg, attr
-
+import binascii
 
 reset = attr(0)
 col1 = fg(128)
