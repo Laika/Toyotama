@@ -176,7 +176,7 @@ def mod_sqrt(a: int, p: int) -> int:
         r = m
 
 
-def rot(rotate: int = 13, s: str) -> str:
+def rot(s: str, rotate: int = 13) -> str:
     rotate %= 26
     r = ''
     for c in s:
