@@ -49,8 +49,6 @@ def show_variables(symboltable, *args):
 
 
 
-
-
 def extract_flag(s: str, head: str, tail: str = '', unique: bool = True) -> Set[str]:
     try:
         comp = compile(rf'{head}.*?{tail}')
@@ -72,7 +70,7 @@ def random_string(n: int) -> str:
 
 
 def int_to_string(x: int, byte: bool = False) -> str:
-    sb = x.to_bytes((x.bit_length()+7)//8, byteorder='big')
+    sb = x.to_bytes((x.bit_length()+7) // 8, 'big')
     if byte:
         return sb
     else:
@@ -92,18 +90,18 @@ def send_query(proc, args: List) -> str:
     return proc.communicate(query.encode())[0].decode()
 
 def hexlify(x):
-    try:
+    if isinstance(x, str):
         y = x.encode()
-    except:
+    else:
         y = x
     return binascii.hexlify(y).decode()
 
 def unhexlify(x):
-    try:
+    if isinstance(x, str):
         y = x.encode()
-    except:
+    else:
         y = x
-    return binascii.unhexlify(y).decode()
+    return binascii.unhexlify(y)
 
 
 
@@ -112,14 +110,10 @@ def unhexlify(x):
 ## Utils
 
 
-
-
-
 # Crypto
 ## Utils
 def lcm(x: int, y: int) -> int:
     return x * y // gcd(x, y)
-
 
 def extended_gcd(a: int, b: int) -> Tuple[int, int, int]:
     c0, c1 = a, b
@@ -129,8 +123,8 @@ def extended_gcd(a: int, b: int) -> Tuple[int, int, int]:
     while c1 != 0:
         q, m = divmod(c0, c1)
         c0, c1 = c1, m
-        a0, a1 = a1, (a0 - q * a1)
-        b0, b1 = b1, (b0 - q * b1)
+        a0, a1 = a1, (a0 - q*a1)
+        b0, b1 = b1, (b0 - q*b1)
     return a0, b0, c0
 
 
@@ -147,7 +141,7 @@ def mod_sqrt(a: int, p: int) -> int:
     elif p == 2:
         return 0
     elif p % 4 == 3:
-        return pow(a, (p + 1) / 4, p)
+        return pow(a, (p+1) / 4, p)
 
     s = p - 1
     e = 0
@@ -159,7 +153,7 @@ def mod_sqrt(a: int, p: int) -> int:
     while legendre_symbol(n, p) != -1:
         n += 1
 
-    x = pow(a, (s + 1) / 2, p)
+    x = pow(a, (s+1) / 2, p)
     b = pow(a, s, p)
     g = pow(n, s, p)
     r = e
@@ -175,24 +169,22 @@ def mod_sqrt(a: int, p: int) -> int:
         if m == 0:
             return x
 
-        gs = pow(g, 2 ** (r - m - 1), p)
-        g = (gs * gs) % p
-        x = (x * gs) % p
-        b = (b * g) % p
+        gs = pow(g, 2 ** (r-m-1), p)
+        g = (gs*gs) % p
+        x = (x*gs) % p
+        b = (b*g) % p
         r = m
 
 
-
-
-def rot(n: int, s: str) -> str:
-    n %= 26
+def rot(rotate: int, s: str) -> str:
+    rotate %= 26
     r = ''
     for c in s:
-        if c in string.ascii_uppercase:
-            r += chr((ord(c) - ord('A') + n) % 26 + ord('A'))
+        if c in ascii_uppercase:
+            r += chr((ord(c)-ord('A')+rotate)%26 + ord('A'))
 
-        elif c in string.ascii_lowercase:
-            r += chr((ord(c) - ord('a') + n) % 26 + ord('a'))
+        elif c in ascii_lowercase:
+            r += chr((ord(c)-ord('a')+rotate)%26 + ord('a'))
         else:
             r += c
     return r
@@ -206,13 +198,13 @@ def xor_string(s: str, t: str) -> str:
 
 
 def get_secretkey(e: int, p: int, q: int) -> int:
-    return mod_inverse(e, (p - 1) * (q - 1))
+    return mod_inverse(e, (p-1) * (q-1))
 
 
 def chinese_remainder(a: List[int], p: List[int]) -> int:
     assert len(a) == len(p)
-    P = reduce(lambda x, y: x * y, p)
-    x = sum([ai * mod_inverse(P // pi, pi) * P // pi for ai, pi in zip(a, p)])
+    P = reduce(lambda x, y: x*y, p)
+    x = sum([ai * mod_inverse(P//pi, pi) * P // pi for ai, pi in zip(a, p)])
     return x % P
 
 
@@ -242,7 +234,7 @@ def common_modulus_attack(e1: int, e2: int, c1: int, c2: int, n: int) -> int:
         c2 = mod_inverse(c2, n)
         s2 *= -1
 
-    return (pow(c1, s1, n) * pow(c2, s2, n)) % n
+    return (pow(c1, s1, n)*pow(c2, s2, n)) % n
 
 
 ## Wiener's Attack
@@ -250,15 +242,15 @@ def rat_to_cfrac(a: int, b: int) -> Iterator[int]:
     while b > 0:
         x = a // b
         yield x
-        a, b = b, a - x * b
+        a, b = b, a - x*b
 
 
 def cfrac_to_rat_itr(cfrac: Iterable[int]) -> Iterator[Tuple[int, int]]:
     n0, d0 = 0, 1
     n1, d1 = 1, 0
     for q in cfrac:
-        n = q * n1 + n0
-        d = q * d1 + d0
+        n = q*n1 + n0
+        d = q*d1 + d0
         yield n, d
         n0, d0 = n1, d1
         n1, d1 = n, d
@@ -267,7 +259,7 @@ def cfrac_to_rat_itr(cfrac: Iterable[int]) -> Iterator[Tuple[int, int]]:
 def conv_from_cfrac(cfrac: Iterable[int]) -> Iterator[Tuple[int, int]]:
     n_, d_ = 1, 0
     for i, (n, d) in enumerate(cfrac_to_rat_itr(cfrac)):
-        yield n + (i + 1) % 2 * n_, d + (i + 1) % 2 * d_
+        yield n + (i+1)%2 * n_, d + (i+1)%2 * d_
         n_, d_ = n, d
 
 
@@ -279,7 +271,7 @@ def wieners_attack(e: int, n: int) -> Optional[int]:
         x = n - phi + 1
         print(is_square((x // 2)**2 - n))
         if x % 2 == 0 and is_square((x // 2)**2 - n):
-            g = edg - phi * k
+            g = edg - phi*k
             return dg // g
     return None
 
@@ -294,14 +286,14 @@ def baby_giant(g: int, y: int, p: int) -> int:
     b = 1
     for i in range(m):
         table[b] = i
-        b = (b * g) % p
+        b = (b*g) % p
 
     gim = mod_inverse(pow(g, m), p)
     gmm = y
 
     for i in range(m):
         if gmm in table.keys():
-            return i * m + table[gmm]
+            return i*m + table[gmm]
         else:
             gmm *= gim
             gmm %= p
@@ -312,7 +304,7 @@ def baby_giant(g: int, y: int, p: int) -> int:
 ## Pohlig-Hellman algorithm
 def pohlig_hellman(g: int, y: int, p: int, phi_p: List[int]) -> int:
     print(phi_p)
-    X = [baby_giant(pow(g, (p - 1) // q, p), pow(y, (p - 1) // q, p), q)
+    X = [baby_giant(pow(g, (p-1)//q, p), pow(y, (p-1)//q, p), q)
          for q in phi_p]
 
     x = chinese_remainder(phi_p, X)
