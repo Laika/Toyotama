@@ -197,7 +197,7 @@ def xor_string(s: str, t: str) -> str:
         return bytes([a ^ b for a, b in zip(s, t)])
 
 
-def get_secretkey(e: int = 0x10001, p: int, q: int) -> int:
+def get_secretkey(p: int, q: int, e: int = 0x10001) -> int:
     return mod_inverse(e, (p-1) * (q-1))
 
 
