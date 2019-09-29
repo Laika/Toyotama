@@ -219,7 +219,7 @@ def vigenere(cipher: str, key: str) -> str:
             ans += c
             i += 1
         else:
-            ans += rot(key[i % len(key)], c)
+            ans += rot(c, key[i % len(key)])
             i += 1
     return ''.join(ans)
 
