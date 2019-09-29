@@ -65,8 +65,8 @@ def extract_flag(s: str, head: str, tail: str = '', unique: bool = True) -> Set[
         return flags
 
 
-def random_string(n: int) -> str:
-    return ''.join([choice(ascii_letters + digits) for _ in range(n)])
+def random_string(length: int) -> str:
+    return ''.join([choice(ascii_letters + digits) for _ in range(length)])
 
 
 def int_to_string(x: int, byte: bool = False) -> str:
@@ -113,7 +113,7 @@ def unhexlify(x):
 # Crypto
 ## Utils
 def lcm(x: int, y: int) -> int:
-    return x * y // gcd(x, y)
+    return x*y // gcd(x, y)
 
 def extended_gcd(a: int, b: int) -> Tuple[int, int, int]:
     c0, c1 = a, b
@@ -176,7 +176,7 @@ def mod_sqrt(a: int, p: int) -> int:
         r = m
 
 
-def rot(rotate: int, s: str) -> str:
+def rot(rotate: int = 13, s: str) -> str:
     rotate %= 26
     r = ''
     for c in s:
@@ -197,7 +197,7 @@ def xor_string(s: str, t: str) -> str:
         return bytes([a ^ b for a, b in zip(s, t)])
 
 
-def get_secretkey(e: int, p: int, q: int) -> int:
+def get_secretkey(e: int = 0x10001, p: int, q: int) -> int:
     return mod_inverse(e, (p-1) * (q-1))
 
 
