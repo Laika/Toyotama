@@ -40,12 +40,13 @@ def show_variables(symboltable, *args):
             else:
                 return error
     names = getVarsNames(args, symboltable)
-    maxlength = max([len(name) for name in names])
+    maxlength = max([len(name+type(value).__name__) for name, value in zip(names, args)])
     for name, value in zip(names, args):
+        typ = f'<{type(value).__name__}>'
         if name.endswith('_addr'):
-            print(f'[{col1}#{reset}] {col2}{bold}{name.rjust(maxlength)}: {value:#x}{reset}')
+            print(f'{col1}[#]{reset} {col2}{bold}{name+typ.rjust(maxlength)}: {reset}{value:#x}')
         else:
-            print(f'[{col1}#{reset}] {col2}{bold}{name.rjust(maxlength)}: {value}{reset}')
+            print(f'{col1}[#]{reset} {col2}{bold}{name+typ.rjust(maxlength)}: {reset}{value}')
 
 
 
