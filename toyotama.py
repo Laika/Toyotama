@@ -33,7 +33,7 @@ console = {
         }
 
 
-message = lambda c, h, m : sys.stderr.write(f"{console['bold']}{color[c]}{h}{m}{console['reset']}")
+message = lambda c, h, m : sys.stderr.write(f"{console['bold']}{console['fg'](color[c])}{h} {m}{console['reset']}\n")
 info = lambda m: message('B', '[+]', m)
 proc = lambda m: message('G', '[*]', m)
 warn = lambda m: message('O', '[!]', m)
@@ -62,13 +62,14 @@ def show_variables(symboltable, *args):
             else:
                 return error
     names = getVarsNames(args, symboltable)
-    maxlength = max([len(name+type(value).__name__) for name, value in zip(names, args)])
+    maxlen_name = max([len(name) for name in names])+1
+    maxlen_type = max([len(type(value).__name__) for value in args])+3
     for name, value in zip(names, args):
         typ = f'<{type(value).__name__}>'
         if name.endswith('_addr'):
-            info(f'{name+typ.rjust(maxlength)}: {value:#x}')
+            info(f'{name.ljust(maxlen_name)}{typ.rjust(maxlen_type)}: {value:#x}')
         else:
-            info(f'{name+typ.rjust(maxlength)}: {value}')
+            info(f'{name.ljust(maxlen_name)}{typ.rjust(maxlen_type)}: {value}')
 
 
 def extract_flag(s: str, head: str = '{', tail: str = '}', unique: bool = True) -> Set[str]:
