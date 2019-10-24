@@ -64,6 +64,7 @@ def show_variables(symboltable, *args):
     for name, value in zip(names, args):
         typ = f'<{type(value).__name__}>'
         if name.endswith('_addr'):
+            
             info(f'{name.ljust(maxlen_name)}{typ.rjust(maxlen_type)}: {value:#x}')
         else:
             info(f'{name.ljust(maxlen_name)}{typ.rjust(maxlen_type)}: {value}')
@@ -90,27 +91,24 @@ def random_string(length: int) -> str:
 
 def int_to_string(x: int, byte: bool = False) -> str:
     sb = x.to_bytes((x.bit_length()+7) // 8, 'big')
-    if byte:
-        return sb
-    else:
-        return sb.decode()
+    if not byte:
+        sb = sb.decode()
+    return sb
 
 
 def string_to_int(s: str) -> int:
-    return int.from_bytes(s.encode(), 'big')
+    if isinstance(s, str):
+        s = s.encode()
+    return int.from_bytes(s, 'big')
 
 def hexlify(x):
     if isinstance(x, str):
-        y = x.encode()
-    else:
-        y = x
+        x = x.encode()
     return binascii.hexlify(y).decode()
 
 def unhexlify(x):
     if isinstance(x, str):
-        y = x.encode()
-    else:
-        y = x
+        x = x.encode()
     return binascii.unhexlify(y)
 
 
