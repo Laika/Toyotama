@@ -7,7 +7,7 @@ import os
 import sys
 import code
 import binascii
-
+from time import sleep
 
 color = {
         'R': 1,
@@ -94,7 +94,7 @@ def int_to_string(x: int, byte: bool = False) -> str:
     if not byte:
         sb = sb.decode()
     return sb
-
+    
 
 def string_to_int(s: str) -> int:
     if isinstance(s, str):
@@ -148,9 +148,9 @@ class Connect:
         if self.mode == 'SOCKET':
             import socket
             host, port = target['host'], target['port']
-            proc(f'Connecting to {host}:{port} ...')
+            proc(f'Connecting to {host}:{port}...')
             self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            self.sock.setntimeout(args['to'] if 'to' in args else 1.0)
+            self.sock.settimeout(args['to'] if 'to' in args else 1.0)
             self.sock.connect((host, port))
             self.timeout = socket.timeout
     
@@ -158,14 +158,12 @@ class Connect:
             import subprocess
             program = target['program']
             proc(f'Starting {program} ...')
-
             self.proc = subprocess.Popen(program, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
             info(f'PID: {self.proc.pid}')
             self.timeout = None
 
     def print(self, t, data):
-        sys.stderr.write(message('V', f'\n[{t}]', ''))
-        print(data)
+        message('V', f'\n[{t}]', '')
 
     def send(self, message):
         if self.log is not None:
@@ -176,10 +174,64 @@ class Connect:
                 self.sock.sendall(message)
             elif self.mode == 'LOCAL':
                 self.proc.stdin.write(message)
-        except StandardError:
+        except Exception:
             self.is_alive = False
 
+    def sendline(self, message):
+        self.send(f'{message}\n')
                 
+
+    def recv(self, n=4):
+        sleep(0.05)
+        ret = b''
+        try:
+            if self.mode == 'SOCKET':
+                ret = self.sock.recv(n)
+            elif self.mode=='LOCAL':
+                ret = self.proc.stdout.read(n)
+        except Exception:
+            pass
+
+        self.print('Read', ret)
+        return ret
+
+    def recvall(self):
+        sleep(0.05)
+        try:
+            res = b''
+            while True:
+                if self.mode == 'SOCKET':
+                    r = self.sock.recv(512)
+                elif self.mode == 'LOCAL':
+                    r = self.proc.stdout.read()
+
+                if r:
+                    res += r
+                else:
+                    break
+        except Exception:
+            pass
+
+        self.print('Read', ret)
+        return ret
+
+    def recvuntil(self, term='\n'):
+        res = b''
+        while not (res.endswith(term.encode()) if isinstance(term, str) else any([res.endswith(x) for x in term])):
+            try:
+                if self.mode == 'SOCKET':
+                    res += self.sock.recv(1)
+                elif self.mode == 'LOCAL':
+                    rsp += self.proc.stdout.read(1)
+            except self.timeout:
+                if not (res.endswith(term) if isinstance(term, str) else any([res.endswith(x) for x in term])):
+                    warn(f'readuntil: not end with {str(term)} (timeout)')
+                break
+            except Exception:
+                sleep(0.05)
+        self.print('Read', res)
+        return res
+
 
     def __del__(self):
         if self.mode == 'SOCKET':
@@ -282,10 +334,9 @@ def rot(s: str, rotate: int = 13) -> str:
     rotate %= 26
     r = ''
     for c in s:
-        if c in ascii_uppercase:
+        if 'A' <= c <= 'Z':
             r += chr((ord(c)-ord('A')+rotate)%26 + ord('A'))
-
-        elif c in ascii_lowercase:
+        elif 'a' <= c <= 'z':
             r += chr((ord(c)-ord('a')+rotate)%26 + ord('a'))
         else:
             r += c
