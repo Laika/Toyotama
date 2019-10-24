@@ -304,7 +304,6 @@ def xor_string(s: str, t: str) -> str:
 def get_secretkey(p: int, q: int, e: int = 0x10001) -> int:
     return mod_inverse(e, (p-1) * (q-1))
 
-
 def chinese_remainder(a: List[int], p: List[int]) -> int:
     assert len(a) == len(p)
     P = reduce(lambda x, y: x*y, p)
