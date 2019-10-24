@@ -1,22 +1,44 @@
 from functools import reduce
 from gmpy2 import is_square, isqrt, jacobi
 from math import gcd, ceil, sqrt
-from random import choice
-from re import compile, findall
-from string import ascii_letters, digits, ascii_uppercase, ascii_lowercase
 from subprocess import Popen, PIPE, run
 from typing import *
 from pwn import remote
+from struct import pack, unpack
+import os
 import sys
 import code
 import time
-from colored import fg, attr
 import binascii
 
-reset = attr(0)
-col1 = fg(128)
-col2 = fg(93)
-bold = attr(1)
+
+color = {
+        'R': 1,
+        'G': 2,
+        'Y': 3,
+        'B': 4,
+        'M': 5,
+        'C': 6,
+        'P': 93,
+        'V': 128,
+        'O': 166,
+        }
+
+
+console = {
+        'reset': '\x1b[0m',
+        'bold' : '\x1b[1m',
+        'fg'   : lambda c: f'\x1b[38;5;{c}m',
+        'bg'   : lambda c: f'\x1b[48;5;{c}m',
+        }
+
+
+message = lambda c, h, m : sys.stderr.write(f"{console['bold']}{color[c]}{h}{m}{console['reset']}")
+info = lambda m: message('B', '[+]', m)
+proc = lambda m: message('G', '[*]', m)
+warn = lambda m: message('O', '[!]', m)
+err  = lambda m: message('R', '[-]', m)
+
 
 # Utils
 def connect(command: str):
@@ -44,29 +66,27 @@ def show_variables(symboltable, *args):
     for name, value in zip(names, args):
         typ = f'<{type(value).__name__}>'
         if name.endswith('_addr'):
-            print(f'{col1}[#]{reset} {col2}{bold}{name+typ.rjust(maxlength)}: {reset}{value:#x}')
+            info(f'{name+typ.rjust(maxlength)}: {value:#x}')
         else:
-            print(f'{col1}[#]{reset} {col2}{bold}{name+typ.rjust(maxlength)}: {reset}{value}')
+            info(f'{name+typ.rjust(maxlength)}: {value}')
 
 
-
-def extract_flag(s: str, head: str, tail: str = '', unique: bool = True) -> Set[str]:
-    try:
-        comp = compile(rf'{head}.*?{tail}')
-        flags = findall(comp, s)
-        if unique:
-            flags = set(flags)
-        return flags
-    except:
-        patt = f'{head}.*?{tail}'
-        comp = compile(patt.encode())
-        flags = findall(comp, s)
-        if unique:
-            flags = set(flags)
-        return flags
+def extract_flag(s: str, head: str = '{', tail: str = '}', unique: bool = True) -> Set[str]:
+    from re import compile, findall
+    patt = f'{head}.*?{tail}'
+    if isinstance(s, bytes):
+        patt = patt.encode()
+    comp = compile(patt)
+    flags = findall(comp, s)
+    if unique:
+        flags = set(flags)
+    return flags
 
 
 def random_string(length: int) -> str:
+    from string import ascii_letters, digits, ascii_uppercase, ascii_lowercase
+    from random import choice
+    
     return ''.join([choice(ascii_letters + digits) for _ in range(length)])
 
 
@@ -105,10 +125,22 @@ def unhexlify(x):
     return binascii.unhexlify(y)
 
 
-
-
 # Pwn
 ## Utils
+p8  = lambda x: pack('<B' if x > 0 else '<b', x)
+p16 = lambda x: pack('<H' if x > 0 else '<h', x)
+p32 = lambda x: pack('<I' if x > 0 else '<i', x)
+p64 = lambda x: pack('<Q' if x > 0 else '<q', x)
+u8   = lambda x, sign=False: unpack('<B' if not s else '<b', x)[0] 
+u16  = lambda x, sign=False: unpack('<H' if not s else '<h', x)[0] 
+u32  = lambda x, sign=False: unpack('<I' if not s else '<i', x)[0] 
+u64  = lambda x, sign=False: unpack('<Q' if not s else '<q', x)[0] 
+
+
+
+
+
+
 
 
 # Crypto
