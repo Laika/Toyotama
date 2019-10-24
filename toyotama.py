@@ -1,14 +1,11 @@
 from functools import reduce
 from gmpy2 import is_square, isqrt, jacobi
 from math import gcd, ceil, sqrt
-from subprocess import Popen, PIPE, run
 from typing import *
-from pwn import remote
 from struct import pack, unpack
 import os
 import sys
 import code
-import time
 import binascii
 
 
@@ -37,7 +34,7 @@ message = lambda c, h, m : sys.stderr.write(f"{console['bold']}{console['fg'](co
 info = lambda m: message('B', '[+]', m)
 proc = lambda m: message('G', '[*]', m)
 warn = lambda m: message('O', '[!]', m)
-err  = lambda m: message('R', '[-]', m)
+error  = lambda m: message('R', '[-]', m)
 
 
 # Utils
@@ -134,6 +131,71 @@ class Shell:
         else:
             ret = self.__run(command, stdout=self.__PIPE, stderr=self.__PIPE, env=self.env)
         return ret
+
+
+class Connect:
+    def __init__(self, target, mode='SOCKET', **args):
+        if mode not in {'SOCKET', 'LOCAL'}:
+            warn(f'Connect: {mode} is not defined.')
+            info(f'Connect: Automatically set to "SOCKET".')
+        self.mode = mode
+        self.log = None
+        self.is_alive = True
+
+        if isinstance(target, tuple):
+            target = {'host': target[0], 'port': target[1]}
+        elif isinstance(target, str):
+            target = {'program': target}
+
+        if self.mode == 'SOCKET':
+            import socket
+            host, port = target['host'], target['port']
+            proc(f'Connecting to {host}:{port} ...')
+            self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.sock.setntimeout(args['to'] if 'to' in args else 1.0)
+            self.sock.connect((host, port))
+            self.timeout = socket.timeout
+    
+        elif self.mode == 'LOCAL':
+            import subprocess
+            program = target['program']
+            proc(f'Starting {program} ...')
+
+            self.proc = subprocess.Popen(program, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+            info(f'PID: {self.proc.pid}')
+            self.timeout = None
+
+    def print(self, t, data):
+        sys.stderr.write(message('V', f'\n[{t}]', ''))
+        print(data)
+
+    def send(self, message):
+        if self.log is not None:
+            self.print('Send', message)
+
+        try:
+            if self.mode == 'SOCKET':
+                self.sock.sendall(message)
+            elif self.mode == 'LOCAL':
+                self.proc.stdin.write(message)
+        except StandardError:
+            self.is_alive = False
+
+                
+
+    def __del__(self):
+        if self.mode == 'SOCKET':
+            self.sock.close()
+            proc('Disconnected.')
+
+        elif self.mode == 'LOCAL':
+            proc(f'{target["program"]} stopped.')
+        
+        input('Press any key to close.')
+
+
+
+    
 # Pwn
 ## Utils
 p8   = lambda x: pack('<B' if x > 0 else '<b', x)
