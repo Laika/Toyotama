@@ -102,15 +102,6 @@ def int_to_string(x: int, byte: bool = False) -> str:
 def string_to_int(s: str) -> int:
     return int.from_bytes(s.encode(), 'big')
 
-
-def run_proc(filename: str):
-    return Popen([f'./{filename}'], stdin=PIPE, stdout=PIPE, stderr=PIPE)
-
-def send_query(proc, args: List) -> str:
-    args = map(str, args)
-    query = ' '.join(args)
-    return proc.communicate(query.encode())[0].decode()
-
 def hexlify(x):
     if isinstance(x, str):
         y = x.encode()
@@ -126,12 +117,29 @@ def unhexlify(x):
     return binascii.unhexlify(y)
 
 
+class Shell:
+    def __init__(self, env=None):
+        from subprocess import run, PIPE, DEVNULL
+        self.__run = run
+        self.__PIPE = PIPE
+        self.__DEVNULL = DEVNULL
+        self.env = env
+        
+
+    def run(self, command, output=True):
+        from shlex import split
+        command = split(command)
+        if not output:
+            ret = self.__run(command, stdout=self.__DEVNULL, stderr=self.__DEVNULL, env=self.env)
+        else:
+            ret = self.__run(command, stdout=self.__PIPE, stderr=self.__PIPE, env=self.env)
+        return ret
 # Pwn
 ## Utils
-p8  = lambda x: pack('<B' if x > 0 else '<b', x)
-p16 = lambda x: pack('<H' if x > 0 else '<h', x)
-p32 = lambda x: pack('<I' if x > 0 else '<i', x)
-p64 = lambda x: pack('<Q' if x > 0 else '<q', x)
+p8   = lambda x: pack('<B' if x > 0 else '<b', x)
+p16  = lambda x: pack('<H' if x > 0 else '<h', x)
+p32  = lambda x: pack('<I' if x > 0 else '<i', x)
+p64  = lambda x: pack('<Q' if x > 0 else '<q', x)
 u8   = lambda x, sign=False: unpack('<B' if not s else '<b', x)[0] 
 u16  = lambda x, sign=False: unpack('<H' if not s else '<h', x)[0] 
 u32  = lambda x, sign=False: unpack('<I' if not s else '<i', x)[0] 
@@ -272,32 +280,33 @@ def common_modulus_attack(e1: int, e2: int, c1: int, c2: int, n: int) -> int:
 
 
 ## Wiener's Attack
-def rat_to_cfrac(a: int, b: int) -> Iterator[int]:
-    while b > 0:
-        x = a // b
-        yield x
-        a, b = b, a - x*b
-
-
-def cfrac_to_rat_itr(cfrac: Iterable[int]) -> Iterator[Tuple[int, int]]:
-    n0, d0 = 0, 1
-    n1, d1 = 1, 0
-    for q in cfrac:
-        n = q*n1 + n0
-        d = q*d1 + d0
-        yield n, d
-        n0, d0 = n1, d1
-        n1, d1 = n, d
-
-
-def conv_from_cfrac(cfrac: Iterable[int]) -> Iterator[Tuple[int, int]]:
-    n_, d_ = 1, 0
-    for i, (n, d) in enumerate(cfrac_to_rat_itr(cfrac)):
-        yield n + (i+1)%2 * n_, d + (i+1)%2 * d_
-        n_, d_ = n, d
 
 
 def wieners_attack(e: int, n: int) -> Optional[int]:
+         
+    def rat_to_cfrac(a: int, b: int) -> Iterator[int]:
+        while b > 0:
+            x = a // b
+            yield x
+            a, b = b, a - x*b
+     
+    def cfrac_to_rat_itr(cfrac: Iterable[int]) -> Iterator[Tuple[int, int]]:
+        n0, d0 = 0, 1
+        n1, d1 = 1, 0
+        for q in cfrac:
+            n = q*n1 + n0
+            d = q*d1 + d0
+            yield n, d
+            n0, d0 = n1, d1
+            n1, d1 = n, d
+    
+    def conv_from_cfrac(cfrac: Iterable[int]) -> Iterator[Tuple[int, int]]:
+        n_, d_ = 1, 0
+        for i, (n, d) in enumerate(cfrac_to_rat_itr(cfrac)):
+            yield n + (i+1)%2 * n_, d + (i+1)%2 * d_
+            n_, d_ = n, d    
+
+
     for k, dg in conv_from_cfrac(rat_to_cfrac(e, n)):
         edg = e * dg
         phi = edg // k
