@@ -137,7 +137,7 @@ class Connect:
             warn(f'Connect: {mode} is not defined.')
             info(f'Connect: Automatically set to "SOCKET".')
         self.mode = mode
-        self.log = None
+        self.log = True
         self.is_alive = True
 
         if isinstance(target, tuple):
@@ -148,7 +148,8 @@ class Connect:
         if self.mode == 'SOCKET':
             import socket
             host, port = target['host'], target['port']
-            proc(f'Connecting to {host}:{port}...')
+            if self.log:
+                proc(f'Connecting to {host}:{port}...')
             self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.sock.settimeout(args['to'] if 'to' in args else 1.0)
             self.sock.connect((host, port))
@@ -157,16 +158,26 @@ class Connect:
         elif self.mode == 'LOCAL':
             import subprocess
             program = target['program']
-            proc(f'Starting {program} ...')
-            self.proc = subprocess.Popen(program, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-            info(f'PID: {self.proc.pid}')
+            self.wait = ('wait' in args and args['wait'])
+            if self.log:
+                proc(f'Starting {program} ...')
+            self.proc = subprocess.Popen(program, shell=False, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+            if self.log:
+                info(f'PID: {self.proc.pid}')
+            self.set_nonblocking(self.proc.stdout)
             self.timeout = None
 
+    def set_nonblocking(self, fh):
+        import fcntl
+        fd = fh.fileno()
+        fl = fcntl.fcntl(fd, fcntl.F_GETFL)
+        fcntl.fcntl(fd, fcntl.F_SETFL, fl | os.O_NONBLOCK)
+    
     def print(self, t, data):
         message('V', f'\n[{t}]', '')
 
     def send(self, message):
-        if self.log is not None:
+        if self.log:
             self.print('Send', message)
 
         try:
@@ -192,13 +203,14 @@ class Connect:
         except Exception:
             pass
 
-        self.print('Read', ret)
+        if self.log:
+            self.print('Read', ret)
         return ret
 
     def recvall(self):
         sleep(0.05)
         try:
-            res = b''
+            ret = b''
             while True:
                 if self.mode == 'SOCKET':
                     r = self.sock.recv(512)
@@ -206,42 +218,51 @@ class Connect:
                     r = self.proc.stdout.read()
 
                 if r:
-                    res += r
+                    ret += r
                 else:
                     break
         except Exception:
             pass
 
-        self.print('Read', ret)
+        if self.log:
+            self.print('Read', ret)
         return ret
 
     def recvuntil(self, term='\n'):
-        res = b''
-        while not (res.endswith(term.encode()) if isinstance(term, str) else any([res.endswith(x) for x in term])):
+        ret = b''
+        while not (ret.endswith(term.encode()) if isinstance(term, str) else any([ret.endswith(x) for x in term])):
             try:
                 if self.mode == 'SOCKET':
-                    res += self.sock.recv(1)
+                    ret += self.sock.recv(1)
                 elif self.mode == 'LOCAL':
-                    rsp += self.proc.stdout.read(1)
+                    ret += self.proc.stdout.read(1)
             except self.timeout:
-                if not (res.endswith(term) if isinstance(term, str) else any([res.endswith(x) for x in term])):
+                if not (ret.endswith(term) if isinstance(term, str) else any([ret.endswith(x) for x in term])):
                     warn(f'readuntil: not end with {str(term)} (timeout)')
                 break
             except Exception:
                 sleep(0.05)
-        self.print('Read', res)
-        return res
+        if self.log:
+            self.print('Read', ret)
+        return ret
 
 
     def __del__(self):
         if self.mode == 'SOCKET':
             self.sock.close()
-            proc('Disconnected.')
+            if self.log:
+                proc('Disconnected.')
 
         elif self.mode == 'LOCAL':
-            proc(f'{target["program"]} stopped.')
-        
-        input('Press any key to close.')
+            if self.wait:
+                self.proc.communicate(None)
+            elif self.proc.poll() is None:
+                self.proc.terminate()
+
+            if self.log:
+                proc(f'Stopped.')
+        if self.log:
+            input('Press any key to close.')
 
 
 
