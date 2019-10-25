@@ -31,17 +31,13 @@ console = {
 
 
 message = lambda c, h, m : sys.stderr.write(f"{console['bold']}{console['fg'](color[c])}{h} {m}{console['reset']}\n")
-info = lambda m: message('B', '[+]', m)
-proc = lambda m: message('G', '[*]', m)
-warn = lambda m: message('O', '[!]', m)
-error  = lambda m: message('R', '[-]', m)
+info  = lambda m: message('B', '[+]', m)
+proc  = lambda m: message('G', '[*]', m)
+warn  = lambda m: message('O', '[!]', m)
+error = lambda m: message('R', '[-]', m)
 
 
 # Utils
-def connect(command: str):
-    host, port = command.split()[1:]
-    return remote(host, port)
-
 def interact(symboltable):
     code.interact(local=symboltable)
 
