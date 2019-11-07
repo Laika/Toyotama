@@ -21,16 +21,12 @@ color = {
         'O': 166,
         }
 
+reset = '\x1b[0m'
+bold  = '\x1b[1m'
+fg    = lambda c: f'\x1b[38;5;{c}m'
+bg    = lambda c: f'\x1b[48;5;{c}m'
 
-console = {
-        'reset': '\x1b[0m',
-        'bold' : '\x1b[1m',
-        'fg'   : lambda c: f'\x1b[38;5;{c}m',
-        'bg'   : lambda c: f'\x1b[48;5;{c}m',
-        }
-
-
-message = lambda c, h, m : sys.stderr.write(f"{console['bold']}{console['fg'](color[c])}{h} {m}{console['reset']}\n")
+message = lambda c, h, m : sys.stderr.write(f"{bold}{fg(color[c])}{h}{reset} {m}\n")
 info  = lambda m: message('B', '[+]', m)
 proc  = lambda m: message('G', '[*]', m)
 warn  = lambda m: message('O', '[!]', m)
@@ -128,7 +124,7 @@ class Shell:
 
 
 class Connect:
-    def __init__(self, target, mode='SOCKET', **args):
+    def __init__(self, target, mode='SOCKET', to=5.0, **args):
         if mode not in {'SOCKET', 'LOCAL'}:
             warn(f'Connect: {mode} is not defined.')
             info(f'Connect: Automatically set to "SOCKET".')
@@ -136,10 +132,12 @@ class Connect:
         self.log = True
         self.is_alive = True
 
-        if isinstance(target, tuple):
-            target = {'host': target[0], 'port': target[1]}
-        elif isinstance(target, str):
+        
+        if target.startswith('./'):
             target = {'program': target}
+        elif target.startswith('nc'):
+            _, host, port = target.split()
+            target = {'host': host, 'port': int(port)}
 
         if self.mode == 'SOCKET':
             import socket
@@ -147,7 +145,7 @@ class Connect:
             if self.log:
                 proc(f'Connecting to {host}:{port}...')
             self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            self.sock.settimeout(args['to'] if 'to' in args else 1.0)
+            self.sock.settimeout(to)
             self.sock.connect((host, port))
             self.timeout = socket.timeout
     
@@ -169,18 +167,17 @@ class Connect:
         fl = fcntl.fcntl(fd, fcntl.F_GETFL)
         fcntl.fcntl(fd, fcntl.F_SETFL, fl | os.O_NONBLOCK)
     
-    def print(self, t, data):
-        message('V', f'\n[{t}]', '')
 
-    def send(self, message):
+    def send(self, msg):
         if self.log:
-            self.print('Send', message)
-
+            message('B', '[Send] <<', msg)
+        if isinstance(msg, str):
+            msg = msg.encode()
         try:
             if self.mode == 'SOCKET':
-                self.sock.sendall(message)
+                self.sock.sendall(msg)
             elif self.mode == 'LOCAL':
-                self.proc.stdin.write(message)
+                self.proc.stdin.write(msg)
         except Exception:
             self.is_alive = False
 
@@ -188,7 +185,7 @@ class Connect:
         self.send(f'{message}\n')
                 
 
-    def recv(self, n=4):
+    def recv(self, n=256):
         sleep(0.05)
         ret = b''
         try:
@@ -200,47 +197,29 @@ class Connect:
             pass
 
         if self.log:
-            self.print('Read', ret)
-        return ret
-
-    def recvall(self):
-        sleep(0.05)
-        try:
-            ret = b''
-            while True:
-                if self.mode == 'SOCKET':
-                    r = self.sock.recv(512)
-                elif self.mode == 'LOCAL':
-                    r = self.proc.stdout.read()
-
-                if r:
-                    ret += r
-                else:
-                    break
-        except Exception:
-            pass
-
-        if self.log:
-            self.print('Read', ret)
+            message('V', '[Recv] >>', ret)
         return ret
 
     def recvuntil(self, term='\n'):
         ret = b''
-        while not (ret.endswith(term.encode()) if isinstance(term, str) else any([ret.endswith(x) for x in term])):
+        while not ret.endswith(term.encode()):
             try:
                 if self.mode == 'SOCKET':
                     ret += self.sock.recv(1)
                 elif self.mode == 'LOCAL':
                     ret += self.proc.stdout.read(1)
             except self.timeout:
-                if not (ret.endswith(term) if isinstance(term, str) else any([ret.endswith(x) for x in term])):
-                    warn(f'readuntil: not end with {str(term)} (timeout)')
+                if not ret.endswith(term.encode()):
+                    warn(f'readuntil: not end with {repr(term)} (timeout)')
                 break
             except Exception:
                 sleep(0.05)
         if self.log:
-            self.print('Read', ret)
+            message('V', '[Recv] >>', ret)
         return ret
+
+    def recvline(self):
+        return self.recvuntil(term='\n')
 
 
     def __del__(self):
@@ -258,9 +237,8 @@ class Connect:
             if self.log:
                 proc(f'Stopped.')
         if self.log:
-            input('Press any key to close.')
-
-
+            info('Press any key to close.')
+            input()
 
     
 # Pwn
@@ -273,13 +251,6 @@ u8   = lambda x, sign=False: unpack('<B' if not s else '<b', x)[0]
 u16  = lambda x, sign=False: unpack('<H' if not s else '<h', x)[0] 
 u32  = lambda x, sign=False: unpack('<I' if not s else '<i', x)[0] 
 u64  = lambda x, sign=False: unpack('<Q' if not s else '<q', x)[0] 
-
-
-
-
-
-
-
 
 # Crypto
 ## Utils
