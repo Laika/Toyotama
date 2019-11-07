@@ -18,6 +18,7 @@ color = {
         'C': 6,
         'P': 93,
         'V': 128,
+        'DP': 161,
         'O': 166,
         }
 
@@ -26,9 +27,9 @@ bold  = '\x1b[1m'
 fg    = lambda c: f'\x1b[38;5;{c}m'
 bg    = lambda c: f'\x1b[48;5;{c}m'
 
-message = lambda c, h, m : sys.stderr.write(f"{bold}{fg(color[c])}{h}{reset} {m}\n")
+message = lambda c, h, m : sys.stderr.write(f"{bold}{fg(color[c])}{h} {m}{reset}\n")
 info  = lambda m: message('B', '[+]', m)
-proc  = lambda m: message('G', '[*]', m)
+proc  = lambda m: message('V', '[*]', m)
 warn  = lambda m: message('O', '[!]', m)
 error = lambda m: message('R', '[-]', m)
 
@@ -131,7 +132,6 @@ class Connect:
         self.mode = mode
         self.log = True
         self.is_alive = True
-
         
         if target.startswith('./'):
             target = {'program': target}
@@ -169,10 +169,10 @@ class Connect:
     
 
     def send(self, msg):
-        if self.log:
-            message('B', '[Send] <<', msg)
         if isinstance(msg, str):
             msg = msg.encode()
+        if self.log:
+            message('B', '[Send] <<', msg)
         try:
             if self.mode == 'SOCKET':
                 self.sock.sendall(msg)
@@ -197,7 +197,7 @@ class Connect:
             pass
 
         if self.log:
-            message('V', '[Recv] >>', ret)
+            message('DP', '[Recv] >>', ret)
         return ret
 
     def recvuntil(self, term='\n'):
@@ -215,11 +215,21 @@ class Connect:
             except Exception:
                 sleep(0.05)
         if self.log:
-            message('V', '[Recv] >>', ret)
+            message('DP', '[Recv] >>', ret)
         return ret
 
     def recvline(self):
         return self.recvuntil(term='\n')
+
+
+    def interactive(self):
+        from telnetlib import Telnet
+        if self.log:
+            info('Switching to interactive mode')
+        with Telnet() as t:
+            t.sock = self.sock
+            t.mt_interact()
+
 
 
     def __del__(self):
