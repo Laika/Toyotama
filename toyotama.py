@@ -182,7 +182,10 @@ class Connect:
             self.is_alive = False
 
     def sendline(self, message):
-        self.send(f'{message}\n')
+        if isinstance(message, str):
+            self.send(message + '\n')
+        else:
+            self.send(message + b'\n')
                 
 
     def recv(self, n=256):
