@@ -125,12 +125,12 @@ class Shell:
 
 
 class Connect:
-    def __init__(self, target, mode='SOCKET', to=5.0, **args):
+    def __init__(self, target, mode='SOCKET', to=5.0, log=True, **args):
         if mode not in {'SOCKET', 'LOCAL'}:
             warn(f'Connect: {mode} is not defined.')
             info(f'Connect: Automatically set to "SOCKET".')
         self.mode = mode
-        self.log = True
+        self.log = log
         self.is_alive = True
         
         if target.startswith('./'):
