@@ -75,11 +75,9 @@ def extract_flag(s: str, head: str = '{', tail: str = '}', unique: bool = True) 
     return flags
 
 
-def random_string(length: int) -> str:
-    from string import ascii_letters, digits, ascii_uppercase, ascii_lowercase
+def random_string(length: int, pts) -> str:
     from random import choice
-    
-    return ''.join([choice(ascii_letters + digits) for _ in range(length)])
+    return ''.join([choice(pts) for _ in range(length)])
 
 
 def int_to_string(x: int, byte: bool = False) -> str:
