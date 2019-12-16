@@ -231,6 +231,17 @@ class Connect:
             t.sock = self.sock
             t.mt_interact()
 
+    def PoW(self, hashtype, match, pts):
+        import hashlib
+        match = match.decode().strip()
+        x = b'a'
+        proc('Searching...')
+        i = 0
+        while (h := hashlib.new(hashtype, x).hexdigest()[-(len(match)):]) != match:
+            x = random_string(20, pts).encode()
+    
+        info(f'Found.  x')
+        self.sendline(x)
 
 
     def __del__(self):
@@ -252,17 +263,6 @@ class Connect:
             input()
 
 
-# this func is taken part in Connect class
-def PoW(hashtype, match, pts):
-    import hashlib
-    x = b'a'
-    hsh = hashlib.new(hashtype)
-    proc('Searching...')
-    while hsh.hexdigest()[-(len(match)):] != match:
-        x = random_string(10, pts).encode()
-
-    info(f'Found.  x')
-    return x
 
     
 # Pwn
