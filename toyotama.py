@@ -251,6 +251,19 @@ class Connect:
             info('Press any key to close.')
             input()
 
+
+# this func is taken part in Connect class
+def PoW(hashtype, match, pts):
+    import hashlib
+    x = b'a'
+    hsh = hashlib.new(hashtype)
+    proc('Searching...')
+    while hsh.hexdigest()[-(len(match)):] != match:
+        x = random_string(10, pts).encode()
+
+    info(f'Found.  x')
+    return x
+
     
 # Pwn
 ## Utils
