@@ -95,12 +95,12 @@ def string_to_int(s: str) -> int:
 def hexlify(x):
     if isinstance(x, str):
         x = x.encode()
-    return binascii.hexlify(y).decode()
+    return binascii.hexlify(x).decode()
 
 def unhexlify(x):
     if isinstance(x, str):
         x = x.encode()
-    return binascii.unhexlify(y)
+    return binascii.unhexlify(x)
 
 
 class Shell:
