@@ -231,7 +231,7 @@ class Connect:
             t.sock = self.sock
             t.mt_interact()
 
-    def PoW(self, hashtype, match, pts):
+    def PoW(self, hashtype, match, pts, hx=False):
         import hashlib
         match = match.decode().strip()
         x = b'a'
@@ -241,7 +241,9 @@ class Connect:
             x = random_string(20, pts).encode()
     
         info(f'Found.  x')
-        self.sendline(x)
+        if hx:
+            x = hexlify(x)
+        self.sendline(hexlify(x))
 
 
     def __del__(self):
