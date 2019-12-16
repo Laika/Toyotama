@@ -240,10 +240,10 @@ class Connect:
         while (h := hashlib.new(hashtype, x).hexdigest()[-(len(match)):]) != match:
             x = random_string(20, pts).encode()
     
-        info(f'Found.  {x}')
+        info(f'Found.  {hashtype}(\'{x.decode()}\') == {h}')
         if hx:
             x = hexlify(x)
-        self.sendline(hexlify(x))
+        self.sendline(x)
 
 
     def __del__(self):
