@@ -1,13 +1,12 @@
-from functools import reduce
-from gmpy2 import is_square, isqrt, jacobi
-from math import gcd, ceil, sqrt
-from typing import *
-from struct import pack, unpack
 import os
 import sys
 import code
 import binascii
+from math import gcd, ceil, sqrt
+from struct import pack, unpack
 from time import sleep
+from functools import reduce
+import gmpy2
 
 color = {
         'R': 1,
@@ -38,6 +37,7 @@ error = lambda m: message('R', '[-]', m)
 def interact(symboltable):
     code.interact(local=symboltable)
 
+
 def show_variables(symboltable, *args):
     def getVarsNames( _vars, symboltable ) :
         return [ getVarName( var, symboltable ) for var in _vars ]
@@ -63,7 +63,7 @@ def show_variables(symboltable, *args):
             info(f'{name.ljust(maxlen_name)}{typ.rjust(maxlen_type)}: {value}')
 
 
-def extract_flag(s: str, head: str = '{', tail: str = '}', unique: bool = True) -> Set[str]:
+def extract_flag(s, head='{', tail='}', unique=True):
     from re import compile, findall
     patt = f'{head}.*?{tail}'
     if isinstance(s, bytes):
@@ -75,19 +75,19 @@ def extract_flag(s: str, head: str = '{', tail: str = '}', unique: bool = True) 
     return flags
 
 
-def random_string(length: int, pts) -> str:
+def random_string(length, pts):
     from random import choice
     return ''.join([choice(pts) for _ in range(length)])
 
 
-def int_to_string(x: int, byte: bool = False) -> str:
+def int_to_string(x, byte=False):
     sb = x.to_bytes((x.bit_length()+7) // 8, 'big')
     if not byte:
         sb = sb.decode()
     return sb
     
 
-def string_to_int(s: str) -> int:
+def string_to_int(s):
     if isinstance(s, str):
         s = s.encode()
     return int.from_bytes(s, 'big')
@@ -110,7 +110,6 @@ class Shell:
         self.__PIPE = PIPE
         self.__DEVNULL = DEVNULL
         self.env = env
-        
 
     def run(self, command, output=True):
         from shlex import split
@@ -164,7 +163,6 @@ class Connect:
         fd = fh.fileno()
         fl = fcntl.fcntl(fd, fcntl.F_GETFL)
         fcntl.fcntl(fd, fcntl.F_SETFL, fl | os.O_NONBLOCK)
-    
 
     def send(self, msg):
         if isinstance(msg, str):
@@ -184,7 +182,6 @@ class Connect:
             self.send(message + '\n')
         else:
             self.send(message + b'\n')
-                
 
     def recv(self, n=256):
         sleep(0.05)
@@ -221,7 +218,6 @@ class Connect:
 
     def recvline(self):
         return self.recvuntil(term='\n')
-
 
     def interactive(self):
         from telnetlib import Telnet
@@ -284,10 +280,10 @@ fill = lambda x, c='A', byte=True: (c*x).encode() if byte else c*x
 
 # Crypto
 ## Utils
-def lcm(x: int, y: int) -> int:
+def lcm(x, y):
     return x*y // gcd(x, y)
 
-def extended_gcd(a: int, b: int) -> Tuple[int, int, int]:
+def extended_gcd(a, b):
     c0, c1 = a, b
     a0, a1 = 1, 0
     b0, b1 = 0, 1
@@ -300,13 +296,13 @@ def extended_gcd(a: int, b: int) -> Tuple[int, int, int]:
     return a0, b0, c0
 
 
-def mod_inverse(a: int, n: int) -> int:
+def mod_inverse(a, n):
     s, _, _ = extended_gcd(a, n)
     return s % n
 
 
-def mod_sqrt(a: int, p: int) -> int:
-    if legendre_symbol(a, p) != 1:
+def mod_sqrt(a, p):
+    if gmpy2.legendre(a, p) != 1:
         return 0
     elif a == 0:
         return 0
@@ -322,7 +318,7 @@ def mod_sqrt(a: int, p: int) -> int:
         e += 1
 
     n = 2
-    while legendre_symbol(n, p) != -1:
+    while gmpy2.legendre(n, p) != -1:
         n += 1
 
     x = pow(a, (s+1) / 2, p)
@@ -348,7 +344,7 @@ def mod_sqrt(a: int, p: int) -> int:
         r = m
 
 
-def rot(s: str, rotate: int = 13) -> str:
+def rot(s, rotate=13):
     rotate %= 26
     r = ''
     for c in s:
@@ -361,17 +357,17 @@ def rot(s: str, rotate: int = 13) -> str:
     return r
 
 
-def xor_string(s: str, t: str) -> str:
+def xor_string(s, t):
     if isinstance(s, str):
         return ''.join(chr(ord(a) ^ ord(b)) for a, b in zip(s, t))
     else:
         return bytes([a ^ b for a, b in zip(s, t)])
 
 
-def get_secretkey(p: int, q: int, e: int = 0x10001) -> int:
+def get_secretkey(p, q, e=0x10001):
     return mod_inverse(e, (p-1) * (q-1))
 
-def chinese_remainder(a: List[int], p: List[int]) -> int:
+def chinese_remainder(a, p):
     assert len(a) == len(p)
     P = reduce(lambda x, y: x*y, p)
     x = sum([ai * mod_inverse(P//pi, pi) * P // pi for ai, pi in zip(a, p)])
@@ -379,7 +375,7 @@ def chinese_remainder(a: List[int], p: List[int]) -> int:
 
 
 ## Vigenere
-def vigenere(cipher: str, key: str) -> str:
+def vigenere(cipher, key):
     key = key.lower()
     key = [ord('a') - ord(c) for c in key]
     ans = ''
@@ -395,7 +391,7 @@ def vigenere(cipher: str, key: str) -> str:
 
 
 ## Common Modulus Attack
-def common_modulus_attack(e1: int, e2: int, c1: int, c2: int, n: int) -> int:
+def common_modulus_attack(e1, e2, c1, c2, n):
     s1, s2, _ = extended_gcd(e1, e2)
     if s1 < 0:
         c1 = mod_inverse(c1, n)
@@ -408,14 +404,14 @@ def common_modulus_attack(e1: int, e2: int, c1: int, c2: int, n: int) -> int:
 
 
 ## Wiener's Attack
-def wieners_attack(e: int, n: int) -> Optional[int]:
-    def rat_to_cfrac(a: int, b: int) -> Iterator[int]:
+def wieners_attack(e, n):
+    def rat_to_cfrac(a, b):
         while b > 0:
             x = a // b
             yield x
             a, b = b, a - x*b
      
-    def cfrac_to_rat_itr(cfrac: Iterable[int]) -> Iterator[Tuple[int, int]]:
+    def cfrac_to_rat_itr(cfrac):
         n0, d0 = 0, 1
         n1, d1 = 1, 0
         for q in cfrac:
@@ -425,7 +421,7 @@ def wieners_attack(e: int, n: int) -> Optional[int]:
             n0, d0 = n1, d1
             n1, d1 = n, d
     
-    def conv_from_cfrac(cfrac: Iterable[int]) -> Iterator[Tuple[int, int]]:
+    def conv_from_cfrac(cfrac):
         n_, d_ = 1, 0
         for i, (n, d) in enumerate(cfrac_to_rat_itr(cfrac)):
             yield n + (i+1)%2 * n_, d + (i+1)%2 * d_
@@ -437,18 +433,14 @@ def wieners_attack(e: int, n: int) -> Optional[int]:
         phi = edg // k
 
         x = n - phi + 1
-        print(is_square((x // 2)**2 - n))
-        if x % 2 == 0 and is_square((x // 2)**2 - n):
+        if x % 2 == 0 and gmpy2.is_square((x // 2)**2 - n):
             g = edg - phi*k
             return dg // g
     return None
 
 
-## Discrete Logarithm Problem
-## find x s.t. pow(g, x, p) == y
-## Baby-step Giant-step algorithm
-def baby_giant(g: int, y: int, p: int) -> int:
-    m = ceil(isqrt(p))
+def baby_giant(g, y, p):
+    m = ceil(gmpy2.isqrt(p))
     table = {}
     b = 1
     for i in range(m):
@@ -468,9 +460,7 @@ def baby_giant(g: int, y: int, p: int) -> int:
     return -1
 
 
-## Pohlig-Hellman algorithm
-def pohlig_hellman(g: int, y: int, p: int, phi_p: List[int]) -> int:
-    print(phi_p)
+def pohlig_hellman(g, y, p, phi_p):
     X = [baby_giant(pow(g, (p-1)//q, p), pow(y, (p-1)//q, p), q)
          for q in phi_p]
 
