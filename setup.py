@@ -5,7 +5,7 @@ setup(
     name='toyotama',
     version='0.5',
     description='CTF lib',
-    packages=find_packages(),
+    py_modules=['toyotama'],
     author='Laika',
     python_requires='>=3.6.*, <4',
     install_requires=['gmpy2']
