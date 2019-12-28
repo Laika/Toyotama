@@ -1,11 +1,11 @@
+import binascii
+import code
 import os
 import sys
-import code
-import binascii
+from functools import reduce
 from math import gcd, ceil, sqrt
 from struct import pack, unpack
 from time import sleep
-from functools import reduce
 import gmpy2
 
 color = {
@@ -39,14 +39,14 @@ def interact(symboltable):
 
 
 def show_variables(symboltable, *args):
-    def getVarsNames( _vars, symboltable ) :
-        return [ getVarName( var, symboltable ) for var in _vars ]
+    def getVarsNames(_vars, symboltable):
+        return [getVarName(var, symboltable) for var in _vars]
 
-    def getVarName( var, symboltable, error=None ) :
-        for k,v in symboltable.items() :
+    def getVarName(var, symboltable, error=None):
+        for k, v in symboltable.items():
             if id(v) == id(var) :
                 return k
-        else :
+        else:
             if error == "exception" :
                 raise ValueError("Undefined function is mixed in subspace?")
             else:
@@ -57,7 +57,6 @@ def show_variables(symboltable, *args):
     for name, value in zip(names, args):
         typ = f'<{type(value).__name__}>'
         if name.endswith('_addr'):
-            
             info(f'{name.ljust(maxlen_name)}{typ.rjust(maxlen_type)}: {value:#x}')
         else:
             info(f'{name.ljust(maxlen_name)}{typ.rjust(maxlen_type)}: {value}')
@@ -75,9 +74,9 @@ def extract_flag(s, head='{', tail='}', unique=True):
     return flags
 
 
-def random_string(length, pts):
+def random_string(length, ps):
     from random import choice
-    return ''.join([choice(pts) for _ in range(length)])
+    return ''.join([choice(ps) for _ in range(length)])
 
 
 def int_to_string(x, byte=False):
@@ -183,7 +182,7 @@ class Connect:
         else:
             self.send(message + b'\n')
 
-    def recv(self, n=256):
+    def recv(self, n=2048):
         sleep(0.05)
         ret = b''
         try:
@@ -260,6 +259,13 @@ class Connect:
             info('Press any key to close.')
             input()
 
+def urlencode(s, encoding='shift-jis', safe=':/&?='):
+    from urllib.parse import quote_plus
+    return quote_plus(s, encoding=encoding, safe=safe)
+
+def urldecode(s, encoding='shift-jis'):
+    from urllib.parse import unquote_plus
+    return unquote_plus(s, encoding=encoding)
 
 
     
@@ -274,8 +280,6 @@ u16  = lambda x, sign=False: unpack('<H' if not sign else '<h', x)[0]
 u32  = lambda x, sign=False: unpack('<I' if not sign else '<i', x)[0] 
 u64  = lambda x, sign=False: unpack('<Q' if not sign else '<q', x)[0] 
 fill = lambda x, c='A', byte=True: (c*x).encode() if byte else c*x
-
-
 
 
 # Crypto
