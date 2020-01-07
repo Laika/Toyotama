@@ -301,7 +301,9 @@ def extended_gcd(a, b):
 
 
 def mod_inverse(a, n):
-    s, _, _ = extended_gcd(a, n)
+    s, _, g = extended_gcd(a, n)
+    if g != 1:
+        raise Exception('The inverse does not exist.')
     return s % n
 
 
