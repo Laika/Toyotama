@@ -226,14 +226,19 @@ class Connect:
             t.sock = self.sock
             t.mt_interact()
 
-    def PoW(self, hashtype, match, pts, hx=False):
+    def PoW(self, hashtype, match, pts, begin=False, hx=False):
         import hashlib
         match = match.decode().strip()
         x = b'a'
         proc('Searching...')
         i = 0
-        while (h := hashlib.new(hashtype, x).hexdigest()[-(len(match)):]) != match:
-            x = random_string(20, pts).encode()
+        if begin:
+            while (h := hashlib.new(hashtype, x).hexdigest()[:len(match)]) != match:
+                x = random_string(20, pts).encode()
+
+        else:
+            while (h := hashlib.new(hashtype, x).hexdigest()[-(len(match)):]) != match:
+                x = random_string(20, pts).encode()
     
         info(f'Found.  {hashtype}(\'{x.decode()}\') == {h}')
         if hx:
