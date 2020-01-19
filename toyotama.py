@@ -6,20 +6,20 @@ from functools import reduce
 from math import gcd, ceil, sqrt
 from struct import pack, unpack
 from time import sleep
+from enum import Enum
 import gmpy2
 
-color = {
-        'R': 1,
-        'G': 2,
-        'Y': 3,
-        'B': 4,
-        'M': 5,
-        'C': 6,
-        'P': 93,
-        'V': 128,
-        'DP': 161,
-        'O': 166,
-        }
+class Color(Enum) :
+    RED = 1
+    GREEN = 2
+    YELLOW = 3
+    BLUE = 4
+    MAGENTA = 5
+    CYAN = 6
+    PURPLE = 93
+    VIOLET = 128
+    DEEP_PURPLE = 161
+    ORANGE = 166
 
 reset = '\x1b[0m'
 bold  = '\x1b[1m'
