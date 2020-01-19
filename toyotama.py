@@ -26,11 +26,11 @@ bold  = '\x1b[1m'
 fg    = lambda c: f'\x1b[38;5;{c}m'
 bg    = lambda c: f'\x1b[48;5;{c}m'
 
-message = lambda c, h, m : sys.stderr.write(f"{bold}{fg(color[c])}{h} {m}{reset}\n")
-info  = lambda m: message('B', '[+]', m)
-proc  = lambda m: message('V', '[*]', m)
-warn  = lambda m: message('O', '[!]', m)
-error = lambda m: message('R', '[-]', m)
+message = lambda c, h, m : sys.stderr.write(f"{bold}{fg(c)}{h} {m}{reset}\n")
+info  = lambda m: message(Color.BLUE, '[+]', m)
+proc  = lambda m: message(Color.VIOLET, '[*]', m)
+warn  = lambda m: message(Color.ORANGE, '[!]', m)
+error = lambda m: message(COLOR.RED, '[-]', m)
 
 
 # Utils
