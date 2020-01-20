@@ -119,6 +119,7 @@ def string_to_int_bytes(s):
     return int.from_bytes(s, 'big')
 
 
+
 def hexlify(x):
     if isinstance(x, str):
         x = x.encode()
@@ -258,13 +259,13 @@ class Connect:
         import hashlib
         match = match.decode().strip()
         x = b'a'
-        proc('Searching...')
         i = 0
         if begin:
+            proc(f'Searching x such that {hashtype}(x)[:{len(match)}] == {match} ...')
             while (h := hashlib.new(hashtype, x).hexdigest()[:len(match)]) != match:
                 x = random_string(20, pts).encode()
-
         else:
+            proc(f'Searching x such that {hashtype}(x)[-{len(match)}:] == {match} ...')
             while (h := hashlib.new(hashtype, x).hexdigest()[-(len(match)):]) != match:
                 x = random_string(20, pts).encode()
     
