@@ -64,10 +64,10 @@ def show_variables(symboltable, *args):
 
 @singledispatch
 def extract_flag(s, head='{', tail='}', unique=True):
-    raise TypeError('s must be str or bytes')
+    raise TypeError('s must be str or bytes.')
 
 @extract_flag.register(str)
-def extract_flag_from_str(s, head='FLAG{', tail='}', unique=True):
+def extract_flag_str(s, head='FLAG{', tail='}', unique=True):
     from re import compile, findall
     patt = f'{head}.*?{tail}'
     comp = compile(patt)
@@ -80,7 +80,7 @@ def extract_flag_from_str(s, head='FLAG{', tail='}', unique=True):
     return flags
 
 @extract_flag.register(bytes)
-def extract_flag_from_bytes(s, head='FLAG{', tail='}', unique=True):
+def extract_flag_bytes(s, head='FLAG{', tail='}', unique=True):
     from re import compile, findall
     patt = f'{head}.*?{tail}'.encode()
     comp = compile(patt)
@@ -104,12 +104,20 @@ def int_to_string(x, byte=False):
     if not byte:
         sb = sb.decode()
     return sb
-    
 
+
+@singledispatch
 def string_to_int(s):
-    if isinstance(s, str):
-        s = s.encode()
+    raise TypeError('s must be str or bytes.')
+
+@string_to_int.register(str)
+def string_to_int_str(s):
+    return int.from_bytes(s.encode(), 'big')
+
+@string_to_int.register(bytes)
+def string_to_int_bytes(s):
     return int.from_bytes(s, 'big')
+
 
 def hexlify(x):
     if isinstance(x, str):
