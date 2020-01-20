@@ -9,7 +9,7 @@ from time import sleep
 from enum import IntEnum
 import gmpy2
 
-class Color(IntEnum) :
+class Color(IntEnum):
     RED = 1
     GREEN = 2
     YELLOW = 3
@@ -120,16 +120,32 @@ def string_to_int_bytes(s):
 
 
 
+@singledispatch
 def hexlify(x):
-    if isinstance(x, str):
-        x = x.encode()
+    raise TypeError('x must be str or bytes.')
+
+@hexlify.register(str)
+def hexlify(x):
+    x = x.encode()
     return binascii.hexlify(x).decode()
 
+@hexlify.register(bytes)
+def hexlify(x):
+    return binascii.hexlify(x).decode()
+
+
+@singledispatch
 def unhexlify(x):
-    if isinstance(x, str):
-        x = x.encode()
+    raise TypeError('x must be str or bytes.')
+
+@unhexlify.register(str)
+def unhexlify(x):
+    x = x.encode()
     return binascii.unhexlify(x)
 
+@unhexlify.register(bytes)
+def unhexlify(x):
+    return binascii.unhexlify(x)
 
 class Shell:
     def __init__(self, env=None):
@@ -329,8 +345,8 @@ def extended_gcd(a, b):
     while c1 != 0:
         q, m = divmod(c0, c1)
         c0, c1 = c1, m
-        a0, a1 = a1, (a0 - q*a1)
-        b0, b1 = b1, (b0 - q*b1)
+        a0, a1 = a1, a0 - q*a1
+        b0, b1 = b1, b0 - q*b1
     return a0, b0, c0
 
 
@@ -440,7 +456,7 @@ def common_modulus_attack(e1, e2, c1, c2, n):
         c2 = mod_inverse(c2, n)
         s2 *= -1
 
-    return (pow(c1, s1, n)*pow(c2, s2, n)) % n
+    return pow(c1, s1, n)*pow(c2, s2, n) % n
 
 
 ## Wiener's Attack
