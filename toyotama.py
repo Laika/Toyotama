@@ -94,9 +94,9 @@ def extract_flag_from_bytes(s, head='FLAG{', tail='}', unique=True):
 
 
 
-def random_string(length, ps):
+def random_string(length, plaintext_space):
     from random import choice
-    return ''.join([choice(ps) for _ in range(length)])
+    return ''.join([choice(plaintext_space) for _ in range(length)])
 
 
 def int_to_string(x, byte=False):
