@@ -2,14 +2,14 @@ import binascii
 import code
 import os
 import sys
-from functools import reduce
+from functools import reduce, singledispatch
 from math import gcd, ceil, sqrt
 from struct import pack, unpack
 from time import sleep
-from enum import Enum
+from enum import IntEnum
 import gmpy2
 
-class Color(Enum) :
+class Color(IntEnum) :
     RED = 1
     GREEN = 2
     YELLOW = 3
@@ -30,7 +30,7 @@ message = lambda c, h, m : sys.stderr.write(f"{bold}{fg(c)}{h} {m}{reset}\n")
 info  = lambda m: message(Color.BLUE, '[+]', m)
 proc  = lambda m: message(Color.VIOLET, '[*]', m)
 warn  = lambda m: message(Color.ORANGE, '[!]', m)
-error = lambda m: message(COLOR.RED, '[-]', m)
+error = lambda m: message(Color.RED, '[-]', m)
 
 
 # Utils
@@ -62,16 +62,36 @@ def show_variables(symboltable, *args):
             info(f'{name.ljust(maxlen_name)}{typ.rjust(maxlen_type)}: {value}')
 
 
+@singledispatch
 def extract_flag(s, head='{', tail='}', unique=True):
+    raise TypeError('s must be str or bytes')
+
+@extract_flag.register(str)
+def extract_flag_from_str(s, head='FLAG{', tail='}', unique=True):
     from re import compile, findall
     patt = f'{head}.*?{tail}'
-    if isinstance(s, bytes):
-        patt = patt.encode()
     comp = compile(patt)
     flags = findall(comp, s)
     if unique:
         flags = set(flags)
+    if not flags:
+        error(f'The pattern {head}.*?{tail} does not exist.') 
+        return None
     return flags
+
+@extract_flag.register(bytes)
+def extract_flag_from_bytes(s, head='FLAG{', tail='}', unique=True):
+    from re import compile, findall
+    patt = f'{head}.*?{tail}'.encode()
+    comp = compile(patt)
+    flags = findall(comp, s)
+    if unique:
+        flags = set(flags)
+    if not flags:
+        error(f'The pattern {head}.*?{tail} does not exist.') 
+        return None
+    return flags
+
 
 
 def random_string(length, ps):
