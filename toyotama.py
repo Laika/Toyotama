@@ -9,28 +9,7 @@ from time import sleep
 from enum import IntEnum
 import gmpy2
 
-class Color(IntEnum):
-    RED = 1
-    GREEN = 2
-    YELLOW = 3
-    BLUE = 4
-    MAGENTA = 5
-    CYAN = 6
-    PURPLE = 93
-    VIOLET = 128
-    DEEP_PURPLE = 161
-    ORANGE = 166
-
-reset = '\x1b[0m'
-bold  = '\x1b[1m'
-fg    = lambda c: f'\x1b[38;5;{c}m'
-bg    = lambda c: f'\x1b[48;5;{c}m'
-
-message = lambda c, h, m : sys.stderr.write(f"{bold}{fg(c)}{h} {m}{reset}\n")
-info  = lambda m: message(Color.BLUE, '[+]', m)
-proc  = lambda m: message(Color.VIOLET, '[*]', m)
-warn  = lambda m: message(Color.ORANGE, '[!]', m)
-error = lambda m: message(Color.RED, '[-]', m)
+import log
 
 
 # Utils
@@ -57,9 +36,9 @@ def show_variables(symboltable, *args):
     for name, value in zip(names, args):
         typ = f'<{type(value).__name__}>'
         if name.endswith('_addr'):
-            info(f'{name.ljust(maxlen_name)}{typ.rjust(maxlen_type)}: {value:#x}')
+            log.info(f'{name.ljust(maxlen_name)}{typ.rjust(maxlen_type)}: {value:#x}')
         else:
-            info(f'{name.ljust(maxlen_name)}{typ.rjust(maxlen_type)}: {value}')
+            log.info(f'{name.ljust(maxlen_name)}{typ.rjust(maxlen_type)}: {value}')
 
 
 @singledispatch
@@ -75,7 +54,7 @@ def extract_flag_str(s, head='FLAG{', tail='}', unique=True):
     if unique:
         flags = set(flags)
     if not flags:
-        error(f'The pattern {head}.*?{tail} does not exist.') 
+        log.error(f'The pattern {head}.*?{tail} does not exist.') 
         return None
     return flags
 
@@ -88,7 +67,7 @@ def extract_flag_bytes(s, head='FLAG{', tail='}', unique=True):
     if unique:
         flags = set(flags)
     if not flags:
-        error(f'The pattern {head}.*?{tail} does not exist.') 
+        log.error(f'The pattern {head}.*?{tail} does not exist.') 
         return None
     return flags
 
@@ -168,8 +147,8 @@ class Shell:
 class Connect:
     def __init__(self, target, mode='SOCKET', to=5.0, log=True, **args):
         if mode not in {'SOCKET', 'LOCAL'}:
-            warn(f'Connect: {mode} is not defined.')
-            info(f'Connect: Automatically set to "SOCKET".')
+            log.warn(f'Connect: {mode} is not defined.')
+            log.info(f'Connect: Automatically set to "SOCKET".')
         self.mode = mode
         self.log = log
         self.is_alive = True
@@ -184,7 +163,7 @@ class Connect:
             import socket
             host, port = target['host'], target['port']
             if self.log:
-                proc(f'Connecting to {host}:{port}...')
+                log.proc(f'Connecting to {host}:{port}...')
             self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.sock.settimeout(to)
             self.sock.connect((host, port))
@@ -195,10 +174,10 @@ class Connect:
             program = target['program']
             self.wait = ('wait' in args and args['wait'])
             if self.log:
-                proc(f'Starting {program} ...')
+                log.proc(f'Starting {program} ...')
             self.proc = subprocess.Popen(program, shell=False, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
             if self.log:
-                info(f'PID: {self.proc.pid}')
+                log.info(f'PID: {self.proc.pid}')
             self.set_nonblocking(self.proc.stdout)
             self.timeout = None
 
@@ -212,7 +191,7 @@ class Connect:
         if isinstance(msg, str):
             msg = msg.encode()
         if self.log:
-            message('B', '[Send] <<', msg)
+            log.message('B', '[Send] <<', msg)
         try:
             if self.mode == 'SOCKET':
                 self.sock.sendall(msg)
@@ -239,7 +218,7 @@ class Connect:
             pass
 
         if self.log:
-            message('DP', '[Recv] >>', ret)
+            log.message('DP', '[Recv] >>', ret)
         return ret
 
     def recvuntil(self, term='\n'):
@@ -252,12 +231,12 @@ class Connect:
                     ret += self.proc.stdout.read(1)
             except self.timeout:
                 if not ret.endswith(term.encode()):
-                    warn(f'readuntil: not end with {repr(term)} (timeout)')
+                    log.warn(f'readuntil: not end with {repr(term)} (timeout)')
                 break
             except Exception:
                 sleep(0.05)
         if self.log:
-            message('DP', '[Recv] >>', ret)
+            log.message('DP', '[Recv] >>', ret)
         return ret
 
     def recvline(self):
@@ -266,7 +245,7 @@ class Connect:
     def interactive(self):
         from telnetlib import Telnet
         if self.log:
-            info('Switching to interactive mode')
+            log.info('Switching to interactive mode')
         with Telnet() as t:
             t.sock = self.sock
             t.mt_interact()
@@ -277,15 +256,15 @@ class Connect:
         x = b'a'
         i = 0
         if begin:
-            proc(f'Searching x such that {hashtype}(x)[:{len(match)}] == {match} ...')
+            log.proc(f'Searching x such that {hashtype}(x)[:{len(match)}] == {match} ...')
             while (h := hashlib.new(hashtype, x).hexdigest()[:len(match)]) != match:
                 x = random_string(20, pts).encode()
         else:
-            proc(f'Searching x such that {hashtype}(x)[-{len(match)}:] == {match} ...')
+            log.proc(f'Searching x such that {hashtype}(x)[-{len(match)}:] == {match} ...')
             while (h := hashlib.new(hashtype, x).hexdigest()[-(len(match)):]) != match:
                 x = random_string(20, pts).encode()
     
-        info(f'Found.  {hashtype}(\'{x.decode()}\') == {h}')
+        log.info(f'Found.  {hashtype}(\'{x.decode()}\') == {h}')
         if hx:
             x = hexlify(x)
         self.sendline(x)
@@ -295,7 +274,7 @@ class Connect:
         if self.mode == 'SOCKET':
             self.sock.close()
             if self.log:
-                proc('Disconnected.')
+                log.proc('Disconnected.')
 
         elif self.mode == 'LOCAL':
             if self.wait:
@@ -304,9 +283,9 @@ class Connect:
                 self.proc.terminate()
 
             if self.log:
-                proc(f'Stopped.')
+                log.proc(f'Stopped.')
         if self.log:
-            info('Press any key to close.')
+            log.info('Press any key to close.')
             input()
 
 def urlencode(s, encoding='shift-jis', safe=':/&?='):

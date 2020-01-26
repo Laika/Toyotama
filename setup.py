@@ -5,7 +5,7 @@ setup(
     name='toyotama',
     version='0.5',
     description='CTF libary',
-    py_modules=['toyotama'],
+    py_modules=['toyotama','log'],
     author='Laika',
     python_requires='>=3.6.*, <4',
     install_requires=['gmpy2']
