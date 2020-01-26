@@ -1,3 +1,7 @@
+from enum import IntEnum
+import sys
+
+
 class Color(IntEnum):
     RED = 1
     GREEN = 2
