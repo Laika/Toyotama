@@ -103,12 +103,12 @@ def hexlify(x):
     raise TypeError('x must be str or bytes.')
 
 @hexlify.register(str)
-def hexlify_from_str(x):
+def hexlify_str(x):
     x = x.encode()
     return binascii.hexlify(x).decode()
 
 @hexlify.register(bytes)
-def hexlify_from_bytes(x):
+def hexlify_bytes(x):
     return binascii.hexlify(x).decode()
 
 
@@ -117,12 +117,12 @@ def unhexlify(x):
     raise TypeError('x must be str or bytes.')
 
 @unhexlify.register(str)
-def unhexlify_from_str(x):
+def unhexlify_str(x):
     x = x.encode()
     return binascii.unhexlify(x)
 
 @unhexlify.register(bytes)
-def unhexlify_from_bytes(x):
+def unhexlify_bytes(x):
     return binascii.unhexlify(x)
 
 class Shell:
