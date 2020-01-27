@@ -190,7 +190,7 @@ class Connect:
         if isinstance(msg, str):
             msg = msg.encode()
         if self.verbose:
-            log.message('B', '[Send] <<', msg)
+            log.message(log.Color.BLUE, '[Send] <<', msg)
         try:
             if self.mode == 'SOCKET':
                 self.sock.sendall(msg)
@@ -217,7 +217,7 @@ class Connect:
             pass
 
         if self.verbose:
-            log.message('DP', '[Recv] >>', ret)
+            log.message(log.Color.DEEP_PURPLE, '[Recv] >>', ret)
         return ret
 
     def recvuntil(self, term='\n'):
@@ -235,7 +235,7 @@ class Connect:
             except Exception:
                 sleep(0.05)
         if self.verbose:
-            log.message('DP', '[Recv] >>', ret)
+            log.message(log.Color.DEEP_PURPLE, '[Recv] >>', ret)
         return ret
 
     def recvline(self):
