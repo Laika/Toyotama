@@ -390,12 +390,17 @@ def rot(s, rotate=13):
             r += c
     return r
 
-
+@singledispatch
 def xor_string(s, t):
-    if isinstance(s, str):
-        return ''.join(chr(ord(a) ^ ord(b)) for a, b in zip(s, t))
-    else:
-        return bytes([a ^ b for a, b in zip(s, t)])
+    raise TypeError('Both s and t must be str or bytes.')
+    
+@xor_string.register(str)
+def xor_string_str(s, t):
+    return ''.join(chr(ord(a) ^ ord(b)) for a, b in zip(s, t))
+
+@xor_string.register(bytes)
+def xor_string_bytes(s, t):
+    return bytes([a ^ b for a, b in zip(s, t)])
 
 
 def get_secretkey(p, q, e=0x10001):
