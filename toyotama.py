@@ -144,12 +144,12 @@ class Shell:
 
 
 class Connect:
-    def __init__(self, target, mode='SOCKET', to=5.0, log=True, **args):
+    def __init__(self, target, mode='SOCKET', to=5.0, verbose=True, **args):
         if mode not in {'SOCKET', 'LOCAL'}:
             log.warn(f'Connect: {mode} is not defined.')
             log.info(f'Connect: Automatically set to "SOCKET".')
         self.mode = mode
-        self.log = log
+        self.verbose = verbose
         self.is_alive = True
         
         if target.startswith('./'):
@@ -161,7 +161,7 @@ class Connect:
         if self.mode == 'SOCKET':
             import socket
             host, port = target['host'], target['port']
-            if self.log:
+            if self.verbose:
                 log.proc(f'Connecting to {host}:{port}...')
             self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.sock.settimeout(to)
@@ -172,10 +172,10 @@ class Connect:
             import subprocess
             program = target['program']
             self.wait = ('wait' in args and args['wait'])
-            if self.log:
+            if self.verbose:
                 log.proc(f'Starting {program} ...')
             self.proc = subprocess.Popen(program, shell=False, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-            if self.log:
+            if self.verbose:
                 log.info(f'PID: {self.proc.pid}')
             self.set_nonblocking(self.proc.stdout)
             self.timeout = None
@@ -189,7 +189,7 @@ class Connect:
     def send(self, msg):
         if isinstance(msg, str):
             msg = msg.encode()
-        if self.log:
+        if self.verbose:
             log.message('B', '[Send] <<', msg)
         try:
             if self.mode == 'SOCKET':
@@ -216,7 +216,7 @@ class Connect:
         except Exception:
             pass
 
-        if self.log:
+        if self.verbose:
             log.message('DP', '[Recv] >>', ret)
         return ret
 
@@ -234,7 +234,7 @@ class Connect:
                 break
             except Exception:
                 sleep(0.05)
-        if self.log:
+        if self.verbose:
             log.message('DP', '[Recv] >>', ret)
         return ret
 
@@ -243,7 +243,7 @@ class Connect:
 
     def interactive(self):
         from telnetlib import Telnet
-        if self.log:
+        if self.verbose:
             log.info('Switching to interactive mode')
         with Telnet() as t:
             t.sock = self.sock
@@ -272,7 +272,7 @@ class Connect:
     def __del__(self):
         if self.mode == 'SOCKET':
             self.sock.close()
-            if self.log:
+            if self.verbose:
                 log.proc('Disconnected.')
 
         elif self.mode == 'LOCAL':
@@ -281,9 +281,9 @@ class Connect:
             elif self.proc.poll() is None:
                 self.proc.terminate()
 
-            if self.log:
+            if self.verbose:
                 log.proc(f'Stopped.')
-        if self.log:
+        if self.verbose:
             log.info('Press any key to close.')
             input()
 
