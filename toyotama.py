@@ -6,6 +6,7 @@ from functools import reduce, singledispatch
 from math import gcd, ceil, sqrt
 from struct import pack, unpack
 from time import sleep
+from enum import Enum
 import gmpy2
 
 import log
@@ -142,10 +143,13 @@ class Shell:
             ret = self.__run(command, stdout=self.__PIPE, stderr=self.__PIPE, env=self.env)
         return ret
 
+class Mode(Enum):
+    SOCKET = 1
+    LOCAL = 2
 
 class Connect:
-    def __init__(self, target, mode='SOCKET', to=5.0, verbose=True, **args):
-        if mode not in {'SOCKET', 'LOCAL'}:
+    def __init__(self, target, mode=Mode.SOCKET, to=5.0, verbose=True, **args):
+        if mode not in Mode:
             log.warn(f'Connect: {mode} is not defined.')
             log.info(f'Connect: Automatically set to "SOCKET".')
         self.mode = mode
@@ -158,7 +162,7 @@ class Connect:
             _, host, port = target.split()
             target = {'host': host, 'port': int(port)}
 
-        if self.mode == 'SOCKET':
+        if self.mode == Mode.SOCKET:
             import socket
             host, port = target['host'], target['port']
             if self.verbose:
@@ -168,7 +172,7 @@ class Connect:
             self.sock.connect((host, port))
             self.timeout = socket.timeout
     
-        elif self.mode == 'LOCAL':
+        elif self.mode == Mode.LOCAL:
             import subprocess
             program = target['program']
             self.wait = ('wait' in args and args['wait'])
