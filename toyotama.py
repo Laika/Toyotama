@@ -11,25 +11,25 @@ import gmpy2
 import log
 
 
-# Utils
+# utils
 def interact(symboltable):
     code.interact(local=symboltable)
 
 
 def show_variables(symboltable, *args):
-    def getVarsNames(_vars, symboltable):
-        return [getVarName(var, symboltable) for var in _vars]
+    def getvarsnames(_vars, symboltable):
+        return [getvarname(var, symboltable) for var in _vars]
 
-    def getVarName(var, symboltable, error=None):
+    def getvarname(var, symboltable, error=None):
         for k, v in symboltable.items():
             if id(v) == id(var) :
                 return k
         else:
             if error == "exception" :
-                raise ValueError("Undefined function is mixed in subspace?")
+                raise valueerror("undefined function is mixed in subspace?")
             else:
                 return error
-    names = getVarsNames(args, symboltable)
+    names = getvarsnames(args, symboltable)
     maxlen_name = max([len(name) for name in names])+1
     maxlen_type = max([len(type(value).__name__) for value in args])+3
     for name, value in zip(names, args):
@@ -42,10 +42,10 @@ def show_variables(symboltable, *args):
 
 @singledispatch
 def extract_flag(s, head='{', tail='}', unique=True):
-    raise TypeError('s must be str or bytes.')
+    raise typeerror('s must be str or bytes.')
 
 @extract_flag.register(str)
-def extract_flag_str(s, head='FLAG{', tail='}', unique=True):
+def extract_flag_str(s, head='flag{', tail='}', unique=True):
     from re import compile, findall
     patt = f'{head}.*?{tail}'
     comp = compile(patt)
@@ -53,12 +53,12 @@ def extract_flag_str(s, head='FLAG{', tail='}', unique=True):
     if unique:
         flags = set(flags)
     if not flags:
-        log.error(f'The pattern {head}.*?{tail} does not exist.') 
+        log.error(f'the pattern {head}.*?{tail} does not exist.') 
         return None
     return flags
 
 @extract_flag.register(bytes)
-def extract_flag_bytes(s, head='FLAG{', tail='}', unique=True):
+def extract_flag_bytes(s, head='flag{', tail='}', unique=True):
     from re import compile, findall
     patt = f'{head}.*?{tail}'.encode()
     comp = compile(patt)
@@ -66,7 +66,7 @@ def extract_flag_bytes(s, head='FLAG{', tail='}', unique=True):
     if unique:
         flags = set(flags)
     if not flags:
-        log.error(f'The pattern {head}.*?{tail} does not exist.') 
+        log.error(f'the pattern {head}.*?{tail} does not exist.') 
         return None
     return flags
 
@@ -86,7 +86,7 @@ def int_to_string(x, byte=False):
 
 @singledispatch
 def string_to_int(s):
-    raise TypeError('s must be str or bytes.')
+    raise typeerror('s must be str or bytes.')
 
 @string_to_int.register(str)
 def string_to_int_str(s):
@@ -100,7 +100,7 @@ def string_to_int_bytes(s):
 
 @singledispatch
 def hexlify(x):
-    raise TypeError('x must be str or bytes.')
+    raise typeerror('x must be str or bytes.')
 
 @hexlify.register(str)
 def hexlify_str(x):
@@ -114,7 +114,7 @@ def hexlify_bytes(x):
 
 @singledispatch
 def unhexlify(x):
-    raise TypeError('x must be str or bytes.')
+    raise typeerror('x must be str or bytes.')
 
 @unhexlify.register(str)
 def unhexlify_str(x):
@@ -125,29 +125,29 @@ def unhexlify_str(x):
 def unhexlify_bytes(x):
     return binascii.unhexlify(x)
 
-class Shell:
+class shell:
     def __init__(self, env=None):
-        from subprocess import run, PIPE, DEVNULL
+        from subprocess import run, pipe, devnull
         self.__run = run
-        self.__PIPE = PIPE
-        self.__DEVNULL = DEVNULL
+        self.__pipe = pipe
+        self.__devnull = devnull
         self.env = env
 
     def run(self, command, output=True):
         from shlex import split
         command = split(command)
         if not output:
-            ret = self.__run(command, stdout=self.__DEVNULL, stderr=self.__DEVNULL, env=self.env)
+            ret = self.__run(command, stdout=self.__devnull, stderr=self.__devnull, env=self.env)
         else:
-            ret = self.__run(command, stdout=self.__PIPE, stderr=self.__PIPE, env=self.env)
+            ret = self.__run(command, stdout=self.__pipe, stderr=self.__pipe, env=self.env)
         return ret
 
 
-class Connect:
-    def __init__(self, target, mode='SOCKET', to=5.0, verbose=True, **args):
-        if mode not in {'SOCKET', 'LOCAL'}:
-            log.warn(f'Connect: {mode} is not defined.')
-            log.info(f'Connect: Automatically set to "SOCKET".')
+class connect:
+    def __init__(self, target, mode='socket', to=5.0, verbose=True, **args):
+        if mode not in {'socket', 'local'}:
+            log.warn(f'connect: {mode} is not defined.')
+            log.info(f'connect: automatically set to "socket".')
         self.mode = mode
         self.verbose = verbose
         self.is_alive = True
@@ -158,45 +158,45 @@ class Connect:
             _, host, port = target.split()
             target = {'host': host, 'port': int(port)}
 
-        if self.mode == 'SOCKET':
+        if self.mode == 'socket':
             import socket
             host, port = target['host'], target['port']
             if self.verbose:
-                log.proc(f'Connecting to {host}:{port}...')
-            self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                log.proc(f'connecting to {host}:{port}...')
+            self.sock = socket.socket(socket.af_inet, socket.sock_stream)
             self.sock.settimeout(to)
             self.sock.connect((host, port))
             self.timeout = socket.timeout
     
-        elif self.mode == 'LOCAL':
+        elif self.mode == 'local':
             import subprocess
             program = target['program']
             self.wait = ('wait' in args and args['wait'])
             if self.verbose:
-                log.proc(f'Starting {program} ...')
-            self.proc = subprocess.Popen(program, shell=False, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+                log.proc(f'starting {program} ...')
+            self.proc = subprocess.popen(program, shell=False, stdin=subprocess.pipe, stdout=subprocess.pipe, stderr=subprocess.stdout)
             if self.verbose:
-                log.info(f'PID: {self.proc.pid}')
+                log.info(f'pid: {self.proc.pid}')
             self.set_nonblocking(self.proc.stdout)
             self.timeout = None
 
     def set_nonblocking(self, fh):
         import fcntl
         fd = fh.fileno()
-        fl = fcntl.fcntl(fd, fcntl.F_GETFL)
-        fcntl.fcntl(fd, fcntl.F_SETFL, fl | os.O_NONBLOCK)
+        fl = fcntl.fcntl(fd, fcntl.f_getfl)
+        fcntl.fcntl(fd, fcntl.f_setfl, fl | os.o_nonblock)
 
     def send(self, msg):
         if isinstance(msg, str):
             msg = msg.encode()
-        if self.verbose:
-            log.message(log.Color.BLUE, '[Send] <<', msg)
         try:
-            if self.mode == 'SOCKET':
+            if self.mode == 'socket':
                 self.sock.sendall(msg)
-            elif self.mode == 'LOCAL':
+            elif self.mode == 'local':
                 self.proc.stdin.write(msg)
-        except Exception:
+            if self.verbose:
+                log.message(log.color.blue, '[send] <<', msg)
+        except exception:
             self.is_alive = False
 
     def sendline(self, message):
@@ -209,82 +209,84 @@ class Connect:
         sleep(0.05)
         ret = b''
         try:
-            if self.mode == 'SOCKET':
+            if self.mode == 'socket':
                 ret = self.sock.recv(n)
-            elif self.mode=='LOCAL':
+            elif self.mode=='local':
                 ret = self.proc.stdout.read(n)
-        except Exception:
+        except exception:
             pass
 
         if self.verbose:
-            log.message(log.Color.DEEP_PURPLE, '[Recv] >>', ret)
+            log.message(log.color.deep_purple, '[recv] >>', ret)
         return ret
 
     def recvuntil(self, term='\n'):
         ret = b''
         while not ret.endswith(term.encode()):
             try:
-                if self.mode == 'SOCKET':
+                if self.mode == 'socket':
                     ret += self.sock.recv(1)
-                elif self.mode == 'LOCAL':
+                elif self.mode == 'local':
                     ret += self.proc.stdout.read(1)
             except self.timeout:
                 if not ret.endswith(term.encode()):
                     log.warn(f'readuntil: not end with {repr(term)} (timeout)')
                 break
-            except Exception:
+            except exception:
                 sleep(0.05)
         if self.verbose:
-            log.message(log.Color.DEEP_PURPLE, '[Recv] >>', ret)
+            log.message(log.color.deep_purple, '[recv] >>', ret)
         return ret
 
     def recvline(self):
         return self.recvuntil(term='\n')
 
     def interactive(self):
-        from telnetlib import Telnet
+        from telnetlib import telnet
         if self.verbose:
-            log.info('Switching to interactive mode')
-        with Telnet() as t:
+            log.info('switching to interactive mode')
+        
+        sleep(0.05)
+        with telnet() as t:
             t.sock = self.sock
             t.mt_interact()
 
-    def PoW(self, hashtype, match, pts, begin=False, hx=False):
+    def pow(self, hashtype, match, pts, begin=False, hx=False):
         import hashlib
         match = match.decode().strip()
         x = b'a'
         i = 0
         if begin:
-            log.proc(f'Searching x such that {hashtype}(x)[:{len(match)}] == {match} ...')
+            log.proc(f'searching x such that {hashtype}(x)[:{len(match)}] == {match} ...')
             while (h := hashlib.new(hashtype, x).hexdigest()[:len(match)]) != match:
                 x = random_string(20, pts).encode()
         else:
-            log.proc(f'Searching x such that {hashtype}(x)[-{len(match)}:] == {match} ...')
+            log.proc(f'searching x such that {hashtype}(x)[-{len(match)}:] == {match} ...')
             while (h := hashlib.new(hashtype, x).hexdigest()[-(len(match)):]) != match:
                 x = random_string(20, pts).encode()
     
-        log.info(f'Found.  {hashtype}(\'{x.decode()}\') == {h}')
+        log.info(f'found.  {hashtype}(\'{x.decode()}\') == {h}')
         if hx:
             x = hexlify(x)
         self.sendline(x)
 
 
     def __del__(self):
-        if self.mode == 'SOCKET':
+        if self.mode == 'socket':
             self.sock.close()
             if self.verbose:
-                log.proc('Disconnected.')
+                log.proc('disconnected.')
 
-        elif self.mode == 'LOCAL':
+        elif self.mode == 'local':
             if self.wait:
                 self.proc.communicate(None)
             elif self.proc.poll() is None:
                 self.proc.terminate()
 
             if self.verbose:
-                log.proc(f'Stopped.')
+                log.proc(f'stopped.')
         if self.verbose:
-            log.info('Press any key to close.')
+            log.info('press any key to close.')
             input()
 
 def urlencode(s, encoding='shift-jis', safe=':/&?='):
@@ -297,21 +299,21 @@ def urldecode(s, encoding='shift-jis'):
 
 
     
-# Pwn
-## Utils
-p8   = lambda x: pack('<B' if x > 0 else '<b', x)
-p16  = lambda x: pack('<H' if x > 0 else '<h', x)
-p32  = lambda x: pack('<I' if x > 0 else '<i', x)
-p64  = lambda x: pack('<Q' if x > 0 else '<q', x)
-u8   = lambda x, sign=False: unpack('<B' if not sign else '<b', x)[0] 
-u16  = lambda x, sign=False: unpack('<H' if not sign else '<h', x)[0] 
-u32  = lambda x, sign=False: unpack('<I' if not sign else '<i', x)[0] 
-u64  = lambda x, sign=False: unpack('<Q' if not sign else '<q', x)[0] 
-fill = lambda x, c='A', byte=True: (c*x).encode() if byte else c*x
+# pwn
+## utils
+p8   = lambda x: pack('<b' if x > 0 else '<b', x)
+p16  = lambda x: pack('<h' if x > 0 else '<h', x)
+p32  = lambda x: pack('<i' if x > 0 else '<i', x)
+p64  = lambda x: pack('<q' if x > 0 else '<q', x)
+u8   = lambda x, sign=False: unpack('<b' if not sign else '<b', x)[0] 
+u16  = lambda x, sign=False: unpack('<h' if not sign else '<h', x)[0] 
+u32  = lambda x, sign=False: unpack('<i' if not sign else '<i', x)[0] 
+u64  = lambda x, sign=False: unpack('<q' if not sign else '<q', x)[0] 
+fill = lambda x, c='a', byte=True: (c*x).encode() if byte else c*x
 
 
-# Crypto
-## Utils
+# crypto
+## utils
 def lcm(x, y):
     return x*y // gcd(x, y)
 
@@ -505,3 +507,17 @@ def pohlig_hellman(g, y, p, phi_p):
 
     x = chinese_remainder(phi_p, X)
     return x
+
+def factorize_from_ed(n, d, e=0x10001):
+    k = e*d-1
+    g = 1
+    while g := int(gmpy2.next_prime(g)):
+        t = k
+        while t%2 == 0:
+            t //= 2
+            x = pow(g, t, n)
+            if x > 1 and gcd(x-1, n) > 1:
+                p = gcd(x-1, n)
+                q = n//p
+                return min(p, q), max(p, q)
+
