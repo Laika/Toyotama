@@ -166,7 +166,7 @@ class Connect:
             import socket
             host, port = target['host'], target['port']
             if self.verbose:
-                log.proc(f'connecting to {host}:{port}...')
+                log.proc(f'Connecting to {host}:{port}...')
             self.sock = socket.socket(socket.af_inet, socket.sock_stream)
             self.sock.settimeout(to)
             self.sock.connect((host, port))
@@ -177,7 +177,7 @@ class Connect:
             program = target['program']
             self.wait = ('wait' in args and args['wait'])
             if self.verbose:
-                log.proc(f'starting {program} ...')
+                log.proc(f'Starting {program} ...')
             self.proc = subprocess.popen(program, shell=False, stdin=subprocess.pipe, stdout=subprocess.pipe, stderr=subprocess.stdout)
             if self.verbose:
                 log.info(f'pid: {self.proc.pid}')
@@ -234,7 +234,7 @@ class Connect:
                     ret += self.proc.stdout.read(1)
             except self.timeout:
                 if not ret.endswith(term.encode()):
-                    log.warn(f'readuntil: not end with {repr(term)} (timeout)')
+                    log.warn(f'readuntil: Not end with {repr(term)} (timeout)')
                 break
             except exception:
                 sleep(0.05)
@@ -248,7 +248,7 @@ class Connect:
     def interactive(self):
         from telnetlib import telnet
         if self.verbose:
-            log.info('switching to interactive mode')
+            log.info('Switching to interactive mode')
         
         sleep(0.05)
         with telnet() as t:
@@ -261,11 +261,11 @@ class Connect:
         x = b'a'
         i = 0
         if begin:
-            log.proc(f'searching x such that {hashtype}(x)[:{len(match)}] == {match} ...')
+            log.proc(f'Searching x such that {hashtype}(x)[:{len(match)}] == {match} ...')
             while (h := hashlib.new(hashtype, x).hexdigest()[:len(match)]) != match:
                 x = random_string(20, pts).encode()
         else:
-            log.proc(f'searching x such that {hashtype}(x)[-{len(match)}:] == {match} ...')
+            log.proc(f'Searching x such that {hashtype}(x)[-{len(match)}:] == {match} ...')
             while (h := hashlib.new(hashtype, x).hexdigest()[-(len(match)):]) != match:
                 x = random_string(20, pts).encode()
     
@@ -279,7 +279,7 @@ class Connect:
         if self.mode == 'socket':
             self.sock.close()
             if self.verbose:
-                log.proc('disconnected.')
+                log.proc('Disconnected.')
 
         elif self.mode == 'local':
             if self.wait:
@@ -288,9 +288,9 @@ class Connect:
                 self.proc.terminate()
 
             if self.verbose:
-                log.proc(f'stopped.')
+                log.proc(f'Stopped.')
         if self.verbose:
-            log.info('press any key to close.')
+            log.info('Press any key to close.')
             input()
 
 def urlencode(s, encoding='shift-jis', safe=':/&?='):
