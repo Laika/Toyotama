@@ -2,6 +2,7 @@ import binascii
 import code
 import os
 import sys
+import threading
 from functools import reduce, singledispatch
 from math import gcd, ceil, sqrt
 from struct import pack, unpack
@@ -167,7 +168,7 @@ class Connect:
             host, port = target['host'], target['port']
             if self.verbose:
                 log.proc(f'Connecting to {host}:{port}...')
-            self.sock = socket.socket(socket.af_inet, socket.sock_stream)
+            self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.sock.settimeout(to)
             self.sock.connect((host, port))
             self.timeout = socket.timeout
@@ -199,7 +200,7 @@ class Connect:
             elif self.mode == 'local':
                 self.proc.stdin.write(msg)
             if self.verbose:
-                log.message(log.color.blue, '[send] <<', msg)
+                log.message(log.Color.BLUE, '[send] <<', msg)
         except exception:
             self.is_alive = False
 
@@ -209,7 +210,7 @@ class Connect:
         else:
             self.send(message + b'\n')
 
-    def recv(self, n=2048):
+    def recv(self, n=2048, quiet=False):
         sleep(0.05)
         ret = b''
         try:
@@ -220,8 +221,8 @@ class Connect:
         except exception:
             pass
 
-        if self.verbose:
-            log.message(log.color.deep_purple, '[recv] >>', ret)
+        if not quiet and self.verbose:
+            log.message(log.Color.DEEP_PURPLE, '[recv] >>', ret)
         return ret
 
     def recvuntil(self, term='\n'):
@@ -239,7 +240,7 @@ class Connect:
             except exception:
                 sleep(0.05)
         if self.verbose:
-            log.message(log.color.deep_purple, '[recv] >>', ret)
+            log.message(log.Color.DEEP_PURPLE, '[recv] >>', ret)
         return ret
 
     def recvline(self):
@@ -250,12 +251,51 @@ class Connect:
         if self.verbose:
             log.info('Switching to interactive mode')
         
-        sleep(0.05)
+
         with telnet() as t:
             t.sock = self.sock
             t.mt_interact()
 
-    def pow(self, hashtype, match, pts, begin=False, hx=False):
+
+        #go = threading.Event()
+        #def recv_thread():
+        #    while not go.isSet():
+        #        try:
+        #            cur = self.recv(4096, quiet=True)
+        #            stdout = sys.stdout
+        #            if cur:
+        #                stdout.write(cur.decode())
+        #                stdout.flush()
+        #        except EOFError:
+        #            log.info('Got EOF while reading in interactive')
+        #            break
+        #t = threading.Thread(target=recv_thread)
+        #t.daemon = True
+        #t.start()
+
+        #try:
+        #    while not go.isSet():
+        #        stdin = sys.stdin
+        #        data = stdin.readline()
+        #        if data:
+        #            try:
+        #                self.send(data)
+        #            except EOFError:
+        #                go.set()
+        #                log.info('Got EOF while reading in interactive')
+        #        else:
+        #            go.set()
+        #except KeyboardInterrupt:
+        #    log.info('Interrupted')
+        #    go.set()
+
+        #while t.is_alive():
+        #    t.join(timeout=0.1)
+
+
+
+
+    def PoW(self, hashtype, match, pts, begin=False, hx=False):
         import hashlib
         match = match.decode().strip()
         x = b'a'
