@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
  
 setup(
     name='toyotama',
-    version='0.5',
+    version='0.6',
     description='CTF libary',
     py_modules=['toyotama','log'],
     author='Laika',

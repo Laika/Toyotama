@@ -27,7 +27,7 @@ def show_variables(symboltable, *args):
             if id(v) == id(var) :
                 return k
         else:
-            if error == "exception" :
+            if error == "Exception" :
                 raise valueerror("undefined function is mixed in subspace?")
             else:
                 return error
@@ -44,7 +44,7 @@ def show_variables(symboltable, *args):
 
 @singledispatch
 def extract_flag(s, head='{', tail='}', unique=True):
-    raise typeerror('s must be str or bytes.')
+    raise TypeError('s must be str or bytes.')
 
 @extract_flag.register(str)
 def extract_flag_str(s, head='flag{', tail='}', unique=True):
@@ -88,7 +88,7 @@ def int_to_string(x, byte=False):
 
 @singledispatch
 def string_to_int(s):
-    raise typeerror('s must be str or bytes.')
+    raise TypeError('s must be str or bytes.')
 
 @string_to_int.register(str)
 def string_to_int_str(s):
@@ -102,7 +102,7 @@ def string_to_int_bytes(s):
 
 @singledispatch
 def hexlify(x):
-    raise typeerror('x must be str or bytes.')
+    raise TypeError('x must be str or bytes.')
 
 @hexlify.register(str)
 def hexlify_str(x):
@@ -116,7 +116,7 @@ def hexlify_bytes(x):
 
 @singledispatch
 def unhexlify(x):
-    raise typeerror('x must be str or bytes.')
+    raise TypeError('x must be str or bytes.')
 
 @unhexlify.register(str)
 def unhexlify_str(x):
@@ -188,20 +188,20 @@ class Connect:
     def set_nonblocking(self, fh):
         import fcntl
         fd = fh.fileno()
-        fl = fcntl.fcntl(fd, fcntl.f_getfl)
-        fcntl.fcntl(fd, fcntl.f_setfl, fl | os.o_nonblock)
+        fl = fcntl.fcntl(fd, fcntl.F_GETFL)
+        fcntl.fcntl(fd, fcntl.F_SETFL, fl | os.O_NONBLOCK)
 
     def send(self, msg):
         if isinstance(msg, str):
             msg = msg.encode()
         try:
-            if self.mode == 'socket':
+            if self.mode == Mode.SOCKET:
                 self.sock.sendall(msg)
-            elif self.mode == 'local':
+            elif self.mode == Mode.LOCAL:
                 self.proc.stdin.write(msg)
             if self.verbose:
-                log.message(log.Color.BLUE, '[send] <<', msg)
-        except exception:
+                log.message(log.Color.BLUE, '[Send] <<', msg)
+        except Exception:
             self.is_alive = False
 
     def sendline(self, message):
@@ -214,45 +214,45 @@ class Connect:
         sleep(0.05)
         ret = b''
         try:
-            if self.mode == 'socket':
+            if self.mode == Mode.SOCKET:
                 ret = self.sock.recv(n)
-            elif self.mode=='local':
+            elif self.mode == Mode.LOCAL:
                 ret = self.proc.stdout.read(n)
-        except exception:
+        except Exception:
             pass
 
         if not quiet and self.verbose:
-            log.message(log.Color.DEEP_PURPLE, '[recv] >>', ret)
+            log.message(log.Color.DEEP_PURPLE, '[Recv] >>', ret)
         return ret
 
     def recvuntil(self, term='\n'):
         ret = b''
         while not ret.endswith(term.encode()):
             try:
-                if self.mode == 'socket':
+                if self.mode == Mode.SOCKET:
                     ret += self.sock.recv(1)
-                elif self.mode == 'local':
+                elif self.mode == Mode.LOCAL:
                     ret += self.proc.stdout.read(1)
             except self.timeout:
                 if not ret.endswith(term.encode()):
-                    log.warn(f'readuntil: Not end with {repr(term)} (timeout)')
+                    log.warn(f'readuntil: not end with {repr(term)} (timeout)')
                 break
-            except exception:
+            except Exception:
                 sleep(0.05)
         if self.verbose:
-            log.message(log.Color.DEEP_PURPLE, '[recv] >>', ret)
+            log.message(log.Color.DEEP_PURPLE, '[Recv] >>', ret)
         return ret
 
     def recvline(self):
         return self.recvuntil(term='\n')
 
     def interactive(self):
-        from telnetlib import telnet
+        from telnetlib import Telnet
         if self.verbose:
             log.info('Switching to interactive mode')
         
 
-        with telnet() as t:
+        with Telnet() as t:
             t.sock = self.sock
             t.mt_interact()
 
@@ -316,12 +316,12 @@ class Connect:
 
 
     def __del__(self):
-        if self.mode == 'socket':
+        if self.mode == Mode.SOCKET:
             self.sock.close()
             if self.verbose:
                 log.proc('Disconnected.')
 
-        elif self.mode == 'local':
+        elif self.mode == Mode.LOCAL:
             if self.wait:
                 self.proc.communicate(None)
             elif self.proc.poll() is None:
