@@ -179,7 +179,7 @@ class Connect:
             self.wait = ('wait' in args and args['wait'])
             if self.verbose:
                 log.proc(f'Starting {program} ...')
-            self.proc = subprocess.popen(program, shell=False, stdin=subprocess.pipe, stdout=subprocess.pipe, stderr=subprocess.stdout)
+            self.proc = subprocess.Popen(program, shell=False, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
             if self.verbose:
                 log.info(f'pid: {self.proc.pid}')
             self.set_nonblocking(self.proc.stdout)
@@ -309,7 +309,7 @@ class Connect:
             while (h := hashlib.new(hashtype, x).hexdigest()[-(len(match)):]) != match:
                 x = random_string(20, pts).encode()
     
-        log.info(f'found.  {hashtype}(\'{x.decode()}\') == {h}')
+        log.info(f'Found.  {hashtype}(\'{x.decode()}\') == {h}')
         if hx:
             x = hexlify(x)
         self.sendline(x)
@@ -345,15 +345,15 @@ def urldecode(s, encoding='shift-jis'):
     
 # pwn
 ## utils
-p8   = lambda x: pack('<b' if x > 0 else '<b', x)
-p16  = lambda x: pack('<h' if x > 0 else '<h', x)
-p32  = lambda x: pack('<i' if x > 0 else '<i', x)
-p64  = lambda x: pack('<q' if x > 0 else '<q', x)
-u8   = lambda x, sign=False: unpack('<b' if not sign else '<b', x)[0] 
-u16  = lambda x, sign=False: unpack('<h' if not sign else '<h', x)[0] 
-u32  = lambda x, sign=False: unpack('<i' if not sign else '<i', x)[0] 
-u64  = lambda x, sign=False: unpack('<q' if not sign else '<q', x)[0] 
-fill = lambda x, c='a', byte=True: (c*x).encode() if byte else c*x
+p8   = lambda x: pack('<B' if x > 0 else '<b', x)
+p16  = lambda x: pack('<H' if x > 0 else '<h', x)
+p32  = lambda x: pack('<I' if x > 0 else '<i', x)
+p64  = lambda x: pack('<Q' if x > 0 else '<q', x)
+u8   = lambda x, sign=False: unpack('<B' if not sign else '<b', x)[0] 
+u16  = lambda x, sign=False: unpack('<H' if not sign else '<h', x)[0] 
+u32  = lambda x, sign=False: unpack('<I' if not sign else '<i', x)[0] 
+u64  = lambda x, sign=False: unpack('<Q' if not sign else '<q', x)[0] 
+fill = lambda x, c='A', byte=True: (c*x).encode() if byte else c*x
 
 
 # crypto
