@@ -9,6 +9,7 @@ from struct import pack, unpack
 from time import sleep
 from enum import Enum
 import gmpy2
+import requests
 
 import log
 
@@ -564,4 +565,23 @@ def factorize_from_ed(n, d, e=0x10001):
                 p = gcd(x-1, n)
                 q = n//p
                 return min(p, q), max(p, q)
+
+# Attack and Defense
+
+def submit_flag(flags, url, token):
+    for flag in flags:
+        header = {
+            'x-api-key': token,
+        }
+        data = {
+            'flag': flag,
+        }
+        response = requests.post(url, data={'flag': flag})
+        log.info(response.text)
+
+
+
+
+
+
 
