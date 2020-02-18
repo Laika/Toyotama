@@ -3,6 +3,7 @@ import code
 import os
 import sys
 import threading
+import subprocess
 from functools import reduce, singledispatch
 from math import gcd, ceil, sqrt
 from struct import pack, unpack
@@ -20,19 +21,16 @@ def interact(symboltable):
 
 
 def show_variables(symboltable, *args):
-    def getvarsnames(_vars, symboltable):
-        return [getvarname(var, symboltable) for var in _vars]
-
     def getvarname(var, symboltable, error=None):
         for k, v in symboltable.items():
-            if id(v) == id(var) :
+            if id(v) == id(var):
                 return k
         else:
-            if error == "Exception" :
-                raise valueerror("undefined function is mixed in subspace?")
+            if error == "Exception":
+                raise ValueError("undefined function is mixed in subspace?")
             else:
                 return error
-    names = getvarsnames(args, symboltable)
+    names = [getvarname(var, symboltable) for var in args]
     maxlen_name = max([len(name) for name in names])+1
     maxlen_type = max([len(type(value).__name__) for value in args])+3
     for name, value in zip(names, args):
@@ -48,7 +46,7 @@ def extract_flag(s, head='{', tail='}', unique=True):
     raise TypeError('s must be str or bytes.')
 
 @extract_flag.register(str)
-def extract_flag_str(s, head='flag{', tail='}', unique=True):
+def extract_flag_str(s, head='{', tail='}', unique=True):
     from re import compile, findall
     patt = f'{head}.*?{tail}'
     comp = compile(patt)
@@ -61,7 +59,7 @@ def extract_flag_str(s, head='flag{', tail='}', unique=True):
     return flags
 
 @extract_flag.register(bytes)
-def extract_flag_bytes(s, head='flag{', tail='}', unique=True):
+def extract_flag_bytes(s, head='{', tail='}', unique=True):
     from re import compile, findall
     patt = f'{head}.*?{tail}'.encode()
     comp = compile(patt)
@@ -69,7 +67,7 @@ def extract_flag_bytes(s, head='flag{', tail='}', unique=True):
     if unique:
         flags = set(flags)
     if not flags:
-        log.error(f'the pattern {head}.*?{tail} does not exist.') 
+        log.error(f'The pattern {head}.*?{tail} does not exist.') 
         return None
     return flags
 
@@ -81,7 +79,7 @@ def random_string(length, plaintext_space):
 
 
 def int_to_string(x, byte=False):
-    sb = x.to_bytes((x.bit_length()+7) // 8, 'big')
+    sb = x.to_bytes((x.bit_length()+7)//8, 'big')
     if not byte:
         sb = sb.decode()
     return sb
@@ -130,10 +128,9 @@ def unhexlify_bytes(x):
 
 class shell:
     def __init__(self, env=None):
-        from subprocess import run, pipe, devnull
-        self.__run = run
-        self.__pipe = pipe
-        self.__devnull = devnull
+        self.__run = subprocess.RUN
+        self.__pipe = subprocess.PIPE
+        self.__devnull = subprocess.devnull
         self.env = env
 
     def run(self, command, output=True):
@@ -175,7 +172,6 @@ class Connect:
             self.timeout = socket.timeout
     
         elif self.mode == Mode.LOCAL:
-            import subprocess
             program = target['program']
             self.wait = ('wait' in args and args['wait'])
             if self.verbose:
