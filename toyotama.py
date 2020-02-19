@@ -572,7 +572,7 @@ def submit_flag(flags, url, token):
         data = {
             'flag': flag,
         }
-        response = requests.post(url, data={'flag': flag})
+        response = requests.post(url, data={'flag': flag}, headers=header)
         log.info(response.text)
 
 
