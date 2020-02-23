@@ -147,12 +147,13 @@ class Mode(Enum):
     LOCAL = 2
 
 class Connect:
-    def __init__(self, target, mode=Mode.SOCKET, to=5.0, verbose=True, **args):
+    def __init__(self, target, mode=Mode.SOCKET, to=5.0, verbose=True, pause=True, **args):
         if mode not in Mode:
             log.warn(f'Connect: {mode} is not defined.')
             log.info(f'Connect: Automatically set to "SOCKET".')
         self.mode = mode
         self.verbose = verbose
+        self.pause = pause
         self.is_alive = True
         
         if target.startswith('./'):
@@ -328,6 +329,7 @@ class Connect:
                 log.proc(f'Stopped.')
         if self.verbose:
             log.info('Press any key to close.')
+        if self.pause:
             input()
 
 def urlencode(s, encoding='shift-jis', safe=':/&?='):
