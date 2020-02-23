@@ -130,7 +130,7 @@ class shell:
     def __init__(self, env=None):
         self.__run = subprocess.RUN
         self.__pipe = subprocess.PIPE
-        self.__devnull = subprocess.devnull
+        self.__devnull = subprocess.DEVNULL
         self.env = env
 
     def run(self, command, output=True):
