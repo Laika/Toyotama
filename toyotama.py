@@ -327,9 +327,9 @@ class Connect:
 
             if self.verbose:
                 log.proc(f'Stopped.')
-        if self.verbose:
-            log.info('Press any key to close.')
         if self.pause:
+            if self.verbose:
+                log.info('Press any key to close.')
             input()
 
 def urlencode(s, encoding='shift-jis', safe=':/&?='):
