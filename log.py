@@ -13,11 +13,13 @@ class Color(IntEnum):
     VIOLET = 128
     DEEP_PURPLE = 161
     ORANGE = 166
+    GREY = 246
 
 reset = '\x1b[0m'
 bold  = '\x1b[1m'
 fg    = lambda c: f'\x1b[38;5;{c}m'
 bg    = lambda c: f'\x1b[48;5;{c}m'
+colorify = lambda c, m: f'{fg(c)}{m}{reset}'
 
 message = lambda c, h, m : sys.stderr.write(f"{bold}{fg(c)}{h} {m}{reset}\n")
 info  = lambda m: message(Color.BLUE, '[+]', m)
