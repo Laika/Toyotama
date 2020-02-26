@@ -12,7 +12,10 @@ from enum import Enum
 import gmpy2
 import requests
 
+from pwn import ELF
+
 import log
+
 
 
 # utils
@@ -126,9 +129,9 @@ def unhexlify_str(x):
 def unhexlify_bytes(x):
     return binascii.unhexlify(x)
 
-class shell:
+class Shell:
     def __init__(self, env=None):
-        self.__run = subprocess.RUN
+        self.__run = subprocess.run
         self.__pipe = subprocess.PIPE
         self.__devnull = subprocess.DEVNULL
         self.env = env
