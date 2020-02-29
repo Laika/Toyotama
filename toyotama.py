@@ -20,10 +20,62 @@ import log
 
 # utils
 def interact(symboltable):
+    """Switch to interactive mode
+
+    Parameters
+    ----------
+        symboltable: dict
+            The symboltable when this function is called.
+
+    Returns
+    -------
+    None
+
+    Examples
+    --------
+    a = 5 + 100
+    interact(globals())
+
+    (InteractiveConsole)
+    >>> a
+    105
+    """
+
+
     code.interact(local=symboltable)
+    
 
 
 def show_variables(symboltable, *args):
+    """Show the value and its type
+
+    Parameters
+    ----------
+        symboltable: dict
+            The symboltable when this function is called.
+
+        *args
+            The variable to show
+            
+
+    Returns
+    -------
+    None
+
+    Examples
+    --------
+    >>> a = 5 + 100
+    >>> b = 0x1001
+    >>> system_addr = 0x08080808
+    >>> s = 'hoge'
+    >>> show_variables(globals(), a, b, system_addr, s)
+
+    [+] a            <int>: 105
+    [+] b            <int>: 4097
+    [+] system_addr  <int>: 0x8080808
+    [+] s            <str>: hoge
+    """
+
     def getvarname(var, symboltable, error=None):
         for k, v in symboltable.items():
             if id(v) == id(var):
@@ -46,6 +98,27 @@ def show_variables(symboltable, *args):
 
 @singledispatch
 def extract_flag(s, head='{', tail='}', unique=True):
+    """Extract flags from a string
+
+    Parameters
+    ----------
+    s: str or bytes
+        Find flags from this string
+
+    head: str  
+        The head of flag format
+
+    tail: str
+        The tail of flag format
+
+
+    Returns
+    -------
+    list
+        The list of flags found in `s`
+
+    """
+
     raise TypeError('s must be str or bytes.')
 
 @extract_flag.register(str)
@@ -77,6 +150,30 @@ def extract_flag_bytes(s, head='{', tail='}', unique=True):
 
 
 def random_string(length, plaintext_space):
+    """ Generate random string
+
+    Parameters
+    ----------
+    length: int
+        Length of random string
+
+    plaintext_space: iterable
+        Each character is picked from this `plaintext_space`
+
+
+    Returns
+    -------
+    str
+        Randomly picked string
+
+    Examples
+    --------
+    >>> random_string(10, 'abcdefghijklmnopqrstuvwxyz')
+    'jzhmajvqje'
+    >>> random_string(10, 'abcdefghijklmnopqrstuvwxyz')
+    'aghlqvucdf'
+    """
+
     from random import choice
     return ''.join([choice(plaintext_space) for _ in range(length)])
 
