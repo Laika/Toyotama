@@ -7,8 +7,8 @@ setup(
     description='CTF libary',
     py_modules=['toyotama','log'],
     author='Laika',
-    python_requires='>=3.6.*, <4',
-    install_requires=['gmpy2']
+    python_requires='>=3.8.*, <4',
+    install_requires=['gmpy2', 'requests']
 )
 
 
