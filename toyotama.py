@@ -9,9 +9,9 @@ from math import gcd, ceil, sqrt
 from struct import pack, unpack
 from time import sleep
 from enum import Enum
+
 import gmpy2
 import requests
-
 from pwn import ELF
 
 import log
@@ -158,7 +158,7 @@ def random_string(length, plaintext_space):
         Length of random string
 
     plaintext_space: iterable
-        Each character is picked from this `plaintext_space`
+        Each character is picked from `plaintext_space`
 
 
     Returns
@@ -179,6 +179,29 @@ def random_string(length, plaintext_space):
 
 
 def int_to_string(x, byte=False):
+    """ Convert integer to string
+
+    Parameters
+    ----------
+    x: int
+        Integer
+
+    byte: bool
+        Keep it bytes or not
+
+    Returns
+    -------
+    str (or bytes)
+        Result
+
+    Examples
+    --------
+    >>> int_to_string(8387236825053623156)
+    'testtest'
+    >>> int_to_string(8387236825053623156, byte=True)
+    b'testtest'
+    """
+
     sb = x.to_bytes((x.bit_length()+7)//8, 'big')
     if not byte:
         sb = sb.decode()
@@ -187,6 +210,26 @@ def int_to_string(x, byte=False):
 
 @singledispatch
 def string_to_int(s):
+    """ Convert string or bytes to integer
+
+    Parameters
+    ----------
+    s: str (or bytes)
+        String
+
+    Returns
+    -------
+    int
+        Result
+
+    Examples
+    --------
+    >>> string_to_int('testtest')
+    8387236825053623156
+    >>> string_to_int(b'testtest')
+    8387236825053623156
+    """
+    
     raise TypeError('s must be str or bytes.')
 
 @string_to_int.register(str)
