@@ -15,6 +15,7 @@ import requests
 from pwn import ELF
 
 import log
+from integer import Int
 
 
 
