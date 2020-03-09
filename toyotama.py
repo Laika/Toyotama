@@ -291,7 +291,7 @@ class Mode(Enum):
     LOCAL = 2
 
 class Connect:
-    def __init__(self, target, mode=Mode.SOCKET, to=5.0, verbose=True, pause=True, **args):
+    def __init__(self, target, mode=Mode.SOCKET, to=10.0, verbose=True, pause=True, **args):
         if mode not in Mode:
             log.warn(f'Connect: {mode} is not defined.')
             log.info(f'Connect: Automatically set to "SOCKET".')
@@ -394,45 +394,45 @@ class Connect:
             log.info('Switching to interactive mode')
         
 
-        with Telnet() as t:
-            t.sock = self.sock
-            t.mt_interact()
+        #with Telnet() as t:
+        #    t.sock = self.sock
+        #    t.mt_interact()
 
 
-        #go = threading.Event()
-        #def recv_thread():
-        #    while not go.isSet():
-        #        try:
-        #            cur = self.recv(4096, quiet=True)
-        #            stdout = sys.stdout
-        #            if cur:
-        #                stdout.write(cur.decode())
-        #                stdout.flush()
-        #        except EOFError:
-        #            log.info('Got EOF while reading in interactive')
-        #            break
-        #t = threading.Thread(target=recv_thread)
-        #t.daemon = True
-        #t.start()
+        go = threading.Event()
+        def recv_thread():
+            while not go.isSet():
+                try:
+                    cur = self.recv(4096, quiet=True)
+                    stdout = sys.stdout
+                    if cur:
+                        stdout.write(cur.decode())
+                        stdout.flush()
+                except EOFError:
+                    log.info('Got EOF while reading in interactive')
+                    break
+        t = threading.Thread(target=recv_thread)
+        t.daemon = True
+        t.start()
 
-        #try:
-        #    while not go.isSet():
-        #        stdin = sys.stdin
-        #        data = stdin.readline()
-        #        if data:
-        #            try:
-        #                self.send(data)
-        #            except EOFError:
-        #                go.set()
-        #                log.info('Got EOF while reading in interactive')
-        #        else:
-        #            go.set()
-        #except KeyboardInterrupt:
-        #    log.info('Interrupted')
-        #    go.set()
+        try:
+            while not go.isSet():
+                stdin = sys.stdin
+                data = stdin.readline()
+                if data:
+                    try:
+                        self.send(data)
+                    except EOFError:
+                        go.set()
+                        log.info('Got EOF while reading in interactive')
+                else:
+                    go.set()
+        except KeyboardInterrupt:
+            log.info('Interrupted')
+            go.set()
 
-        #while t.is_alive():
-        #    t.join(timeout=0.1)
+        while t.is_alive():
+            t.join(timeout=0.1)
 
 
 
