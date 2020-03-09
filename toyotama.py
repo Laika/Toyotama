@@ -707,6 +707,35 @@ def factorize_from_ed(n, d, e=0x10001):
                 q = n//p
                 return min(p, q), max(p, q)
 
+def lsb_decryption_oracle_attack(n, e, c, oracle, progress=True):
+    """
+    oracle: method 
+        decryption oracle
+        c*2**e = (2*m)**e (mod n) >> oracle >> m&1
+    """
+    from fractions import Fraction
+
+    l, r = 0, n
+    C = c
+    i = 0
+    nl = n.bit_length()
+    while r-l > 1:
+        if progress:
+            log.proc(f'{(100*i//nl):>3}% [{i:>4}/{nl}]')
+
+        mid = Fraction(l+r, 2)
+        C = C*pow(2, e, n) % n
+        if oracle(C):
+            l = mid
+        else:
+            r = mid
+        i += 1
+        
+
+    return int(ceil(l))
+
+
+
 # Attack and Defense
 
 def submit_flag(flags, url, token):
