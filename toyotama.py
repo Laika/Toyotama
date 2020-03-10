@@ -766,8 +766,25 @@ def lsb_decryption_oracle_attack(n, e, c, oracle, progress=True):
     return int(ceil(l))
 
 
+def session_falsification(data, secret_key):
+    import flask.sessions
+    class App:
+        def __init__(self, secret_key):
+            self.secret_key = secret_key
+
+    app = App(secret_key)
+    si = flask.sessions.SecureCookieSessionInterface()
+    s = si.get_signing_serializer(app)
+    data = s.dumps(data)
+    return data
+
+
+
 
 # Attack and Defense
+
+
+
 
 def submit_flag(flags, url, token):
     for flag in flags:
