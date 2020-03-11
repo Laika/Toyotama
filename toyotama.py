@@ -242,34 +242,6 @@ def string_to_int_bytes(s):
     return int.from_bytes(s, 'big')
 
 
-
-@singledispatch
-def hexlify(x):
-    raise TypeError('x must be str or bytes.')
-
-@hexlify.register(str)
-def hexlify_str(x):
-    x = x.encode()
-    return binascii.hexlify(x).decode()
-
-@hexlify.register(bytes)
-def hexlify_bytes(x):
-    return binascii.hexlify(x).decode()
-
-
-@singledispatch
-def unhexlify(x):
-    raise TypeError('x must be str or bytes.')
-
-@unhexlify.register(str)
-def unhexlify_str(x):
-    x = x.encode()
-    return binascii.unhexlify(x)
-
-@unhexlify.register(bytes)
-def unhexlify_bytes(x):
-    return binascii.unhexlify(x)
-
 class Shell:
     def __init__(self, env=None):
         self.__run = subprocess.run
@@ -393,12 +365,6 @@ class Connect:
         if self.verbose:
             log.info('Switching to interactive mode')
         
-
-        #with Telnet() as t:
-        #    t.sock = self.sock
-        #    t.mt_interact()
-
-
         go = threading.Event()
         def recv_thread():
             while not go.isSet():
@@ -435,8 +401,6 @@ class Connect:
             t.join(timeout=0.1)
 
 
-
-
     def PoW(self, hashtype, match, pts, begin=False, hx=False):
         import hashlib
         match = match.decode().strip()
@@ -453,7 +417,7 @@ class Connect:
     
         log.info(f'Found.  {hashtype}(\'{x.decode()}\') == {h}')
         if hx:
-            x = hexlify(x)
+            x = x.hex()
         self.sendline(x)
 
 
@@ -507,14 +471,6 @@ def binary_to_image(data, padding=5, size=5, rev=False, image_size=(1000, 1000))
 
     return image.crop((0, 0, 2*padding+w*size, 2*padding+h*size))
 
-
-
-
-
-
-
-
-
     
 # pwn
 ## utils
@@ -526,7 +482,7 @@ u8   = lambda x, sign=False: unpack('<B' if not sign else '<b', x)[0]
 u16  = lambda x, sign=False: unpack('<H' if not sign else '<h', x)[0] 
 u32  = lambda x, sign=False: unpack('<I' if not sign else '<i', x)[0] 
 u64  = lambda x, sign=False: unpack('<Q' if not sign else '<q', x)[0] 
-fill = lambda x, c='A', byte=True: (c*x).encode() if byte else c*x
+fill = lambda x, c='A', byte=True: bytes([b'A' for _ in range(x)]) if byte else c*x
 
 
 # crypto
@@ -779,13 +735,7 @@ def session_falsification(data, secret_key):
     return data
 
 
-
-
 # Attack and Defense
-
-
-
-
 @singledispatch
 def submit_flag(flags, url, token):
     raise TypeError('flag must be str or list.')
