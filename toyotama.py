@@ -12,7 +12,6 @@ from enum import Enum
 
 import gmpy2
 import requests
-from pwn import ELF
 
 import log
 from integer import Int
@@ -754,7 +753,7 @@ def submit_flag_list(flags, url, token):
         log.info(response.text)
 
 @submit_flag.register(str)
-def submit_flag_list(flag, url, token):
+def submit_flag_str(flag, url, token):
     header = {
         'x-api-key': token,
     }
