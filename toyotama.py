@@ -544,6 +544,11 @@ def mod_sqrt(a, p):
         b = (b*g) % p
         r = m
 
+def factorize(x):
+    from factordb.factordb import FactorDB
+    f = FactorDB(x)
+    f.connect()
+    return f.get_factor_list()
 
 def rot(s, rotate=13):
     rotate %= 26
