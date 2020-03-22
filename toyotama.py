@@ -202,10 +202,10 @@ def int_to_string(x, byte=False):
     b'testtest'
     """
 
-    sb = x.to_bytes((x.bit_length()+7)//8, 'big')
+    res = bytes.fromhex(format(x, 'x'))
     if not byte:
-        sb = sb.decode()
-    return sb
+        res = res.decode()
+    return res
 
 
 @singledispatch
