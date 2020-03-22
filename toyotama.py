@@ -502,13 +502,6 @@ def extended_gcd(a, b):
     return a0, b0, c0
 
 
-def mod_inverse(a, n):
-    s, _, g = extended_gcd(a, n)
-    if g != 1:
-        raise Exception('The inverse does not exist.')
-    return s % n
-
-
 def mod_sqrt(a, p):
     if gmpy2.legendre(a, p) != 1:
         return 0
@@ -660,7 +653,7 @@ def baby_giant(g, y, p):
         table[b] = i
         b = (b*g) % p
 
-    gim = mod_inverse(pow(g, m), p)
+    gim = pow(pow(g, -1, p), m, p)
     gmm = y
 
     for i in range(m):
