@@ -650,8 +650,10 @@ def wieners_attack(e, n):
     return None
 
 
-def baby_giant(g, y, p):
-    m = ceil(gmpy2.isqrt(p))
+def baby_giant(g, y, p, q=None):
+    if not q:
+        q = p
+    m = ceil(gmpy2.isqrt(q))
     table = {}
     b = 1
     for i in range(m):
@@ -673,11 +675,10 @@ def baby_giant(g, y, p):
 
 def pohlig_hellman(g, y, p):
     phi_p = factorize(p-1)
-
-    X = [baby_giant(pow(g, (p-1)//q, p), pow(y, (p-1)//q, p), q)
+    X = [baby_giant(pow(g, (p-1)//q, p), pow(y, (p-1)//q, p), p, q)
          for q in phi_p]
 
-    x = chinese_remainder(phi_p, X)
+    x = chinese_remainder(X, phi_p)
     return x
 
 def factorize_from_ed(n, d, e=0x10001):
