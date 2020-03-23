@@ -576,12 +576,12 @@ def xor_string_bytes(s, t):
 
 
 def get_secretkey(p, q, e=0x10001):
-    return mod_inverse(e, (p-1) * (q-1))
+    return pow(e, -1, (p-1)*(q-1))
 
 def chinese_remainder(a, p):
     assert len(a) == len(p)
     P = reduce(lambda x, y: x*y, p)
-    x = sum([ai * mod_inverse(P//pi, pi) * P // pi for ai, pi in zip(a, p)])
+    x = sum([ai * pow(P//pi, -1, pi) * P // pi for ai, pi in zip(a, p)])
     return x % P
 
 
@@ -605,10 +605,10 @@ def vigenere(cipher, key):
 def common_modulus_attack(e1, e2, c1, c2, n):
     s1, s2, _ = extended_gcd(e1, e2)
     if s1 < 0:
-        c1 = mod_inverse(c1, n)
+        c1 = pow(c1, -1, n)
         s1 *= -1
     if s2 < 0:
-        c2 = mod_inverse(c2, n)
+        c2 = pow(c2, -1, n)
         s2 *= -1
 
     return pow(c1, s1, n)*pow(c2, s2, n) % n
@@ -663,7 +663,7 @@ def baby_giant(g, y, p):
 
     for i in range(m):
         if gmm in table.keys():
-            return i*m + table[gmm]
+            return int(i*m + table[gmm])
         else:
             gmm *= gim
             gmm %= p
@@ -671,7 +671,9 @@ def baby_giant(g, y, p):
     return -1
 
 
-def pohlig_hellman(g, y, p, phi_p):
+def pohlig_hellman(g, y, p):
+    phi_p = factorize(p-1)
+
     X = [baby_giant(pow(g, (p-1)//q, p), pow(y, (p-1)//q, p), q)
          for q in phi_p]
 
