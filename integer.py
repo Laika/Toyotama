@@ -12,7 +12,7 @@ class Int:
             sign = self.__x & 1<<self.bits-1
             value = self.__x & self.mask>>1
             if sign:
-                return -(~value+1 & self.mask>>1)
+                return -((~self.__x+1) & self.mask)
             return value & self.mask
         else:
             return self.__x & self.mask
