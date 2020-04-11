@@ -587,14 +587,15 @@ def chinese_remainder(a, p):
 
 ## Vigenere
 def vigenere(cipher, key):
+    pts = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
+
     key = key.lower()
     key = [ord('a') - ord(c) for c in key]
     ans = ''
     i = 0
     for c in cipher:
-        if not c in ascii_letters:
+        if not c in pts:
             ans += c
-            i += 1
         else:
             ans += rot(c, key[i % len(key)])
             i += 1
