@@ -149,7 +149,7 @@ def extract_flag_bytes(s, head='{', tail='}', unique=True):
 
 
 
-def random_string(length, plaintext_space):
+def random_string(length, plaintext_space, byte=True):
     """ Generate random string
 
     Parameters
@@ -174,8 +174,13 @@ def random_string(length, plaintext_space):
     'aghlqvucdf'
     """
 
-    from random import choice
-    return ''.join([choice(plaintext_space) for _ in range(length)])
+    from random import choices
+    rnd = choices(plaintext_space, k=length)
+    if isinstance(plaintext_space, bytes):
+        rnd = bytes(rnd)
+    if isinstance(plaintext_space, str):
+        rnd = ''.join(rnd)
+    return rnd
 
 
 def int_to_string(x, byte=False):
@@ -400,21 +405,23 @@ class Connect:
             t.join(timeout=0.1)
 
 
-    def PoW(self, hashtype, match, pts, begin=False, hx=False):
+    def PoW(self, hashtype, match, pts, begin=False, hx=False, length=20, start=b'', end=b''):
         import hashlib
-        match = match.decode().strip()
-        x = b'a'
-        i = 0
+        match = match.strip()
+        x = b''
+        rand_length = length - len(start) - len(end)
         if begin:
-            log.proc(f'Searching x such that {hashtype}(x)[:{len(match)}] == {match} ...')
+            log.proc(f'Searching x such that {hashtype}(x)[:{len(match.decode())}] == {match.decode()} ...')
             while (h := hashlib.new(hashtype, x).hexdigest()[:len(match)]) != match:
-                x = random_string(20, pts).encode()
+                x = start + random_string(rand_length, pts) + end
+
         else:
-            log.proc(f'Searching x such that {hashtype}(x)[-{len(match)}:] == {match} ...')
+            log.proc(f'Searching x such that {hashtype}(x)[-{len(match.decode())}:] == {match.decode()} ...')
             while (h := hashlib.new(hashtype, x).hexdigest()[-(len(match)):]) != match:
-                x = random_string(20, pts).encode()
+                x = start + random_string(rand_length, pts) + end
+                print(x)
     
-        log.info(f'Found.  {hashtype}(\'{x.decode()}\') == {h}')
+        log.info(f"Found.  {hashtype}('{x.decode()}') == {h}")
         if hx:
             x = x.hex()
         self.sendline(x)
