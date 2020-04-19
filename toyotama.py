@@ -419,7 +419,6 @@ class Connect:
             log.proc(f'Searching x such that {hashtype}(x)[-{len(match.decode())}:] == {match.decode()} ...')
             while (h := hashlib.new(hashtype, x).hexdigest()[-(len(match)):]) != match:
                 x = start + random_string(rand_length, pts) + end
-                print(x)
     
         log.info(f"Found.  {hashtype}('{x.decode()}') == {h}")
         if hx:
