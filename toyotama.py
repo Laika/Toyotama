@@ -37,7 +37,8 @@ def interact(symboltable):
     interact(globals())
 
     (InteractiveConsole)
-    >>> a 105
+    >>> a 
+    105
     """
 
 
@@ -763,6 +764,62 @@ def ecb_chosen_plaintext_attack(encrypt_oracle, plaintext_space=b'ABCDEFGHIJKLMN
                 if verbose:
                     sys.stderr.write('\n')
                 break
+
+
+
+# [str,b64encoded] plaintext >> padding_oracle >> [bool] padding is valid?
+def padding_oracle_attack(ciphertext, iv, padding_oracle, block_size=16, verbose=False):
+    cipher_block = [ciphertext[i:i+block_size] for i in range(0, len(ciphertext), block_size)]
+    cipher_block.reverse()
+    plaintext = b''
+
+    def is_valid(c_target, d_prev, nth_byte, i):
+        attempt_byte = bytes.fromhex(f'{i:02x}')
+        adjusted_bytes = bytes(c^nth_byte for c in d_prev)
+
+        payload = b'\x00'*(block_size-nth_byte) + attempt_byte + adjusted_bytes + c_target
+        if verbose:
+            print(log.colorify(log.Color.GREY, repr(b'\x00'*(block_size-nth_byte))[2:-1]) + log.colorify(log.Color.RED, repr(attempt_byte)[2:-1]) + log.colorify(log.Color.MAGENTA, repr(adjusted_bytes)[2:-1]) + log.colorify(log.Color.GREY, repr(c_target)[2:-1]))
+
+        payload = base64.b64encode(payload).decode()
+        return padding_oracle(payload)
+
+
+    for _ in range(len(cipher_block)-1):
+        c_target, c_prev = cipher_block[:2]
+
+        if verbose:
+            log.info(f'c_target: {c_target}')
+            log.info(f'c_prev: {c_prev}')
+
+        cipher_block.pop(0)
+        nth_byte = 1
+        i = 0
+        m = d_prev = b''
+        while True:
+            if is_valid(c_target, d_prev, nth_byte, i):
+                if verbose:
+                    log.info(f'{i:#02x}:' + f'{nth_byte:02x}'*nth_byte)
+
+                m += bytes.fromhex(f'{i^nth_byte^c_prev[-nth_byte]:02x}')
+                d_prev = bytes.fromhex(f'{i^nth_byte:02x}')+d_prev
+                nth_byte += 1
+                i = 0
+                if nth_byte <= block_size:
+                    continue
+                break
+            i += 1
+            if i > 0xff:
+                log.error('Not Found')
+                return None
+        plaintext = m[::-1] + plaintext 
+
+        if verbose:
+            log.info(f'Dec(c{len(cipher_block)}): {d_prev}')
+            log.info(f'm{len(cipher_block)}: {repr(m::-1])}')
+            log.info(f'plaintext: {plaintext}')
+
+    return plaintext
 
 
 
