@@ -37,8 +37,7 @@ def interact(symboltable):
     interact(globals())
 
     (InteractiveConsole)
-    >>> a
-    105
+    >>> a 105
     """
 
 
@@ -727,6 +726,44 @@ def lsb_decryption_oracle_attack(n, e, c, oracle, progress=True):
         
 
     return int(ceil(l))
+
+# |chosen_pt|FLAG|pad|
+def ecb_chosen_plaintext_attack(encrypt_oracle, plaintext_space=b'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789{}_', known_plaintext=b'', block_size=16, verbose=False):
+    from random import sample
+    block_end = block_size * (len(known_plaintext)//(block_size-2) + 1)
+    for _ in range(1, 100):
+
+        # shuffle plaintext_space to reduce complexity
+        plaintext_space = bytes(sample(bytearray(plaintext_space), len(plaintext_space)))
+
+        # get the encrypted block which includes the beginning of FLAG
+        if verbose:
+            log.info('Getting the encrypted block which includes the beginning of FLAG')
+
+        if len(known_plaintext) % block_size == block_size-1:
+            block_end += block_size
+
+        
+        chosen_plaintext = b'\x00'*(block_end-len(known_plaintext)-1) 
+        print(chosen_plaintext)
+        encrypted_block = encrypt_oracle(chosen_plaintext)
+        encrypted_block = encrypted_block[block_end-block_size:block_end]
+
+
+        # bruteforcing all of the characters in plaintext_space 
+        if verbose:
+            log.info('Bruteforcing all of the characters in plaintext_space')
+        for c in plaintext_space:
+            if verbose:
+                sys.stderr.write(f'\r{log.colorify(log.Color.GREY, known_plaintext[:-1].decode())}{log.colorify(log.Color.RED, known_plaintext[-1:].decode())}{log.colorify(log.Color.MAGENTA, chr(c))}')
+            payload = b'\x00'*(block_end-len(known_plaintext)-1) + known_plaintext + bytearray([c])
+            enc_block = encrypt_oracle(payload)[block_end-block_size:block_end]
+            if encrypted_block == enc_block:
+                known_plaintext += bytearray([c])
+                if verbose:
+                    sys.stderr.write('\n')
+                break
+
 
 
 def session_falsification(data, secret_key):
