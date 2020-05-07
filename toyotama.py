@@ -453,6 +453,21 @@ def urldecode(s, encoding='shift-jis'):
     from urllib.parse import unquote_plus
     return unquote_plus(s, encoding=encoding)
 
+@singledispatch
+def b64_padding(s):
+    raise TypeError('s must be str or bytes.')
+
+@b64_padding.register(str)
+def b64_padding_str(s):
+    s += '='*(-len(s)%4)
+    return s
+
+@b64_padding.register(bytes)
+def b64_padding_bytes(s):
+    s += b'='*(-len(s)%4)
+    return s
+
+
 def binary_to_image(data, padding=5, size=5, rev=False, image_size=(1000, 1000)):
     from PIL import Image, ImageDraw
     bk, wh = (0, 0, 0), (255, 255, 255)
