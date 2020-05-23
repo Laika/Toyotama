@@ -783,7 +783,7 @@ def ecb_chosen_plaintext_attack(encrypt_oracle, plaintext_space=b'ABCDEFGHIJKLMN
 
 
 # [str,b64encoded] plaintext >> padding_oracle >> [bool] padding is valid?
-def padding_oracle_attack(ciphertext, iv, padding_oracle, block_size=16, verbose=False):
+def padding_oracle_attack(ciphertext, padding_oracle, iv=b'', block_size=16, verbose=False):
     from base64 import b64encode
     cipher_block = [ciphertext[i:i+block_size] for i in range(0, len(ciphertext), block_size)]
     cipher_block.reverse()
@@ -795,7 +795,7 @@ def padding_oracle_attack(ciphertext, iv, padding_oracle, block_size=16, verbose
 
         payload = b'\x00'*(block_size-nth_byte) + attempt_byte + adjusted_bytes + c_target
         if verbose:
-            print(log.colorify(log.Color.GREY, repr(b'\x00'*(block_size-nth_byte))[2:-1]) + log.colorify(log.Color.RED, repr(attempt_byte)[2:-1]) + log.colorify(log.Color.MAGENTA, repr(adjusted_bytes)[2:-1]) + log.colorify(log.Color.GREY, repr(c_target)[2:-1]))
+            print('\r'+log.colorify(log.Color.GREY, repr(b'\x00'*(block_size-nth_byte))[2:-1]) + log.colorify(log.Color.RED, repr(attempt_byte)[2:-1]) + log.colorify(log.Color.MAGENTA, repr(adjusted_bytes)[2:-1]) + log.colorify(log.Color.GREY, repr(c_target)[2:-1]), end='')
 
         payload = b64encode(payload).decode()
         return padding_oracle(payload)
@@ -805,6 +805,7 @@ def padding_oracle_attack(ciphertext, iv, padding_oracle, block_size=16, verbose
         c_target, c_prev = cipher_block[:2]
 
         if verbose:
+            print()
             log.info(f'c_target: {c_target}')
             log.info(f'c_prev: {c_prev}')
 
@@ -815,6 +816,7 @@ def padding_oracle_attack(ciphertext, iv, padding_oracle, block_size=16, verbose
         while True:
             if is_valid(c_target, d_prev, nth_byte, i):
                 if verbose:
+                    print()
                     log.info(f'{i:#02x}:' + f'{nth_byte:02x}'*nth_byte)
 
                 m += bytes.fromhex(f'{i^nth_byte^c_prev[-nth_byte]:02x}')
