@@ -13,6 +13,7 @@ class Color(IntEnum):
     VIOLET = 128
     DEEP_PURPLE = 161
     ORANGE = 166
+    DARK_GREY = 240
     GREY = 246
 
 reset = '\x1b[0m'

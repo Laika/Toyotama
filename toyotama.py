@@ -799,7 +799,7 @@ def padding_oracle_attack(ciphertext, padding_oracle, iv=b'', block_size=16, ver
                     +log.colorify(log.Color.GREY, repr(b'\x00'*(block_size-nth_byte))[2:-1]) 
                     +log.colorify(log.Color.RED, repr(attempt_byte)[2:-1])
                     +log.colorify(log.Color.MAGENTA, repr(adjusted_bytes)[2:-1])
-                    +log.colorify(log.Color.GREY, repr(c_target)[2:-1])
+                    +log.colorify(log.Color.DARK_GREY, repr(c_target)[2:-1])
             )
             sys.stdout.flush()
 
