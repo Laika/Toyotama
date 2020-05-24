@@ -795,7 +795,13 @@ def padding_oracle_attack(ciphertext, padding_oracle, iv=b'', block_size=16, ver
 
         payload = b'\x00'*(block_size-nth_byte) + attempt_byte + adjusted_bytes + c_target
         if verbose:
-            print('\r'+log.colorify(log.Color.GREY, repr(b'\x00'*(block_size-nth_byte))[2:-1]) + log.colorify(log.Color.RED, repr(attempt_byte)[2:-1]) + log.colorify(log.Color.MAGENTA, repr(adjusted_bytes)[2:-1]) + log.colorify(log.Color.GREY, repr(c_target)[2:-1]), end='')
+            sys.stdout.write('\033[2K\033[G'
+                    +log.colorify(log.Color.GREY, repr(b'\x00'*(block_size-nth_byte))[2:-1]) 
+                    +log.colorify(log.Color.RED, repr(attempt_byte)[2:-1])
+                    +log.colorify(log.Color.MAGENTA, repr(adjusted_bytes)[2:-1])
+                    +log.colorify(log.Color.GREY, repr(c_target)[2:-1])
+            )
+            sys.stdout.flush()
 
         payload = b64encode(payload).decode()
         return padding_oracle(payload)
@@ -803,22 +809,13 @@ def padding_oracle_attack(ciphertext, padding_oracle, iv=b'', block_size=16, ver
 
     for _ in range(len(cipher_block)-1):
         c_target, c_prev = cipher_block[:2]
-
-        if verbose:
-            print()
-            log.info(f'c_target: {c_target}')
-            log.info(f'c_prev: {c_prev}')
-
+        print(cipher_block)
         cipher_block.pop(0)
         nth_byte = 1
         i = 0
         m = d_prev = b''
         while True:
             if is_valid(c_target, d_prev, nth_byte, i):
-                if verbose:
-                    print()
-                    log.info(f'{i:#02x}:' + f'{nth_byte:02x}'*nth_byte)
-
                 m += bytes.fromhex(f'{i^nth_byte^c_prev[-nth_byte]:02x}')
                 d_prev = bytes.fromhex(f'{i^nth_byte:02x}')+d_prev
                 nth_byte += 1
@@ -833,7 +830,8 @@ def padding_oracle_attack(ciphertext, padding_oracle, iv=b'', block_size=16, ver
         plaintext = m[::-1] + plaintext 
 
         if verbose:
-            log.info(f'Dec(c{len(cipher_block)}): {d_prev}')
+            print()
+            log.info(f'Decrypt(c{len(cipher_block)}): {d_prev}')
             log.info(f'm{len(cipher_block)}: {repr(m[::-1])}')
             log.info(f'plaintext: {plaintext}')
 
