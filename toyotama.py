@@ -571,6 +571,7 @@ def factorize(x):
     f.connect()
     return f.get_factor_list()
 
+@singledispatch
 def rot(s, rotate=13):
     rotate %= 26
     r = ''
@@ -582,6 +583,34 @@ def rot(s, rotate=13):
         else:
             r += c
     return r
+
+@rot.register(str)
+def rot_str(s, rotate=13):
+    rotate %= 26
+    r = ''
+    for c in s:
+        if 'A' <= c <= 'Z':
+            r += chr((ord(c)-65+rotate)%26 + 65)
+        elif 'a' <= c <= 'z':
+            r += chr((ord(c)-97+rotate)%26 + 97)
+        else:
+            r += c
+    return r
+
+
+@rot.register(bytes)
+def rot_bytes(s, rotate=13):
+    rotate %= 26
+    r = []
+    for c in s:
+        if 'A' <= chr(c) <= 'Z':
+            r.append((c-65+rotate)%26 + 65)
+        elif 'a' <= chr(c) <= 'z':
+            r.append((c-97+rotate)%26 + 97)
+        else:
+            r.append(c)
+    return bytes(r)
+
 
 @singledispatch
 def xor_string(s, t):
