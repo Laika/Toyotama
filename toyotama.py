@@ -626,13 +626,6 @@ def vigenere(cipher, key):
 ## Common Modulus Attack
 def common_modulus_attack(e1, e2, c1, c2, n):
     s1, s2, _ = extended_gcd(e1, e2)
-    if s1 < 0:
-        c1 = pow(c1, -1, n)
-        s1 *= -1
-    if s2 < 0:
-        c2 = pow(c2, -1, n)
-        s2 *= -1
-
     return pow(c1, s1, n)*pow(c2, s2, n) % n
 
 
