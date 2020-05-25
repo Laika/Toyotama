@@ -149,7 +149,7 @@ def extract_flag_bytes(s, head='{', tail='}', unique=True):
 
 
 
-def random_string(length, plaintext_space, byte=True):
+def random_string(length, plaintext_space='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789', byte=True):
     """ Generate random string
 
     Parameters
