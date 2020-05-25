@@ -853,9 +853,9 @@ def padding_oracle_attack(ciphertext, padding_oracle, iv=b'', block_size=16, ver
 
         if verbose:
             print()
-            log.info(f'Decrypt(c{len(cipher_block)}): {d_prev}')
-            log.info(f'm{len(cipher_block)}: {repr(m[::-1])}')
-            log.info(f'plaintext: {plaintext}')
+            log.info(f'Decrypt(c{len(cipher_block)}): {repr(d_prev)[2:-1]}')
+            log.info(f'm{len(cipher_block)}: {repr(m[::-1])[2:-1]}')
+            log.info(f'plaintext: {repr(plaintext)[2:-1]}')
 
     return plaintext
 
