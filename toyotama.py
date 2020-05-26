@@ -514,6 +514,8 @@ def fsa_write(target_addr: list, contents: list, nth_word: int, offset=0):
                 -> AAAA0x1e 0xf7f6f580 0x804860b 0xf7f6f000 0xf7fbb2f0 (nil) 0x4141d402
                 -> 7th (0x4141d402)
     offset: from the above, offset is 2 (0x4141d402)
+
+    verified : pwnb0d, Villager A
     """
 
     # adjust stack alignment
