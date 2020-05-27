@@ -1,14 +1,19 @@
 #!/usr/bin/env python
 from setuptools import setup, find_packages
+
+def _requires_from_file(filename):
+    with open(filename) as f:
+        return f.read().splitlines()
  
 setup(
     name='toyotama',
-    version='0.8',
+    version='0.9',
     description='CTF libary',
+    packages=find_packages(),
     py_modules=['toyotama','log', 'integer'],
     author='Laika',
     python_requires='>=3.8.*, <4',
-    install_requires=['gmpy2', 'requests', 'factordb-pycli']
+    install_requires=_requires_from_file('requirements.txt')
 )
 
 

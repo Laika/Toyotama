@@ -1,6 +1,5 @@
-from enum import IntEnum
 import sys
-
+from enum import IntEnum
 
 class Color(IntEnum):
     RED = 1
