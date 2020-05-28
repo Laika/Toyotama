@@ -1,6 +1,7 @@
 import fcntl
 import socket
 import threading
+from time import sleep
 from toyotama.util.log import *
 from enum import Enum
 
@@ -11,8 +12,8 @@ class Mode(Enum):
 class Connect:
     def __init__(self, target, mode=Mode.SOCKET, to=10.0, verbose=True, pause=True, **args):
         if mode not in Mode:
-            log.warn(f'Connect: {mode} is not defined.')
-            log.info(f'Connect: Automatically set to "SOCKET".')
+            warn(f'Connect: {mode} is not defined.')
+            info(f'Connect: Automatically set to "SOCKET".')
         self.mode = mode
         self.verbose = verbose
         self.pause = pause
@@ -27,7 +28,7 @@ class Connect:
         if self.mode == Mode.SOCKET:
             host, port = target['host'], target['port']
             if self.verbose:
-                log.proc(f'Connecting to {host}:{port}...')
+                proc(f'Connecting to {host}:{port}...')
             self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.sock.settimeout(to)
             self.sock.connect((host, port))
@@ -37,10 +38,10 @@ class Connect:
             program = target['program']
             self.wait = ('wait' in args and args['wait'])
             if self.verbose:
-                log.proc(f'Starting {program} ...')
+                proc(f'Starting {program} ...')
             self.proc = subprocess.Popen(program, shell=False, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
             if self.verbose:
-                log.info(f'pid: {self.proc.pid}')
+                info(f'pid: {self.proc.pid}')
             self.set_nonblocking(self.proc.stdout)
             self.timeout = None
 
@@ -58,7 +59,7 @@ class Connect:
             elif self.mode == Mode.LOCAL:
                 self.proc.stdin.write(msg)
             if self.verbose:
-                log.message(log.Color.BLUE, '[Send] <<', msg)
+                message(Color.BLUE, '[Send] <<', msg)
         except Exception:
             self.is_alive = False
 
@@ -80,7 +81,7 @@ class Connect:
             pass
 
         if not quiet and self.verbose:
-            log.message(log.Color.DEEP_PURPLE, '[Recv] >>', ret)
+            message(Color.DEEP_PURPLE, '[Recv] >>', ret)
         return ret
 
     def recvuntil(self, term='\n'):
@@ -93,12 +94,12 @@ class Connect:
                     ret += self.proc.stdout.read(1)
             except self.timeout:
                 if not ret.endswith(term.encode()):
-                    log.warn(f'readuntil: not end with {repr(term)} (timeout)')
+                    warn(f'readuntil: not end with {repr(term)} (timeout)')
                 break
             except Exception:
                 sleep(0.05)
         if self.verbose:
-            log.message(log.Color.DEEP_PURPLE, '[Recv] >>', ret)
+            message(Color.DEEP_PURPLE, '[Recv] >>', ret)
         return ret
 
     def recvline(self):
@@ -106,7 +107,7 @@ class Connect:
 
     def interactive(self):
         if self.verbose:
-            log.info('Switching to interactive mode')
+            info('Switching to interactive mode')
         
         go = threading.Event()
         def recv_thread():
@@ -118,7 +119,7 @@ class Connect:
                         stdout.write(cur.decode())
                         stdout.flush()
                 except EOFError:
-                    log.info('Got EOF while reading in interactive')
+                    info('Got EOF while reading in interactive')
                     break
         t = threading.Thread(target=recv_thread)
         t.daemon = True
@@ -133,11 +134,11 @@ class Connect:
                         self.send(data)
                     except EOFError:
                         go.set()
-                        log.info('Got EOF while reading in interactive')
+                        info('Got EOF while reading in interactive')
                 else:
                     go.set()
         except KeyboardInterrupt:
-            log.info('Interrupted')
+            info('Interrupted')
             go.set()
 
         while t.is_alive():
@@ -150,16 +151,16 @@ class Connect:
         x = b''
         rand_length = length - len(start) - len(end)
         if begin:
-            log.proc(f'Searching x such that {hashtype}(x)[:{len(match.decode())}] == {match.decode()} ...')
+            proc(f'Searching x such that {hashtype}(x)[:{len(match.decode())}] == {match.decode()} ...')
             while (h := hashlib.new(hashtype, x).hexdigest()[:len(match)]) != match:
                 x = start + random_string(rand_length, pts) + end
 
         else:
-            log.proc(f'Searching x such that {hashtype}(x)[-{len(match.decode())}:] == {match.decode()} ...')
+            proc(f'Searching x such that {hashtype}(x)[-{len(match.decode())}:] == {match.decode()} ...')
             while (h := hashlib.new(hashtype, x).hexdigest()[-(len(match)):]) != match:
                 x = start + random_string(rand_length, pts) + end
     
-        log.info(f"Found.  {hashtype}('{x.decode()}') == {h}")
+        info(f"Found.  {hashtype}('{x.decode()}') == {h}")
         if hx:
             x = x.hex()
         self.sendline(x)
@@ -169,7 +170,7 @@ class Connect:
         if self.mode == Mode.SOCKET:
             self.sock.close()
             if self.verbose:
-                log.proc('Disconnected.')
+                proc('Disconnected.')
 
         elif self.mode == Mode.LOCAL:
             if self.wait:
@@ -178,9 +179,9 @@ class Connect:
                 self.proc.terminate()
 
             if self.verbose:
-                log.proc(f'Stopped.')
+                proc(f'Stopped.')
         if self.pause:
             if self.verbose:
-                log.info('Press any key to close.')
+                info('Press any key to close.')
             input()
 
