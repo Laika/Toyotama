@@ -1,3 +1,5 @@
+from toyotama.pwn.util import *
+
 def fsa_write(target_addr: list, contents: list, nth_word: int, offset=0):
     """
     target_addr: The address where the content will be written
