@@ -1,5 +1,6 @@
 import gmpy2
 from math import gcd
+from functools import reduce
 
 def lcm(x, y):
     return x*y // gcd(x, y)
