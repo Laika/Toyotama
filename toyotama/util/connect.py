@@ -2,8 +2,10 @@ import fcntl
 import socket
 import threading
 from time import sleep
-from toyotama.util.log import *
+from string import printable
 from enum import Enum
+
+from toyotama.util.log import *
 
 class Mode(Enum):
     SOCKET = 1
@@ -145,25 +147,40 @@ class Connect:
             t.join(timeout=0.1)
 
 
-    def PoW(self, hashtype, match, pts, begin=False, hx=False, length=20, start=b'', end=b''):
+    def PoW(self, hashtype, match, pts=printable, begin=False, hx=False, length=20, start=b'', end=b''):
         import hashlib
-        match = match.strip()
-        x = b''
-        rand_length = length - len(start) - len(end)
-        if begin:
-            proc(f'Searching x such that {hashtype}(x)[:{len(match.decode())}] == {match.decode()} ...')
-            while (h := hashlib.new(hashtype, x).hexdigest()[:len(match)]) != match:
-                x = start + random_string(rand_length, pts) + end
+        from itertools import product
 
+        if isinstance(hashtype, bytes):
+            hashtype = hashtype.decode()
+        if isinstance(match, bytes):
+            match = match.decode()
+
+        hashtype = hashtype.strip()
+        match = match.strip()
+        pts = pts.encode()
+
+        rand_length = length-len(start)-len(end)
+
+        if begin:
+            proc(f'Searching x such that {hashtype}(x)[:{len(match)}] == {match} ...')
+            for patt in product(pts, repeat=rand_length):
+                patt = bytes(patt)
+                h = hashlib.new(hashtype, patt).hexdigest()[:len(match)]
+                if h == match:
+                    break
         else:
-            proc(f'Searching x such that {hashtype}(x)[-{len(match.decode())}:] == {match.decode()} ...')
-            while (h := hashlib.new(hashtype, x).hexdigest()[-(len(match)):]) != match:
-                x = start + random_string(rand_length, pts) + end
+            proc(f'Searching x such that {hashtype}(x)[-{len(match)}:] == {match} ...')
+            for patt in product(pts, repeat=rand_length):
+                patt = bytes(patt)
+                h = hashlib.new(hashtype, patt).hexdigest()[-len(match):]
+                if h == match:
+                    break
     
-        info(f"Found.  {hashtype}('{x.decode()}') == {h}")
+        info(f"Found.  {hashtype}('{patt.decode()}') == {h}")
         if hx:
-            x = x.hex()
-        self.sendline(x)
+            patt = patt.hex()
+        self.sendline(patt)
 
 
     def __del__(self):
