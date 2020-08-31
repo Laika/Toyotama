@@ -1,19 +1,29 @@
+from functools import reduce
+from math import gcd
+
 def lcg_crack(X, A=None, B=None, M=None):
-    if A and B:
-        M = gcd(X[2]-A*X[1]-B, X[1]-A*X[0]-B)
+    if not M:
+        if len(X) >= 6:
+            Y = [x-y for x, y in zip(X, X[1:])]
+            Z = [x*z - y*y for x, y, z in zip(Y, Y[1:], Y[2:])]
+            M = abs(reduce(gcd, Z))
 
-    Y = [X[i+1]-X[i] for i in range(len(X)-1)]
-    print(Y)
-    Z = [Y[i]*Y[i+3] - Y[i+1]*Y[i+2] for i in range(len(X)-4)]
-    M = reduce(gcd, Z)
+        elif len(X) >= 3:
+            assert A and B, "Can't crack" 
+            M = gcd(X[2]-A*X[1]-B, X[1]-A*X[0]-B)
+        else:
+            assert False, "Can't crack" 
 
-    if M and len(X) >= 3:
-        A = (X[2]-X[1]) * pow(X[1]-X[0], -1, M) % M
 
-    if A and M and len(X) >= 2:
-        B = (X[1]-A*X[0]) % M
+    if not A:
+        if len(X) >= 3:
+            A = (X[2]-X[1])*pow(X[1]-X[0], -1, M) % M
 
-    assert [(A*X[i]+B)%M == X[i+1] for i in range(len(X)-1)]
+
+    if not B:
+        if len(X) >= 2:
+            B = (X[1]-A*X[0]) % M
+
 
     return A, B, M
 
