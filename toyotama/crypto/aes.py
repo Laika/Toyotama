@@ -40,9 +40,8 @@ def ecb_chosen_plaintext_attack(encrypt_oracle, plaintext_space=b'ABCDEFGHIJKLMN
 
 
 
-# [str,b64encoded] plaintext >> padding_oracle >> [bool] padding is valid?
+# [bytes] plaintext >> padding_oracle >> [bool] padding is valid?
 def padding_oracle_attack(ciphertext, padding_oracle, iv=b'', block_size=16, verbose=False):
-    from base64 import b64encode
     cipher_block = [ciphertext[i:i+block_size] for i in range(0, len(ciphertext), block_size)]
     cipher_block.reverse()
     plaintext = b''
@@ -61,7 +60,6 @@ def padding_oracle_attack(ciphertext, padding_oracle, iv=b'', block_size=16, ver
             )
             sys.stdout.flush()
 
-        payload = b64encode(payload).decode()
         return padding_oracle(payload)
 
 
@@ -83,7 +81,7 @@ def padding_oracle_attack(ciphertext, padding_oracle, iv=b'', block_size=16, ver
                 break
             i += 1
             if i > 0xff:
-                error('Not Found')
+                error('[padding_oracle_attack] Not Found')
                 return None
         plaintext = m[::-1] + plaintext 
 
