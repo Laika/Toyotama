@@ -1,6 +1,6 @@
 from toyotama.pwn.util import *
 
-def fsa_write(target_addr: list, contents: list, nth_word: int, offset=0):
+def fsa_write(target_addr: list, contents: list, nth_word: int, sofar=0, offset=0):
     """
     target_addr: The address where the content will be written
     contents: What you want to write
@@ -15,7 +15,6 @@ def fsa_write(target_addr: list, contents: list, nth_word: int, offset=0):
     """
 
     # adjust stack alignment
-    sofar = 0
     payload = fill(-offset%4)
     if offset != 0:
         nth_word += 1
