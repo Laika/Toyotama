@@ -1,3 +1,6 @@
+import gmpy2
+from toyotama.crypto.util import extended_gcd
+
 ## Common Modulus Attack
 def common_modulus_attack(e1, e2, c1, c2, n):
     s1, s2, _ = extended_gcd(e1, e2)
