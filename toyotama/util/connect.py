@@ -118,7 +118,7 @@ class Connect:
                     cur = self.recv(4096, quiet=True)
                     stdout = sys.stdout
                     if cur:
-                        stdout.write(cur)
+                        stdout.buffer.write(cur)
                         stdout.flush()
                 except EOFError:
                     info('Got EOF while reading in interactive')
