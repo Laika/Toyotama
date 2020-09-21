@@ -106,17 +106,29 @@ def pohlig_hellman(g, y, p):
     x = chinese_remainder(X, phi_p)
     return x
 
-def factorize_from_ed(n, d, e=0x10001):
-    k = e*d-1
+
+def factorize_from_kphi(n, kphi):
+    """
+    factorize by Miller-Rabin primality test
+    n: p*q
+    kphi: k*phi(n) = k*(p-1)*(q-1)
+
+    kphi = 2**r * s
+    """
+    r = (kphi & -kphi).bit_length()-1
+    s = kphi >> r
     g = 1
     while g := int(gmpy2.next_prime(g)):
-        t = k
-        while t%2 == 0:
-            t //= 2
-            x = pow(g, t, n)
-            if x > 1 and gcd(x-1, n) > 1:
-                p = gcd(x-1, n)
-                q = n//p
-                return min(p, q), max(p, q)
+        x = pow(g, s, n)
+        for _ in range(r):
+            p = gcd(x-1, n)
+            if p != 1 and p != n:
+                assert p * n//p == n
+                return p, n//p
+            x = x*x % n
+    return None
+
+def factorize_from_ed(n, d, e=0x10001):
+    return factorize_from_kphi(n, e*d-1)
 
 
