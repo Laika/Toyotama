@@ -8,7 +8,6 @@ def generate_prime(bits):
     return int(gmpy2.next_prime(random.getrandbits(bits)))
 
 class UtilTestCase(unittest.TestCase):
-
     def test_mod_sqrt(self):
         p = generate_prime(1024)
         x = random.getrandbits(1024)
@@ -17,7 +16,6 @@ class UtilTestCase(unittest.TestCase):
         ok = x == X or x == p-X 
 
         self.assertTrue(ok)
-        
         
     def test_chinese_remainder(self):
         y = random.getrandbits(1024)

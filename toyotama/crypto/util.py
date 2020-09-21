@@ -26,19 +26,17 @@ def mod_sqrt(a, p):
     elif p == 2:
         return 0
     elif p % 4 == 3:
-        return pow(a, (p+1) / 4, p)
+        return pow(a, (p+1)>>2, p)
 
-    s = p - 1
-    e = 0
-    while s % 2 == 0:
-        s >>= 1
-        e += 1
+    s = p-1
+    e = (s & -s).bit_length()-1
+    s >>= e
 
     n = 2
     while gmpy2.legendre(n, p) != -1:
         n += 1
 
-    x = pow(a, (s+1) / 2, p)
+    x = pow(a, (s+1)>>1, p)
     b = pow(a, s, p)
     g = pow(n, s, p)
     r = e
@@ -52,12 +50,12 @@ def mod_sqrt(a, p):
             t = pow(t, 2, p)
 
         if m == 0:
-            return x
+            return x%p
 
-        gs = pow(g, 2 ** (r-m-1), p)
-        g = (gs*gs) % p
-        x = (x*gs) % p
-        b = (b*g) % p
+        gs = pow(g, 1<<(r-m-1), p)
+        g = gs*gs % p
+        x = x*gs % p
+        b = b*g % p
         r = m
 
 def factorize(x):
