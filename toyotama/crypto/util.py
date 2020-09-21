@@ -67,11 +67,22 @@ def factorize(x):
     return f.get_factor_list()
 
 
-def chinese_remainder(a, p):
-    assert len(a) == len(p)
-    P = reduce(lambda x, y: x*y, p)
-    x = sum([ai * pow(P//pi, -1, pi) * P // pi for ai, pi in zip(a, p)])
-    return x % P
+def chinese_remainder(A, M):
+    assert len(A) == len(M), 'numbers and moduli are not the same length.'
+
+    n = len(A)
+    a1, m1 = A[0], M[0]
+    for i in range(1, n):
+        a2, m2 = A[i], M[i]
+        g = gcd(m1, m2)
+        if a1 % g != a2 % g:
+            return 0, 0
+        p, q, _ = extended_gcd(m1//g, m2//g)
+        mod = lcm(m1, m2)
+        a1 = (a1*(m2//g)*q + a2*(m1//g)*p) % mod
+        m1 = mod
+
+    return a1, m1
 
 
 
