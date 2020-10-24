@@ -96,7 +96,7 @@ class Connect:
                     ret += self.proc.stdout.read(1)
             except self.timeout:
                 if not ret.endswith(term.encode()):
-                    warn(f'readuntil: not end with {repr(term)} (timeout)')
+                    warn(f'readuntil: Not ends with {repr(term)} (Timeout)')
                 break
             except Exception:
                 sleep(0.05)
@@ -104,8 +104,9 @@ class Connect:
             message(Color.DEEP_PURPLE, '[Recv] >>', ret)
         return ret
 
-    def recvline(self):
-        return self.recvuntil(term='\n')
+    def recvline(self, repeat=1):
+        buffer = [self.recvuntil(term='\n') for i in range(repeat)]
+        return buffer.pop() if len(buffer) == 1 else buffer
 
     def interactive(self):
         if self.verbose:
@@ -163,16 +164,16 @@ class Connect:
         rand_length = length-len(start)-len(end)
 
         if begin:
-            proc(f'Searching x such that {hashtype}(x)[:{len(match)}] == {match} ...')
+            proc(f'Searching x such that {hashtype}({start} x {end})[:{len(match)}] == {match} ...')
             for patt in product(pts, repeat=rand_length):
-                patt = bytes(patt)
+                patt = start+bytes(patt)+end
                 h = hashlib.new(hashtype, patt).hexdigest()[:len(match)]
                 if h == match:
                     break
         else:
-            proc(f'Searching x such that {hashtype}(x)[-{len(match)}:] == {match} ...')
+            proc(f'Searching x such that {hashtype}({start} x {end})[-{len(match)}:] == {match} ...')
             for patt in product(pts, repeat=rand_length):
-                patt = bytes(patt)
+                patt = start+bytes(patt)+end
                 h = hashlib.new(hashtype, patt).hexdigest()[-len(match):]
                 if h == match:
                     break
