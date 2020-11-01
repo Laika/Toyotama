@@ -1,5 +1,7 @@
 import fcntl
+import os
 import socket
+import subprocess
 import threading
 from time import sleep
 from string import printable
@@ -7,43 +9,51 @@ from enum import Enum
 
 from toyotama.util.log import *
 
+
 class Mode(Enum):
     SOCKET = 1
     LOCAL = 2
 
+
 class Connect:
     def __init__(self, target, mode=Mode.SOCKET, to=10.0, verbose=True, pause=True, **args):
         if mode not in Mode:
-            warn(f'Connect: {mode} is not defined.')
+            warn(f"Connect: {mode} is not defined.")
             info(f'Connect: Automatically set to "SOCKET".')
         self.mode = mode
         self.verbose = verbose
         self.pause = pause
         self.is_alive = True
-        
-        if target.startswith('./'):
-            target = {'program': target}
-        elif target.startswith('nc'):
+
+        if target.startswith("./"):
+            target = {"program": target}
+        elif target.startswith("nc"):
             _, host, port = target.split()
-            target = {'host': host, 'port': int(port)}
+            target = {"host": host, "port": int(port)}
 
         if self.mode == Mode.SOCKET:
-            host, port = target['host'], target['port']
+            host, port = target["host"], target["port"]
             if self.verbose:
-                proc(f'Connecting to {host}:{port}...')
+                proc(f"Connecting to {host}:{port}...")
             self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.sock.settimeout(to)
             self.sock.connect((host, port))
             self.timeout = socket.timeout
-    
-        elif self.mode == Mode.LOCAL:
-            program = target['program']
-            self.wait = ('wait' in args and args['wait'])
+
+        if self.mode == Mode.LOCAL:
+            program = target["program"]
+            self.wait = "wait" in args and args["wait"]
             if self.verbose:
-                proc(f'Starting {program} ...')
-            self.proc = subprocess.Popen(program, shell=False, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+                proc(f"Starting {program} ...")
+            self.proc = subprocess.Popen(
+                program,
+                shell=True,
+                stdin=subprocess.PIPE,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+            )
             if self.verbose:
-                info(f'pid: {self.proc.pid}')
+                info(f"PID: {self.proc.pid}")
             self.set_nonblocking(self.proc.stdout)
             self.timeout = None
 
@@ -61,19 +71,19 @@ class Connect:
             elif self.mode == Mode.LOCAL:
                 self.proc.stdin.write(msg)
             if self.verbose:
-                message(Color.BLUE, '[Send] <<', msg)
+                message(Color.BLUE, "[Send] <<", msg)
         except Exception:
             self.is_alive = False
 
     def sendline(self, message):
         if isinstance(message, str):
-            self.send(message + '\n')
+            self.send(message + "\n")
         else:
-            self.send(message + b'\n')
+            self.send(message + b"\n")
 
     def recv(self, n=2048, quiet=False):
         sleep(0.05)
-        ret = b''
+        ret = b""
         try:
             if self.mode == Mode.SOCKET:
                 ret = self.sock.recv(n)
@@ -83,36 +93,38 @@ class Connect:
             pass
 
         if not quiet and self.verbose:
-            message(Color.DEEP_PURPLE, '[Recv] >>', ret)
+            message(Color.DEEP_PURPLE, "[Recv] >>", ret)
         return ret
 
-    def recvuntil(self, term='\n'):
-        ret = b''
+    def recvuntil(self, term="\n"):
+        ret = b""
         while not ret.endswith(term.encode()):
             try:
                 if self.mode == Mode.SOCKET:
                     ret += self.sock.recv(1)
-                elif self.mode == Mode.LOCAL:
+                if self.mode == Mode.LOCAL:
+                    print(self.proc.stdout)
                     ret += self.proc.stdout.read(1)
             except self.timeout:
                 if not ret.endswith(term.encode()):
-                    warn(f'readuntil: Not ends with {repr(term)} (Timeout)')
+                    warn(f"recvuntil: Not ends with {repr(term)} (Timeout)")
                 break
             except Exception:
                 sleep(0.05)
         if self.verbose:
-            message(Color.DEEP_PURPLE, '[Recv] >>', ret)
+            message(Color.DEEP_PURPLE, "[Recv] >>", ret)
         return ret
 
     def recvline(self, repeat=1):
-        buffer = [self.recvuntil(term='\n') for i in range(repeat)]
+        buffer = [self.recvuntil(term="\n") for i in range(repeat)]
         return buffer.pop() if len(buffer) == 1 else buffer
 
     def interactive(self):
         if self.verbose:
-            info('Switching to interactive mode')
-        
+            info("Switching to interactive mode")
+
         go = threading.Event()
+
         def recv_thread():
             while not go.isSet():
                 try:
@@ -122,8 +134,9 @@ class Connect:
                         stdout.buffer.write(cur)
                         stdout.flush()
                 except EOFError:
-                    info('Got EOF while reading in interactive')
+                    info("Got EOF while reading in interactive")
                     break
+
         t = threading.Thread(target=recv_thread)
         t.daemon = True
         t.start()
@@ -137,18 +150,19 @@ class Connect:
                         self.send(data)
                     except EOFError:
                         go.set()
-                        info('Got EOF while reading in interactive')
+                        info("Got EOF while reading in interactive")
                 else:
                     go.set()
         except KeyboardInterrupt:
-            info('Interrupted')
+            info("Interrupted")
             go.set()
 
         while t.is_alive():
             t.join(timeout=0.1)
 
-
-    def PoW(self, hashtype, match, pts=printable, begin=False, hx=False, length=20, start=b'', end=b''):
+    def PoW(
+        self, hashtype, match, pts=printable, begin=False, hx=False, length=20, start=b"", end=b""
+    ):
         import hashlib
         from itertools import product
 
@@ -161,34 +175,35 @@ class Connect:
         match = match.strip()
         pts = pts.encode()
 
-        rand_length = length-len(start)-len(end)
+        rand_length = length - len(start) - len(end)
 
         if begin:
-            proc(f'Searching x such that {hashtype}({start} x {end})[:{len(match)}] == {match} ...')
+            proc(f"Searching x such that {hashtype}({start} x {end})[:{len(match)}] == {match} ...")
             for patt in product(pts, repeat=rand_length):
-                patt = start+bytes(patt)+end
-                h = hashlib.new(hashtype, patt).hexdigest()[:len(match)]
+                patt = start + bytes(patt) + end
+                h = hashlib.new(hashtype, patt).hexdigest()[: len(match)]
                 if h == match:
                     break
         else:
-            proc(f'Searching x such that {hashtype}({start} x {end})[-{len(match)}:] == {match} ...')
+            proc(
+                f"Searching x such that {hashtype}({start} x {end})[-{len(match)}:] == {match} ..."
+            )
             for patt in product(pts, repeat=rand_length):
-                patt = start+bytes(patt)+end
-                h = hashlib.new(hashtype, patt).hexdigest()[-len(match):]
+                patt = start + bytes(patt) + end
+                h = hashlib.new(hashtype, patt).hexdigest()[-len(match) :]
                 if h == match:
                     break
-    
+
         info(f"Found.  {hashtype}('{patt.decode()}') == {h}")
         if hx:
             patt = patt.hex()
         self.sendline(patt)
 
-
     def __del__(self):
         if self.mode == Mode.SOCKET:
             self.sock.close()
             if self.verbose:
-                proc('Disconnected.')
+                proc("Disconnected.")
 
         elif self.mode == Mode.LOCAL:
             if self.wait:
@@ -197,9 +212,8 @@ class Connect:
                 self.proc.terminate()
 
             if self.verbose:
-                proc(f'Stopped.')
+                proc(f"Stopped.")
         if self.pause:
             if self.verbose:
-                info('Press any key to close.')
+                info("Press any key to close.")
             input()
-
