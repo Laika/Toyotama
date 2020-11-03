@@ -71,7 +71,10 @@ class Connect:
             elif self.mode == Mode.LOCAL:
                 self.proc.stdin.write(msg)
             if self.verbose:
-                message(Color.BLUE, "[Send] <<", msg)
+                try:
+                    message(Color.BLUE, "[Send] <<", msg.decode())
+                except:
+                    message(Color.BLUE, "[Send] <<", msg)
         except Exception:
             self.is_alive = False
 
@@ -95,7 +98,7 @@ class Connect:
         if not quiet and self.verbose:
             try:
                 message(Color.DEEP_PURPLE, "[Recv] >>", ret.decode())
-            except:
+            except Exception as e:
                 message(Color.DEEP_PURPLE, "[Recv] >>", ret)
         return ret
 
@@ -115,7 +118,11 @@ class Connect:
             except Exception:
                 sleep(0.05)
         if self.verbose:
-            message(Color.DEEP_PURPLE, "[Recv] >>", ret)
+            try:
+                message(Color.DEEP_PURPLE, "[Recv] >>", ret.decode())
+            except:
+                message(Color.DEEP_PURPLE, "[Recv] >>", ret)
+
         return ret
 
     def recvline(self, repeat=1):
