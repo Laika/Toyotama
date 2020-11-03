@@ -93,7 +93,10 @@ class Connect:
             pass
 
         if not quiet and self.verbose:
-            message(Color.DEEP_PURPLE, "[Recv] >>", ret)
+            try:
+                message(Color.DEEP_PURPLE, "[Recv] >>", ret.decode())
+            except:
+                message(Color.DEEP_PURPLE, "[Recv] >>", ret)
         return ret
 
     def recvuntil(self, term="\n"):
