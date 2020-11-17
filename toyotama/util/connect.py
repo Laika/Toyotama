@@ -16,13 +16,16 @@ class Mode(Enum):
 
 
 class Connect:
-    def __init__(self, target, mode=Mode.SOCKET, to=10.0, verbose=True, pause=True, **args):
+    def __init__(
+        self, target, mode=Mode.SOCKET, to=10.0, verbose=True, pause=True, raw_output=True, **args
+    ):
         if mode not in Mode:
             warn(f"Connect: {mode} is not defined.")
             info(f'Connect: Automatically set to "SOCKET".')
         self.mode = mode
         self.verbose = verbose
         self.pause = pause
+        self.raw_output = raw_output
         self.is_alive = True
 
         if target.startswith("./"):
@@ -72,7 +75,10 @@ class Connect:
                 self.proc.stdin.write(msg)
             if self.verbose:
                 try:
-                    message(Color.BLUE, "[Send] <<", msg.decode())
+                    if self.raw_output:
+                        message(Color.BLUE, "[Send] <<", msg.decode())
+                    else:
+                        message(Color.BLUE, "[Send] <<", msg.decode())
                 except:
                     message(Color.BLUE, "[Send] <<", msg)
         except Exception:
@@ -97,7 +103,10 @@ class Connect:
 
         if not quiet and self.verbose:
             try:
-                message(Color.DEEP_PURPLE, "[Recv] >>", ret.decode())
+                if self.raw_output:
+                    message(Color.DEEP_PURPLE, "[Recv] >>", ret)
+                else:
+                    message(Color.DEEP_PURPLE, "[Recv] >>", ret.decode())
             except Exception as e:
                 message(Color.DEEP_PURPLE, "[Recv] >>", ret)
         return ret
@@ -119,7 +128,10 @@ class Connect:
                 sleep(0.05)
         if self.verbose:
             try:
-                message(Color.DEEP_PURPLE, "[Recv] >>", ret.decode())
+                if self.raw_output:
+                    message(Color.DEEP_PURPLE, "[Recv] >>", ret)
+                else:
+                    message(Color.DEEP_PURPLE, "[Recv] >>", ret.decode())
             except:
                 message(Color.DEEP_PURPLE, "[Recv] >>", ret)
 
