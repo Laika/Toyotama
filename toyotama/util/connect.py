@@ -76,7 +76,7 @@ class Connect:
             if self.verbose:
                 try:
                     if self.raw_output:
-                        message(Color.BLUE, "[Send] <<", msg.decode())
+                        message(Color.BLUE, "[Send] <<", msg)
                     else:
                         message(Color.BLUE, "[Send] <<", msg.decode())
                 except:
