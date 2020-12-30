@@ -2,7 +2,9 @@ from math import ceil
 
 import gmpy2
 from toyotama.crypto.util import extended_gcd
-from toyotama.util.log import proc
+from toyotama.util.log import Logger
+
+log = Logger()
 
 
 def common_modulus_attack(e1, e2, c1, c2, n):
@@ -58,7 +60,7 @@ def lsb_decryption_oracle_attack(n, e, c, oracle, progress=True):
     nl = n.bit_length()
     while ub - lb > 1:
         if progress:
-            proc(f"{(100*i//nl):>3}% [{i:>4}/{nl}]")
+            log.progress(f"{(100*i//nl):>3}% [{i:>4}/{nl}]")
 
         mid = Fraction(lb + ub, 2)
         C = C * pow(2, e, n) % n

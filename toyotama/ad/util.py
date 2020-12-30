@@ -4,7 +4,9 @@
 from functools import singledispatch
 
 import requests
-import toyotama.util.log as log
+from toyotama.util.log import Logger
+
+log = Logger()
 
 
 @singledispatch
@@ -32,7 +34,7 @@ def submit_flag_list(flags: list[str], url: str, token: str):
             "flag": flag,
         }
         response = requests.post(url, data=data, headers=header)
-        log.info(response.text)
+        log.information(response.text)
 
 
 @submit_flag.register(str)
@@ -44,4 +46,4 @@ def submit_flag_str(flag: str, url: str, token: str):
         "flag": flag,
     }
     response = requests.post(url, data=data, headers=header)
-    log.info(response.text)
+    log.information(response.text)

@@ -30,7 +30,7 @@ class Logger:
     def __message(self, color: str, header: str, message: str):
         self.fd.write(f"{Style.BOLD}{color}{header} {message}{Style.RESET}\n")
 
-    def color(self, color: str, message: str):
+    def colored(self, color: str, message: str):
         self.__message(color, "", message)
 
     def information(self, color: str, message: str):

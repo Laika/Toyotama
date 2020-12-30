@@ -1,6 +1,8 @@
 import sys
 
-from toyotama.util.log import Color, colorify, error, info
+from toyotama.util.log import Logger, Style
+
+log = Logger()
 
 
 # |chosen_pt|FLAG|pad|
@@ -21,7 +23,7 @@ def ecb_chosen_plaintext_attack(
 
         # get the encrypted block which includes the beginning of FLAG
         if verbose:
-            info("Getting the encrypted block which includes the beginning of FLAG")
+            log.information("Getting the encrypted block which includes the beginning of FLAG")
 
         if len(known_plaintext) % block_size == block_size - 1:
             block_end += block_size
@@ -33,13 +35,13 @@ def ecb_chosen_plaintext_attack(
 
         # bruteforcing all of the characters in plaintext_space
         if verbose:
-            info("Bruteforcing all of the characters in plaintext_space")
+            log.information("Bruteforcing all of the characters in plaintext_space")
         for c in plaintext_space:
             if verbose:
                 sys.stderr.write(
-                    f"\r{colorify(Color.GREY, known_plaintext[:-1].decode())}"
-                    f"{colorify(Color.RED, known_plaintext[-1:].decode())}"
-                    f"{colorify(Color.MAGENTA, chr(c))}"
+                    f"\r{log.colored(Style.Color.GREY, known_plaintext[:-1].decode())}"
+                    f"{log.colored(Style.Color.RED, known_plaintext[-1:].decode())}"
+                    f"{log.colored(Style.MAGENTA, chr(c))}"
                 )
             payload = (
                 b"\x00" * (block_end - len(known_plaintext) - 1) + known_plaintext + bytearray([c])
@@ -66,10 +68,10 @@ def padding_oracle_attack(ciphertext, padding_oracle, iv=b"", block_size=16, ver
         if verbose:
             sys.stdout.write(
                 "\033[2k\033[g"
-                + colorify(Color.GREY, repr(b"\x00" * (block_size - nth_byte))[2:-1])
-                + colorify(Color.RED, repr(attempt_byte)[2:-1])
-                + colorify(Color.MAGENTA, repr(adjusted_bytes)[2:-1])
-                + colorify(Color.DARK_GREY, repr(c_target)[2:-1])
+                + log.colored(Style.GREY, repr(b"\x00" * (block_size - nth_byte))[2:-1])
+                + log.colored(Style.RED, repr(attempt_byte)[2:-1])
+                + log.colored(Style.MAGENTA, repr(adjusted_bytes)[2:-1])
+                + log.colored(Style.DARK_GREY, repr(c_target)[2:-1])
             )
             sys.stdout.flush()
 
@@ -93,14 +95,14 @@ def padding_oracle_attack(ciphertext, padding_oracle, iv=b"", block_size=16, ver
                 break
             i += 1
             if i > 0xFF:
-                error("[padding_oracle_attack] Not Found")
+                log.error("[padding_oracle_attack] Not Found")
                 return None
         plaintext = m[::-1] + plaintext
 
         if verbose:
             print()
-            info(f"Decrypt(c{len(cipher_block)}): {repr(d_prev)[2:-1]}")
-            info(f"m{len(cipher_block)}: {repr(m[::-1])[2:-1]}")
-            info(f"plaintext: {repr(plaintext)[2:-1]}")
+            log.information(f"Decrypt(c{len(cipher_block)}): {repr(d_prev)[2:-1]}")
+            log.information(f"m{len(cipher_block)}: {repr(m[::-1])[2:-1]}")
+            log.information(f"plaintext: {repr(plaintext)[2:-1]}")
 
     return plaintext

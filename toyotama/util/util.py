@@ -2,6 +2,9 @@ import code
 from functools import singledispatch
 
 import toyotama.util.log as log
+from toyotama.util.log import Logger
+
+log = Logger()
 
 
 def interact(symboltable):
@@ -75,9 +78,9 @@ def show_variables(symboltable, *args):
     for name, value in zip(names, args):
         typ = f"<{type(value).__name__}>"
         if name.endswith("_addr"):
-            log.info(f"{name.ljust(maxlen_name)}{typ.rjust(maxlen_type)}: {value:#x}")
+            log.information(f"{name.ljust(maxlen_name)}{typ.rjust(maxlen_type)}: {value:#x}")
         else:
-            log.info(f"{name.ljust(maxlen_name)}{typ.rjust(maxlen_type)}: {value}")
+            log.information(f"{name.ljust(maxlen_name)}{typ.rjust(maxlen_type)}: {value}")
 
 
 @singledispatch
