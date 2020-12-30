@@ -2,12 +2,13 @@ import fcntl
 import os
 import socket
 import subprocess
+import sys
 import threading
-from time import sleep
-from string import printable
 from enum import Enum
+from string import printable
+from time import sleep
 
-from toyotama.util.log import *
+from toyotama.util.log import Color, info, message, proc, warn
 
 
 class Mode(Enum):
@@ -21,7 +22,7 @@ class Connect:
     ):
         if mode not in Mode:
             warn(f"Connect: {mode} is not defined.")
-            info(f'Connect: Automatically set to "SOCKET".')
+            info("Connect: Automatically set to 'SOCKET'.")
         self.mode = mode
         self.verbose = verbose
         self.pause = pause
@@ -79,7 +80,7 @@ class Connect:
                         message(Color.BLUE, "[Send] <<", msg)
                     else:
                         message(Color.BLUE, "[Send] <<", msg.decode())
-                except:
+                except Exception:
                     message(Color.BLUE, "[Send] <<", msg)
         except Exception:
             self.is_alive = False
@@ -107,7 +108,7 @@ class Connect:
                     message(Color.DEEP_PURPLE, "[Recv] >>", ret)
                 else:
                     message(Color.DEEP_PURPLE, "[Recv] >>", ret.decode())
-            except Exception as e:
+            except Exception:
                 message(Color.DEEP_PURPLE, "[Recv] >>", ret)
         return ret
 
@@ -132,7 +133,7 @@ class Connect:
                     message(Color.DEEP_PURPLE, "[Recv] >>", ret)
                 else:
                     message(Color.DEEP_PURPLE, "[Recv] >>", ret.decode())
-            except:
+            except Exception:
                 message(Color.DEEP_PURPLE, "[Recv] >>", ret)
 
         return ret
@@ -234,7 +235,7 @@ class Connect:
                 self.proc.terminate()
 
             if self.verbose:
-                proc(f"Stopped.")
+                proc("Stopped.")
         if self.pause:
             if self.verbose:
                 info("Press any key to close.")

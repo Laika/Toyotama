@@ -1,6 +1,8 @@
 import code
 from functools import singledispatch
 
+import toyotama.util.log as log
+
 
 def interact(symboltable):
     """Switch to interactive mode
@@ -20,13 +22,11 @@ def interact(symboltable):
     interact(globals())
 
     (InteractiveConsole)
-    >>> a 
+    >>> a
     105
     """
 
-
     code.interact(local=symboltable)
-    
 
 
 def show_variables(symboltable, *args):
@@ -39,7 +39,7 @@ def show_variables(symboltable, *args):
 
         *args
             The variable to show
-            
+
 
     Returns
     -------
@@ -68,19 +68,20 @@ def show_variables(symboltable, *args):
                 raise ValueError("undefined function is mixed in subspace?")
             else:
                 return error
+
     names = [getvarname(var, symboltable) for var in args]
-    maxlen_name = max([len(name) for name in names])+1
-    maxlen_type = max([len(type(value).__name__) for value in args])+3
+    maxlen_name = max([len(name) for name in names]) + 1
+    maxlen_type = max([len(type(value).__name__) for value in args]) + 3
     for name, value in zip(names, args):
-        typ = f'<{type(value).__name__}>'
-        if name.endswith('_addr'):
-            log.info(f'{name.ljust(maxlen_name)}{typ.rjust(maxlen_type)}: {value:#x}')
+        typ = f"<{type(value).__name__}>"
+        if name.endswith("_addr"):
+            log.info(f"{name.ljust(maxlen_name)}{typ.rjust(maxlen_type)}: {value:#x}")
         else:
-            log.info(f'{name.ljust(maxlen_name)}{typ.rjust(maxlen_type)}: {value}')
+            log.info(f"{name.ljust(maxlen_name)}{typ.rjust(maxlen_type)}: {value}")
 
 
 @singledispatch
-def extract_flag(s, head='{', tail='}', unique=True):
+def extract_flag(s, head="{", tail="}", unique=True):
     """Extract flags from a string
 
     Parameters
@@ -88,7 +89,7 @@ def extract_flag(s, head='{', tail='}', unique=True):
     s: str or bytes
         Find flags from this string
 
-    head: str  
+    head: str
         The head of flag format
 
     tail: str
@@ -102,38 +103,45 @@ def extract_flag(s, head='{', tail='}', unique=True):
 
     """
 
-    raise TypeError('s must be str or bytes.')
+    raise TypeError("s must be str or bytes.")
+
 
 @extract_flag.register(str)
-def extract_flag_str(s, head='{', tail='}', unique=True):
+def extract_flag_str(s, head="{", tail="}", unique=True):
     from re import compile, findall
-    patt = f'{head}.*?{tail}'
+
+    patt = f"{head}.*?{tail}"
     comp = compile(patt)
     flags = findall(comp, s)
     if unique:
         flags = set(flags)
     if not flags:
-        log.error(f'the pattern {head}.*?{tail} does not exist.') 
+        log.error(f"the pattern {head}.*?{tail} does not exist.")
         return None
     return flags
+
 
 @extract_flag.register(bytes)
-def extract_flag_bytes(s, head='{', tail='}', unique=True):
+def extract_flag_bytes(s, head="{", tail="}", unique=True):
     from re import compile, findall
-    patt = f'{head}.*?{tail}'.encode()
+
+    patt = f"{head}.*?{tail}".encode()
     comp = compile(patt)
     flags = findall(comp, s)
     if unique:
         flags = set(flags)
     if not flags:
-        log.error(f'The pattern {head}.*?{tail} does not exist.') 
+        log.error(f"The pattern {head}.*?{tail} does not exist.")
         return None
     return flags
 
 
-
-def random_string(length, plaintext_space='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789', byte=True):
-    """ Generate random string
+def random_string(
+    length,
+    plaintext_space="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789",
+    byte=True,
+):
+    """Generate random string
 
     Parameters
     ----------
@@ -158,16 +166,17 @@ def random_string(length, plaintext_space='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijk
     """
 
     from random import choices
+
     rnd = choices(plaintext_space, k=length)
     if isinstance(plaintext_space, bytes):
         rnd = bytes(rnd)
     if isinstance(plaintext_space, str):
-        rnd = ''.join(rnd)
+        rnd = "".join(rnd)
     return rnd
 
 
 def int_to_string(x, byte=False):
-    """ Convert integer to string
+    """Convert integer to string
 
     Parameters
     ----------
@@ -190,7 +199,7 @@ def int_to_string(x, byte=False):
     b'testtest'
     """
 
-    res = bytes.fromhex(format(x, 'x'))
+    res = bytes.fromhex(format(x, "x"))
     if not byte:
         res = res.decode()
     return res
@@ -198,7 +207,7 @@ def int_to_string(x, byte=False):
 
 @singledispatch
 def string_to_int(s):
-    """ Convert string or bytes to integer
+    """Convert string or bytes to integer
 
     Parameters
     ----------
@@ -217,62 +226,69 @@ def string_to_int(s):
     >>> string_to_int(b'testtest')
     8387236825053623156
     """
-    
-    raise TypeError('s must be str or bytes.')
+
+    raise TypeError("s must be str or bytes.")
+
 
 @string_to_int.register(str)
 def string_to_int_str(s):
-    return int.from_bytes(s.encode(), 'big')
+    return int.from_bytes(s.encode(), "big")
+
 
 @string_to_int.register(bytes)
 def string_to_int_bytes(s):
-    return int.from_bytes(s, 'big')
+    return int.from_bytes(s, "big")
 
 
-def urlencode(s, encoding='shift-jis', safe=':/&?='):
+def urlencode(s, encoding="shift-jis", safe=":/&?="):
     from urllib.parse import quote_plus
+
     return quote_plus(s, encoding=encoding, safe=safe)
 
-def urldecode(s, encoding='shift-jis'):
+
+def urldecode(s, encoding="shift-jis"):
     from urllib.parse import unquote_plus
+
     return unquote_plus(s, encoding=encoding)
+
 
 @singledispatch
 def b64_padding(s):
-    raise TypeError('s must be str or bytes.')
+    raise TypeError("s must be str or bytes.")
+
 
 @b64_padding.register(str)
 def b64_padding_str(s):
-    s += '='*(-len(s)%4)
+    s += "=" * (-len(s) % 4)
     return s
+
 
 @b64_padding.register(bytes)
 def b64_padding_bytes(s):
-    s += b'='*(-len(s)%4)
+    s += b"=" * (-len(s) % 4)
     return s
 
 
 def binary_to_image(data, padding=5, size=5, rev=False, image_size=(1000, 1000)):
     from PIL import Image, ImageDraw
+
     bk, wh = (0, 0, 0), (255, 255, 255)
-    image = Image.new('RGB', image_size, wh)
-    rect = Image.new('RGB', (size, size))
+    image = Image.new("RGB", image_size, wh)
+    rect = Image.new("RGB", (size, size))
     draw = ImageDraw.Draw(rect)
     draw.rectangle((0, 0, size, size), fill=bk)
 
     h, w = 0, 0
     x, y = 0, 0
     for pixel in data:
-        if pixel == '\n':
+        if pixel == "\n":
             y += 1
             h += 1
             w = max(w, x)
             x = 0
         else:
-            if (pixel == '1') ^ rev:
-                image.paste(rect, (padding+x*size, padding+y*size))
+            if (pixel == "1") ^ rev:
+                image.paste(rect, (padding + x * size, padding + y * size))
             x += 1
 
-    return image.crop((0, 0, 2*padding+w*size, 2*padding+h*size))
-
-
+    return image.crop((0, 0, 2 * padding + w * size, 2 * padding + h * size))

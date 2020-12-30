@@ -1,18 +1,17 @@
 class Int:
     def __init__(self, value, bits=32, signed=True):
         self.bits = bits
-        self.mask = (1<<self.bits)-1
+        self.mask = (1 << self.bits) - 1
         self.signed = signed
         self.__x = value & self.mask
-
 
     @property
     def x(self):
         if self.signed:
-            sign = self.__x & 1<<self.bits-1
-            value = self.__x & self.mask>>1
+            sign = self.__x & 1 << self.bits - 1
+            value = self.__x & self.mask >> 1
             if sign:
-                return -((~self.__x+1) & self.mask)
+                return -((~self.__x + 1) & self.mask)
             return value & self.mask
         else:
             return self.__x & self.mask
@@ -23,15 +22,17 @@ class Int:
 
     def __int__(self):
         return int(self.x)
+
     def __str__(self):
         return str(self.x)
 
     def __repr__(self):
-        return f'Int({self.x}, bits={self.bits}, signed={self.signed})'
-    
+        return f"Int({self.x}, bits={self.bits}, signed={self.signed})"
+
     def __add__(self, other):
         assert self.bits == other.bits and self.signed == other.signed
         return Int(self.x + other.x, self.bits, self.signed)
+
     def __iadd__(self, other):
         assert self.bits == other.bits and self.signed == other.signed
         self.x += other.x
@@ -40,6 +41,7 @@ class Int:
     def __sub__(self, other):
         assert self.bits == other.bits and self.signed == other.signed
         return Int(self.x - other.x, self.bits, self.signed)
+
     def __isub__(self, other):
         assert self.bits == other.bits and self.signed == other.signed
         self.x -= other.x
@@ -48,24 +50,25 @@ class Int:
     def __mul__(self, other):
         assert self.bits == other.bits and self.signed == other.signed
         return Int(self.x * other.x, self.bits, self.signed)
+
     def __imul__(self, other):
         assert self.bits == other.bits and self.signed == other.signed
         self.x *= other.x
         return self
 
-
     def __floordiv__(self, other):
         assert self.bits == other.bits and self.signed == other.signed
         return Int(self.x // other.x, self.bits, self.signed)
+
     def __ifloordiv__(self, other):
         assert self.bits == other.bits and self.signed == other.signed
         self.x //= other.x
         return self
 
-
     def __truediv__(self, other):
         assert self.bits == other.bits and self.signed == other.signed
         return Int(self.x // other.x, self.bits, self.signed)
+
     def __itruediv__(self, other):
         assert self.bits == other.bits and self.signed == other.signed
         self.x //= other.x
@@ -77,19 +80,18 @@ class Int:
 
     def __eq__(self, other):
         return self.x == other.x
+
     def __ne__(self, other):
         return self.x != other.x
+
     def __lt__(self, other):
         return self.x < other.x
+
     def __gt__(self, other):
         return self.x > other.x
+
     def __le__(self, other):
         return self.x <= other.x
+
     def __ge__(self, other):
         return self.x >= other.x
-
-
-
-
-
-

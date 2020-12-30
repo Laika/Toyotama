@@ -1,6 +1,7 @@
 import subprocess
 from shlex import split
 
+
 class Shell:
     def __init__(self, env=None):
         self.__run = subprocess.run
@@ -15,4 +16,3 @@ class Shell:
         else:
             ret = self.__run(command, stdout=self.__pipe, stderr=self.__pipe, env=self.env)
         return ret
-
