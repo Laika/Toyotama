@@ -11,8 +11,9 @@ CTF Library
 
 ## Usage
 ### Install 
-`git clone https://github.com/wani-hackase/Toyotama.git`  
-`python setup.py install`  or `pip install .` 
+`pip install git+ssh://git@github.com/wani-hackase/Toyotama.git`  
+or  
+`pip install git+https://github.com/wani-hackase/Toyotama`   
 
 ### Uninstall
 `pip uninstall toyotama`  
