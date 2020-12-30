@@ -1,30 +1,46 @@
 import sys
-from enum import IntEnum
+from collections import namedtuple
+
+Style = namedtuple(
+    "Style",
+    "RESET BOLD RED GREEN YELLOW BLUE MAGENTA CYAN PURPLE VIOLET"
+    "DEEP_PURPLE ORANGE DARK_GREY GREY",
+)(
+    RESET="\x1b[0m",
+    BOLD="\x1b[1m",
+    RED="\x1b[38;5;1m",
+    GREEN="\x1b[38;5;2m",
+    YELLOW="\x1b[38;5;3m",
+    BLUE="\x1b[38;5;4m",
+    MAGENTA="\x1b[38;5;5m",
+    CYAN="\x1b[38;5;6m",
+    PURPLE="\x1b[38;5;93m",
+    VIOLET="\x1b[38;5;128m",
+    DEEP_PURPLE="\x1b[38;5;161m",
+    ORANGE="\x1b[38;5;166m",
+    DARK_GREY="\x1b[38;5;240m",
+    GREY="\x1b[38;5;246m",
+)
 
 
-class Color(IntEnum):
-    RED = 1
-    GREEN = 2
-    YELLOW = 3
-    BLUE = 4
-    MAGENTA = 5
-    CYAN = 6
-    PURPLE = 93
-    VIOLET = 128
-    DEEP_PURPLE = 161
-    ORANGE = 166
-    DARK_GREY = 240
-    GREY = 246
+class Logger:
+    def __init__(self, fd=sys.stderr):
+        self.fd = fd
 
+    def __message(self, color: str, header: str, message: str):
+        self.fd.write(f"{Style.BOLD}{color}{header} {message}{Style.RESET}\n")
 
-reset = "\x1b[0m"
-bold = "\x1b[1m"
-fg = lambda c: f"\x1b[38;5;{c}m"
-bg = lambda c: f"\x1b[48;5;{c}m"
-colorify = lambda c, m: f"{fg(c)}{m}{reset}"
+    def color(self, color: str, message: str):
+        self.__message(color, "", message)
 
-message = lambda c, h, m: sys.stderr.write(f"{bold}{fg(c)}{h} {m}{reset}\n")
-info = lambda m: message(Color.BLUE, "[+]", m)
-proc = lambda m: message(Color.VIOLET, "[*]", m)
-warn = lambda m: message(Color.ORANGE, "[!]", m)
-error = lambda m: message(Color.RED, "[-]", m)
+    def information(self, color: str, message: str):
+        self.__message(Style.BLUE, "[+]", message)
+
+    def progress(self, color: str, message: str):
+        self.__message(Style.VIOLET, "[*]", message)
+
+    def warning(self, color: str, message: str):
+        self.__message(Style.ORANGE, "[!]", message)
+
+    def error(self, color: str, message: str):
+        self.__message(Style.RED, "[x]", message)
