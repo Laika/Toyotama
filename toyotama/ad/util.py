@@ -1,16 +1,29 @@
+"""Attack-and-Defense utility module
+"""
+
 from functools import singledispatch
 
 import requests
-from toyotama.util.log import info
+import toyotama.util.log as log
 
 
 @singledispatch
-def submit_flag(flags, url, token):
+def submit_flag(flags, url: str, token: str):
+    """Submit flags
+
+    Args:
+        flags (list or str): Flags you've got.
+          url         (str): A URL.
+        token         (str): A token needed to submit.
+
+    Returns:
+        None
+    """
     raise TypeError("flag must be str or list.")
 
 
 @submit_flag.register(list)
-def submit_flag_list(flags, url, token):
+def submit_flag_list(flags: list[str], url: str, token: str):
     header = {
         "x-api-key": token,
     }
@@ -19,11 +32,11 @@ def submit_flag_list(flags, url, token):
             "flag": flag,
         }
         response = requests.post(url, data=data, headers=header)
-        info(response.text)
+        log.info(response.text)
 
 
 @submit_flag.register(str)
-def submit_flag_str(flag, url, token):
+def submit_flag_str(flag: str, url: str, token: str):
     header = {
         "x-api-key": token,
     }
@@ -31,4 +44,4 @@ def submit_flag_str(flag, url, token):
         "flag": flag,
     }
     response = requests.post(url, data=data, headers=header)
-    info(response.text)
+    log.info(response.text)
