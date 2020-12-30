@@ -1,8 +1,8 @@
-## !!!Notice!!!
-* 部外秘でお願いします（めちゃくちゃ適当に書いている、一部他所からパクっているなどの理由により）
-* ドキュメントを書いていない
+
 
 # Toyotama
+
+![](https://img.shields.io/badge/Python->=3.9,%20<4-52307c)
 CTF Library  
 
 個人のリポジトリでちまちまやってましたが、こっちに持ってきました。
@@ -16,11 +16,13 @@ CTF Library
 
 このライブラリに何か機能を追加したり変更したかったら適当にいじってもらってOKです。
 
-
+## !!!Notice!!!
+* **部外秘**（めちゃくちゃ適当に書いている、一部他所からパクっているなどの理由により）
+* ドキュメントを書いていない
 
 ## Install 
 `git clone https://github.com/wani-hackase/Toyotama.git`  
-`python setup.py install`  
+`python setup.py install`  or `pip install .` 
 
 ## Uninstall
 `pip uninstall toyotama`  
