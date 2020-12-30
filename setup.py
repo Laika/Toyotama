@@ -8,12 +8,12 @@ def _requires_from_file(filename):
 
 
 setup(
-    name='toyotama',
-    version='0.9',
-    description='CTF libary',
+    name="toyotama",
+    version="0.9",
+    description="CTF libary",
     packages=find_packages(),
-    py_modules=['toyotama', 'log', 'integer'],
-    author='Laika',
-    python_requires='>=3.8.*, <4',
-    install_requires=_requires_from_file('requirements.txt')
+    py_modules=["toyotama", "log", "integer"],
+    author="Laika",
+    python_requires=">=3.8.*, <4",
+    install_requires=_requires_from_file("requirements.txt"),
 )
