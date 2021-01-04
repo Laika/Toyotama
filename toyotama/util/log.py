@@ -32,14 +32,14 @@ class Logger:
     def colored(self, color: str, message: str):
         self.__message(color, "", message)
 
-    def information(self, color: str, message: str):
+    def information(self, message: str):
         self.__message(Style.BLUE, "[+]", message)
 
-    def progress(self, color: str, message: str):
+    def progress(self, message: str):
         self.__message(Style.VIOLET, "[*]", message)
 
-    def warning(self, color: str, message: str):
+    def warning(self, message: str):
         self.__message(Style.ORANGE, "[!]", message)
 
-    def error(self, color: str, message: str):
+    def error(self, message: str):
         self.__message(Style.RED, "[x]", message)
