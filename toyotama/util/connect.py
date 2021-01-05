@@ -79,11 +79,11 @@ class Connect:
             if self.verbose:
                 try:
                     if self.raw_output:
-                        log.colored(Style.BLUE, "[Send] << {msg}")
+                        log.colored(Style.BLUE, f"[Send] << {msg}")
                     else:
-                        log.colored(Style.BLUE, "[Send] << {msg.decode()}")
+                        log.colored(Style.BLUE, f"[Send] << {msg.decode()}")
                 except Exception:
-                    log.colored(Style.BLUE, "[Send] << {msg}")
+                    log.colored(Style.BLUE, f"[Send] << {msg}")
         except Exception:
             self.is_alive = False
 
@@ -107,11 +107,11 @@ class Connect:
         if not quiet and self.verbose:
             try:
                 if self.raw_output:
-                    log.colored(Style.DEEP_PURPLE, "[Recv] >> {ret}")
+                    log.colored(Style.DEEP_PURPLE, f"[Recv] >> {ret}")
                 else:
-                    log.colored(Style.DEEP_PURPLE, "[Recv] >> {ret.decode()}")
+                    log.colored(Style.DEEP_PURPLE, f"[Recv] >> {ret.decode()}")
             except Exception:
-                log.colored(Style.DEEP_PURPLE, "[Recv] >> {ret}")
+                log.colored(Style.DEEP_PURPLE, f"[Recv] >> {ret}")
         return ret
 
     def recvuntil(self, term="\n"):
@@ -132,11 +132,11 @@ class Connect:
         if self.verbose:
             try:
                 if self.raw_output:
-                    log.colored(Style.DEEP_PURPLE, "[Recv] >> {ret}")
+                    log.colored(Style.DEEP_PURPLE, f"[Recv] >> {ret}")
                 else:
-                    log.colored(Style.DEEP_PURPLE, "[Recv] >> {ret.decode()}")
+                    log.colored(Style.DEEP_PURPLE, f"[Recv] >> {ret.decode()}")
             except Exception:
-                log.colored(Style.DEEP_PURPLE, "[Recv] >> {ret}")
+                log.colored(Style.DEEP_PURPLE, f"[Recv] >> {ret}")
 
         return ret
 
