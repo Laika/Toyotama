@@ -1,13 +1,17 @@
+from math import ceil
+
 import gmpy2
 from toyotama.crypto.util import extended_gcd
+from toyotama.util.log import Logger
 
-## Common Modulus Attack
+log = Logger()
+
+
 def common_modulus_attack(e1, e2, c1, c2, n):
     s1, s2, _ = extended_gcd(e1, e2)
     return pow(c1, s1, n) * pow(c2, s2, n) % n
 
 
-## Wiener's Attack
 def wieners_attack(e, n):
     def rat_to_cfrac(a, b):
         while b > 0:
@@ -50,20 +54,20 @@ def lsb_decryption_oracle_attack(n, e, c, oracle, progress=True):
     """
     from fractions import Fraction
 
-    l, r = 0, n
+    lb, ub = 0, n
     C = c
     i = 0
     nl = n.bit_length()
-    while r - l > 1:
+    while ub - lb > 1:
         if progress:
-            log.proc(f"{(100*i//nl):>3}% [{i:>4}/{nl}]")
+            log.progress(f"{(100*i//nl):>3}% [{i:>4}/{nl}]")
 
-        mid = Fraction(l + r, 2)
+        mid = Fraction(lb + ub, 2)
         C = C * pow(2, e, n) % n
         if oracle(C):
-            l = mid
+            lb = mid
         else:
-            r = mid
+            ub = mid
         i += 1
 
-    return int(ceil(l))
+    return int(ceil(lb))

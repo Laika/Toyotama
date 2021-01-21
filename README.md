@@ -1,28 +1,21 @@
-## !!!Notice!!!
-* 部外秘でお願いします（めちゃくちゃ適当に書いている、一部他所からパクっているなどの理由により）
-* ドキュメントを書いていない
 
 # Toyotama
-CTF Library  
 
-個人のリポジトリでちまちまやってましたが、こっちに持ってきました。
-自分用のライブラリ作ってると、機能が多すぎて手に余るようなことがないので使いやすいです。
-
-このライブラリはそのまま使うなり、使えそうなやつだけ引っこ抜くなりご自由にお使い下さい。  
-ただしドキュメントを一切書いていないので、使い方はメソッド名や引数からエスパーしてください…  
-（不明な点があればいつでもslackとかでLaikaまで）
-
-いつかちゃんとドキュメントを書きます…リファクタリングもします…😭
-
-このライブラリに何か機能を追加したり変更したかったら適当にいじってもらってOKです。
+![](https://img.shields.io/badge/Python-3.9.*-52307c)  
+CTF Library
 
 
+## Notice
+* This is **CONFIDENTIAL** library.
+* No document. (for now)
 
-## Install 
-`git clone https://github.com/wani-hackase/Toyotama.git`  
-`python setup.py install`  
+## Usage
+### Install 
+`pip install git+ssh://git@github.com/wani-hackase/Toyotama.git`  
+or  
+`pip install git+https://github.com/wani-hackase/Toyotama`   
 
-## Uninstall
+### Uninstall
 `pip uninstall toyotama`  
 
 

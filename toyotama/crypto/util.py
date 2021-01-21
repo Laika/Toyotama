@@ -1,3 +1,5 @@
+from math import ceil, gcd, lcm
+
 import gmpy2
 
 

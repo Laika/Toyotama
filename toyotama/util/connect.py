@@ -2,12 +2,15 @@ import fcntl
 import os
 import socket
 import subprocess
+import sys
 import threading
-from time import sleep
-from string import printable
 from enum import Enum
+from string import printable
+from time import sleep
 
-from toyotama.util.log import *
+from toyotama.util.log import Logger, Style
+
+log = Logger()
 
 
 class Mode(Enum):
@@ -20,8 +23,8 @@ class Connect:
         self, target, mode=Mode.SOCKET, to=10.0, verbose=True, pause=True, raw_output=True, **args
     ):
         if mode not in Mode:
-            warn(f"Connect: {mode} is not defined.")
-            info(f'Connect: Automatically set to "SOCKET".')
+            log.warning(f"Connect: {mode} is not defined.")
+            log.information("Connect: Automatically set to 'SOCKET'.")
         self.mode = mode
         self.verbose = verbose
         self.pause = pause
@@ -37,7 +40,7 @@ class Connect:
         if self.mode == Mode.SOCKET:
             host, port = target["host"], target["port"]
             if self.verbose:
-                proc(f"Connecting to {host}:{port}...")
+                log.progress(f"Connecting to {host}:{port}...")
             self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.sock.settimeout(to)
             self.sock.connect((host, port))
@@ -47,7 +50,7 @@ class Connect:
             program = target["program"]
             self.wait = "wait" in args and args["wait"]
             if self.verbose:
-                proc(f"Starting {program} ...")
+                log.progress(f"Starting {program} ...")
             self.proc = subprocess.Popen(
                 program,
                 shell=True,
@@ -56,7 +59,7 @@ class Connect:
                 stderr=subprocess.STDOUT,
             )
             if self.verbose:
-                info(f"PID: {self.proc.pid}")
+                log.information(f"PID: {self.proc.pid}")
             self.set_nonblocking(self.proc.stdout)
             self.timeout = None
 
@@ -76,11 +79,11 @@ class Connect:
             if self.verbose:
                 try:
                     if self.raw_output:
-                        message(Color.BLUE, "[Send] <<", msg)
+                        log.colored(Style.BLUE, f"[Send] << {msg}")
                     else:
-                        message(Color.BLUE, "[Send] <<", msg.decode())
-                except:
-                    message(Color.BLUE, "[Send] <<", msg)
+                        log.colored(Style.BLUE, f"[Send] << {msg.decode()}")
+                except Exception:
+                    log.colored(Style.BLUE, f"[Send] << {msg}")
         except Exception:
             self.is_alive = False
 
@@ -104,11 +107,11 @@ class Connect:
         if not quiet and self.verbose:
             try:
                 if self.raw_output:
-                    message(Color.DEEP_PURPLE, "[Recv] >>", ret)
+                    log.colored(Style.DEEP_PURPLE, f"[Recv] >> {ret}")
                 else:
-                    message(Color.DEEP_PURPLE, "[Recv] >>", ret.decode())
-            except Exception as e:
-                message(Color.DEEP_PURPLE, "[Recv] >>", ret)
+                    log.colored(Style.DEEP_PURPLE, f"[Recv] >> {ret.decode()}")
+            except Exception:
+                log.colored(Style.DEEP_PURPLE, f"[Recv] >> {ret}")
         return ret
 
     def recvuntil(self, term="\n"):
@@ -122,18 +125,18 @@ class Connect:
                     ret += self.proc.stdout.read(1)
             except self.timeout:
                 if not ret.endswith(term.encode()):
-                    warn(f"recvuntil: Not ends with {repr(term)} (Timeout)")
+                    log.warning(f"recvuntil: Not ends with {repr(term)} (Timeout)")
                 break
             except Exception:
                 sleep(0.05)
         if self.verbose:
             try:
                 if self.raw_output:
-                    message(Color.DEEP_PURPLE, "[Recv] >>", ret)
+                    log.colored(Style.DEEP_PURPLE, f"[Recv] >> {ret}")
                 else:
-                    message(Color.DEEP_PURPLE, "[Recv] >>", ret.decode())
-            except:
-                message(Color.DEEP_PURPLE, "[Recv] >>", ret)
+                    log.colored(Style.DEEP_PURPLE, f"[Recv] >> {ret.decode()}")
+            except Exception:
+                log.colored(Style.DEEP_PURPLE, f"[Recv] >> {ret}")
 
         return ret
 
@@ -143,7 +146,7 @@ class Connect:
 
     def interactive(self):
         if self.verbose:
-            info("Switching to interactive mode")
+            log.information("Switching to interactive mode")
 
         go = threading.Event()
 
@@ -156,7 +159,7 @@ class Connect:
                         stdout.buffer.write(cur)
                         stdout.flush()
                 except EOFError:
-                    info("Got EOF while reading in interactive")
+                    log.information("Got EOF while reading in interactive")
                     break
 
         t = threading.Thread(target=recv_thread)
@@ -172,11 +175,11 @@ class Connect:
                         self.send(data)
                     except EOFError:
                         go.set()
-                        info("Got EOF while reading in interactive")
+                        log.information("Got EOF while reading in interactive")
                 else:
                     go.set()
         except KeyboardInterrupt:
-            info("Interrupted")
+            log.information("Interrupted")
             go.set()
 
         while t.is_alive():
@@ -200,14 +203,16 @@ class Connect:
         rand_length = length - len(start) - len(end)
 
         if begin:
-            proc(f"Searching x such that {hashtype}({start} x {end})[:{len(match)}] == {match} ...")
+            log.progress(
+                f"Searching x such that {hashtype}({start} x {end})[:{len(match)}] == {match} ..."
+            )
             for patt in product(pts, repeat=rand_length):
                 patt = start + bytes(patt) + end
                 h = hashlib.new(hashtype, patt).hexdigest()[: len(match)]
                 if h == match:
                     break
         else:
-            proc(
+            log.progress(
                 f"Searching x such that {hashtype}({start} x {end})[-{len(match)}:] == {match} ..."
             )
             for patt in product(pts, repeat=rand_length):
@@ -216,7 +221,7 @@ class Connect:
                 if h == match:
                     break
 
-        info(f"Found.  {hashtype}('{patt.decode()}') == {h}")
+        log.information(f"Found.  {hashtype}('{patt.decode()}') == {h}")
         if hx:
             patt = patt.hex()
         self.sendline(patt)
@@ -225,7 +230,7 @@ class Connect:
         if self.mode == Mode.SOCKET:
             self.sock.close()
             if self.verbose:
-                proc("Disconnected.")
+                log.progress("Disconnected.")
 
         elif self.mode == Mode.LOCAL:
             if self.wait:
@@ -234,8 +239,8 @@ class Connect:
                 self.proc.terminate()
 
             if self.verbose:
-                proc(f"Stopped.")
+                log.progress("Stopped.")
         if self.pause:
             if self.verbose:
-                info("Press any key to close.")
+                log.information("Press any key to close.")
             input()
