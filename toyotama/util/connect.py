@@ -68,11 +68,13 @@ class Connect:
         fl = fcntl.fcntl(fd, fcntl.F_GETFL)
         fcntl.fcntl(fd, fcntl.F_SETFL, fl | os.O_NONBLOCK)
 
-    def send(self, msg):
+    def send(self, msg, end=b""):
         if isinstance(msg, int):
             msg = str(msg).encode()
         if isinstance(msg, str):
             msg = msg.encode()
+
+        msg += end
 
         try:
             if self.mode == Mode.SOCKET:
@@ -91,10 +93,7 @@ class Connect:
             self.is_alive = False
 
     def sendline(self, message):
-        if isinstance(message, str):
-            self.send(message + "\n")
-        else:
-            self.send(message + b"\n")
+        self.send(message, end=b"\n")
 
     def recv(self, n=2048, quiet=False):
         sleep(0.05)
