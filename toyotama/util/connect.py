@@ -69,8 +69,11 @@ class Connect:
         fcntl.fcntl(fd, fcntl.F_SETFL, fl | os.O_NONBLOCK)
 
     def send(self, msg):
+        if isinstance(msg, int):
+            msg = str(msg).encode()
         if isinstance(msg, str):
             msg = msg.encode()
+
         try:
             if self.mode == Mode.SOCKET:
                 self.sock.sendall(msg)
