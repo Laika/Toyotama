@@ -4,6 +4,8 @@ import socket
 import subprocess
 import sys
 import threading
+import ipaddress
+
 from enum import Enum
 from string import printable
 from time import sleep
@@ -35,15 +37,15 @@ class Connect:
             target = {"program": target}
         elif target.startswith("nc"):
             _, host, port = target.split()
-            target = {"host": host, "port": int(port)}
+            target = {"host": ipaddress.ip_address(host), "port": int(port)}
 
         if self.mode == Mode.SOCKET:
             host, port = target["host"], target["port"]
             if self.verbose:
-                log.progress(f"Connecting to {host}:{port}...")
+                log.progress(f"Connecting to {host!s}:{port}...")
             self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.sock.settimeout(to)
-            self.sock.connect((host, port))
+            self.sock.connect((str(host), port))
             self.timeout = socket.timeout
 
         if self.mode == Mode.LOCAL:
