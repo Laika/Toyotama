@@ -97,6 +97,10 @@ class Connect:
     def sendline(self, message):
         self.send(message, end=b"\n")
 
+    def sendlineafter(self, term, message):
+        self.recvuntil(term=term)
+        self.send(message, end=b"\n")
+
     def recv(self, n=2048, quiet=False):
         sleep(0.05)
         ret = b""
@@ -118,9 +122,9 @@ class Connect:
                 log.colored(Style.DEEP_PURPLE, f"[Recv] >> {ret}")
         return ret
 
-    def recvuntil(self, term="\n"):
+    def recvuntil(self, term=b"\n"):
         ret = b""
-        while not ret.endswith(term.encode()):
+        while not ret.endswith(term):
             try:
                 if self.mode == Mode.SOCKET:
                     ret += self.sock.recv(1)
@@ -128,7 +132,7 @@ class Connect:
                     print(self.proc.stdout)
                     ret += self.proc.stdout.read(1)
             except self.timeout:
-                if not ret.endswith(term.encode()):
+                if not ret.endswith(term):
                     log.warning(f"recvuntil: Not ends with {repr(term)} (Timeout)")
                 break
             except Exception:
@@ -145,8 +149,8 @@ class Connect:
         return ret
 
     def recvline(self, repeat=1):
-        buffer = [self.recvuntil(term="\n") for i in range(repeat)]
-        return buffer.pop() if len(buffer) == 1 else buffer
+        buf = [self.recvuntil(term=b"\n") for i in range(repeat)]
+        return buf.pop() if len(buf) == 1 else buf
 
     def interactive(self):
         if self.verbose:
