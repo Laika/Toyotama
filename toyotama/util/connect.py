@@ -124,6 +124,8 @@ class Connect:
 
     def recvuntil(self, term=b"\n"):
         ret = b""
+        if isinstance(term, str):
+            term = term.encode()
         while not ret.endswith(term):
             try:
                 if self.mode == Mode.SOCKET:
