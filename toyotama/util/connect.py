@@ -4,7 +4,6 @@ import socket
 import subprocess
 import sys
 import threading
-import ipaddress
 
 from enum import Enum
 from string import printable
@@ -37,7 +36,7 @@ class Connect:
             target = {"program": target}
         elif target.startswith("nc"):
             _, host, port = target.split()
-            target = {"host": ipaddress.ip_address(host), "port": int(port)}
+            target = {"host": host, "port": int(port)}
 
         if self.mode == Mode.SOCKET:
             host, port = target["host"], target["port"]
