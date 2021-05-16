@@ -46,16 +46,16 @@ class Logger:
         self.__message(Style.BG_BLUE + Style.FG_WHITE, " INFO ", message)
 
     def progress(self, message: str):
-        self.__message(f"{Style.BG_VIOLET}{Style.FG_WHITE}", " PROG ", message)
+        self.__message(Style.BG_VIOLET + Style.FG_WHITE, " PROG ", message)
 
     def warning(self, message: str):
-        self.__message(f"{Style.BG_ORANGE}{Style.FG_BLACK}", " WARN ", message)
+        self.__message(Style.BG_ORANGE + Style.FG_BLACK, " WARN ", message)
 
     def error(self, message: str):
-        self.__message(f"{Style.BG_RED}{Style.FG_WHITE}", " ERROR ", message)
+        self.__message(Style.BG_RED + Style.FG_WHITE, " ERROR ", message)
 
     def send(self, message: str):
-        self.__message(f"{Style.BG_DEEPPURPLE}{Style.FG_WHITE}", " <<SEND ", message)
+        self.__message(Style.BG_DEEPPURPLE + Style.FG_WHITE, " <<SEND ", message)
 
     def recv(self, message: str):
-        self.__message(f"{Style.BG_DEEPPURPLE}{Style.FG_WHITE}", " >>RECV ", message)
+        self.__message(Style.BG_DEEPPURPLE + Style.FG_WHITE, " >>RECV ", message)
