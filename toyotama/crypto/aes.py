@@ -23,19 +23,18 @@ def ecb_chosen_plaintext_attack(
 
         # get the encrypted block which includes the beginning of FLAG
         if verbose:
-            log.information("Getting the encrypted block which includes the beginning of FLAG")
+            log.progress("Getting the encrypted block which includes the beginning of FLAG")
 
         if len(known_plaintext) % block_size == block_size - 1:
             block_end += block_size
 
         chosen_plaintext = b"\x00" * (block_end - len(known_plaintext) - 1)
-        print(chosen_plaintext)
         encrypted_block = encrypt_oracle(chosen_plaintext)
         encrypted_block = encrypted_block[block_end - block_size : block_end]
 
         # bruteforcing all of the characters in plaintext_space
         if verbose:
-            log.information("Bruteforcing all of the characters in plaintext_space")
+            log.progress("Bruteforcing all of the characters in plaintext_space")
         for c in plaintext_space:
             if verbose:
                 sys.stderr.write(

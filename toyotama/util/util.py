@@ -1,7 +1,6 @@
 import code
 from functools import singledispatch
 
-import toyotama.util.log as log
 from toyotama.util.log import Logger
 
 log = Logger()

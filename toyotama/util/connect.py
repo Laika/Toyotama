@@ -4,6 +4,7 @@ import socket
 import subprocess
 import sys
 import threading
+
 from enum import Enum
 from string import printable
 from time import sleep
@@ -40,10 +41,10 @@ class Connect:
         if self.mode == Mode.SOCKET:
             host, port = target["host"], target["port"]
             if self.verbose:
-                log.progress(f"Connecting to {host}:{port}...")
+                log.progress(f"Connecting to {host!s}:{port}...")
             self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.sock.settimeout(to)
-            self.sock.connect((host, port))
+            self.sock.connect((str(host), port))
             self.timeout = socket.timeout
 
         if self.mode == Mode.LOCAL:
@@ -68,9 +69,14 @@ class Connect:
         fl = fcntl.fcntl(fd, fcntl.F_GETFL)
         fcntl.fcntl(fd, fcntl.F_SETFL, fl | os.O_NONBLOCK)
 
-    def send(self, msg):
+    def send(self, msg, end=b""):
+        if isinstance(msg, int):
+            msg = str(msg).encode()
         if isinstance(msg, str):
             msg = msg.encode()
+
+        msg += end
+
         try:
             if self.mode == Mode.SOCKET:
                 self.sock.sendall(msg)
@@ -88,10 +94,11 @@ class Connect:
             self.is_alive = False
 
     def sendline(self, message):
-        if isinstance(message, str):
-            self.send(message + "\n")
-        else:
-            self.send(message + b"\n")
+        self.send(message, end=b"\n")
+
+    def sendlineafter(self, term, message):
+        self.recvuntil(term=term)
+        self.send(message, end=b"\n")
 
     def recv(self, n=2048, quiet=False):
         sleep(0.05)
@@ -114,9 +121,11 @@ class Connect:
                 log.recv(ret)
         return ret
 
-    def recvuntil(self, term="\n"):
+    def recvuntil(self, term=b"\n"):
         ret = b""
-        while not ret.endswith(term.encode()):
+        if isinstance(term, str):
+            term = term.encode()
+        while not ret.endswith(term):
             try:
                 if self.mode == Mode.SOCKET:
                     ret += self.sock.recv(1)
@@ -124,7 +133,7 @@ class Connect:
                     print(self.proc.stdout)
                     ret += self.proc.stdout.read(1)
             except self.timeout:
-                if not ret.endswith(term.encode()):
+                if not ret.endswith(term):
                     log.warning(f"recvuntil: Not ends with {repr(term)} (Timeout)")
                 break
             except Exception:
@@ -141,8 +150,8 @@ class Connect:
         return ret
 
     def recvline(self, repeat=1):
-        buffer = [self.recvuntil(term="\n") for i in range(repeat)]
-        return buffer.pop() if len(buffer) == 1 else buffer
+        buf = [self.recvuntil(term=b"\n") for i in range(repeat)]
+        return buf.pop() if len(buf) == 1 else buf
 
     def interactive(self):
         if self.verbose:
