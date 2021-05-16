@@ -8,7 +8,7 @@ from enum import Enum
 from string import printable
 from time import sleep
 
-from toyotama.util.log import Logger, Style
+from toyotama.util.log import Logger
 
 log = Logger()
 
@@ -79,11 +79,11 @@ class Connect:
             if self.verbose:
                 try:
                     if self.raw_output:
-                        log.colored(Style.BLUE, f"[Send] << {msg}")
+                        log.send(msg)
                     else:
-                        log.colored(Style.BLUE, f"[Send] << {msg.decode()}")
+                        log.send(msg.decode())
                 except Exception:
-                    log.colored(Style.BLUE, f"[Send] << {msg}")
+                    log.send(msg)
         except Exception:
             self.is_alive = False
 
@@ -107,11 +107,11 @@ class Connect:
         if not quiet and self.verbose:
             try:
                 if self.raw_output:
-                    log.colored(Style.DEEP_PURPLE, f"[Recv] >> {ret}")
+                    log.recv(ret)
                 else:
-                    log.colored(Style.DEEP_PURPLE, f"[Recv] >> {ret.decode()}")
+                    log.recv(ret.decode())
             except Exception:
-                log.colored(Style.DEEP_PURPLE, f"[Recv] >> {ret}")
+                log.recv(ret)
         return ret
 
     def recvuntil(self, term="\n"):
@@ -132,11 +132,11 @@ class Connect:
         if self.verbose:
             try:
                 if self.raw_output:
-                    log.colored(Style.DEEP_PURPLE, f"[Recv] >> {ret}")
+                    log.recv(ret)
                 else:
-                    log.colored(Style.DEEP_PURPLE, f"[Recv] >> {ret.decode()}")
+                    log.recv(ret.decode())
             except Exception:
-                log.colored(Style.DEEP_PURPLE, f"[Recv] >> {ret}")
+                log.recv(ret)
 
         return ret
 
