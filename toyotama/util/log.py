@@ -1,5 +1,5 @@
 import sys
-from namedtuple import namedtuple
+from collections import namedtuple
 
 color = {
     "RESET": "\x1b[0m",
