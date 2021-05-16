@@ -9,8 +9,8 @@ color = {
     "GREEN": "\x1b[38;5;2m",
     "FG_YELLOW": f"\x1b[38;5;{0xff};{0xc1};{0x07}m",
     "BG_YELLOW": f"\x1b[48;5;{0xff};{0xc1};{0x07}m",
-    "FG_BLUE": "\x1b[38;5;4m",
-    "BG_BLUE": "\x1b[48;5;4m",
+    "FG_BLUE": f"\x1b[38;5;{0x00};{0x57};{0xd9}m",
+    "BG_BLUE": f"\x1b[48;5;{0x00};{0x57};{0xd9}m",
     "FG_MAGENTA": "\x1b[38;5;5m",
     "BG_MAGENTA": "\x1b[48;5;5m",
     "CYAN": "\x1b[38;5;6m",
@@ -37,13 +37,13 @@ class Logger:
         self.fd = fd
 
     def __message(self, color: str, header: str, message: str):
-        self.fd.write(f"{Style.BOLD}{color}{header} {message}{Style.RESET}\n")
+        self.fd.write(f"{color}{header}{Style.RESET} {message}\n")
 
     def colored(self, color: str, message: str):
         self.__message(color, "", message)
 
     def information(self, message: str):
-        self.__message(f"{Style.BG_BLUE}{Style.FG_WHITE}", " INFO ", message)
+        self.__message(Style.BG_BLUE + Style.FG_WHITE, " INFO ", message)
 
     def progress(self, message: str):
         self.__message(f"{Style.BG_VIOLET}{Style.FG_WHITE}", " PROG ", message)
