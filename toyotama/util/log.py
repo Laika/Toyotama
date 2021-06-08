@@ -1,6 +1,8 @@
 import sys
 from collections import namedtuple
 
+WIDTH = 8
+
 color = {
     "RESET": "\x1b[0m",
     "BOLD": "\x1b[1m",
@@ -42,25 +44,25 @@ class Logger:
         self.fd = fd
 
     def __message(self, color: str, header: str, message: str):
-        self.fd.write(f"{color}{header}{Style.RESET}\t{message}\n")
+        self.fd.write(f"{color}{header}{Style.RESET}  {message}\n")
 
     def colored(self, color: str, message: str):
         self.__message(color, "", message)
 
     def information(self, message: str):
-        self.__message(Style.BG_BLUE + Style.FG_WHITE, " INFO ", message)
+        self.__message(Style.BG_BLUE + Style.FG_WHITE, "INFO".center(WIDTH, " "), message)
 
     def progress(self, message: str):
-        self.__message(Style.BG_VIOLET + Style.FG_WHITE, " PROG ", message)
+        self.__message(Style.BG_VIOLET + Style.FG_WHITE, "PROG".center(WIDTH, " "), message)
 
     def warning(self, message: str):
-        self.__message(Style.BG_YELLOW + Style.FG_BLACK, " WARN ", message)
+        self.__message(Style.BG_YELLOW + Style.FG_BLACK, "WARN".center(WIDTH, " "), message)
 
     def error(self, message: str):
-        self.__message(Style.BG_RED + Style.FG_WHITE, " ERROR ", message)
+        self.__message(Style.BG_RED + Style.FG_WHITE, "FAIL".center(WIDTH, " "), message)
 
     def send(self, message: str):
-        self.__message(Style.BG_GRAY + Style.FG_BLACK, " < SEND ", message)
+        self.__message(Style.BG_GRAY + Style.FG_BLACK, "SEND".center(WIDTH, " "), message)
 
     def recv(self, message: str):
-        self.__message(Style.BG_DARKGRAY + Style.FG_WHITE, " RECV > ", message)
+        self.__message(Style.BG_DARKGRAY + Style.FG_WHITE, "RECV".center(WIDTH, " "), message)
