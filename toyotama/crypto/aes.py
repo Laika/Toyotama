@@ -7,7 +7,7 @@ log = Logger()
 
 
 def ecb_chosen_plaintext_attack(
-    encrypt_oracle: typing.Callable,
+    encrypt_oracle: typing.Callable[[bytes], bool],
     plaintext_space: bytes = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789{}_",
     known_plaintext: bytes = b"",
     block_size: int = 16,
@@ -16,6 +16,15 @@ def ecb_chosen_plaintext_attack(
     """AES ECB mode chosen plaintext attack
 
     This function helps solving chosen plaintext attack.
+
+    Args:
+        encrypt_oracle (typing.Callable[[bytes], bool]): the encryption oracle.
+        plaintext_space (bytes, optional): Defaults to uppercase + lowercase + numbers + "{}_".
+        known_plaintext (bytes, optional): Defaults to b"".
+        block_size (int, optional): Defaults to 16.
+        verbose (bool, optional): Defaults to False.
+    Returns:
+        bytes: The plaintext.
     """
     from random import sample
 
