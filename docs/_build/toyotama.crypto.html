@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html >
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1"><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+      <title>toyotama.crypto package</title>
+    
+          <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+          <link rel="stylesheet" href="_static/theme.css " type="text/css" />
+      
+      <!-- sphinx script_files -->
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+
+      
+      <!-- bundled in js (rollup iife) -->
+      <!-- <script src="_static/theme-vendors.js"></script> -->
+      <script src="_static/theme.js" defer></script>
+    
+  <link rel="index" title="Index" href="genindex.html" />
+  <link rel="search" title="Search" href="search.html" /> 
+  </head>
+
+  <body>
+    <div id="app">
+    <div class="theme-container" :class="pageClasses"><navbar @toggle-sidebar="toggleSidebar">
+  <router-link to="index.html" class="home-link">
+    
+      <span class="site-name">Toyotama</span>
+    
+  </router-link>
+
+  <div class="links">
+    <navlinks class="can-hide">
+
+
+
+    </navlinks>
+  </div>
+</navbar>
+
+      
+      <div class="sidebar-mask" @click="toggleSidebar(false)">
+      </div>
+        <sidebar @toggle-sidebar="toggleSidebar">
+          
+          <navlinks>
+            
+
+
+
+            
+          </navlinks><div id="searchbox" class="searchbox" role="search">
+  <div class="caption"><span class="caption-text">Quick search</span>
+    <div class="searchformwrapper">
+      <form class="search" action="search.html" method="get">
+        <input type="text" name="q" />
+        <input type="submit" value="Search" />
+        <input type="hidden" name="check_keywords" value="yes" />
+        <input type="hidden" name="area" value="default" />
+      </form>
+    </div>
+  </div>
+</div><div class="sidebar-links" role="navigation" aria-label="main navigation">
+  
+    <div class="sidebar-group">
+      <p class="caption">
+        <span class="caption-text"><a href="index.html#welcome-to-toyotama-s-documentation">Contents:</a></span>
+      </p>
+      <ul class="">
+        
+      </ul>
+    </div>
+  
+</div>
+        </sidebar>
+
+      <page>
+          <div class="body-header" role="navigation" aria-label="navigation">
+  
+  <ul class="breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+    
+    <li>toyotama.crypto package</li>
+  </ul>
+  
+
+  <ul class="page-nav">
+</ul>
+  
+</div>
+<hr>
+          <div class="content" role="main" v-pre>
+            
+  <section id="toyotama-crypto-package">
+<h1>toyotama.crypto package<a class="headerlink" href="#toyotama-crypto-package" title="Permalink to this headline">¶</a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="module-toyotama.crypto.aes">
+<span id="toyotama-crypto-aes-module"></span><h2>toyotama.crypto.aes module<a class="headerlink" href="#module-toyotama.crypto.aes" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="toyotama.crypto.aes.ecb_chosen_plaintext_attack">
+<span class="sig-prename descclassname"><span class="pre">toyotama.crypto.aes.</span></span><span class="sig-name descname"><span class="pre">ecb_chosen_plaintext_attack</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">encrypt_oracle</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plaintext_space</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">b'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789{}_'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">known_plaintext</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">b''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">block_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">16</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#toyotama.crypto.aes.ecb_chosen_plaintext_attack" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="toyotama.crypto.aes.padding_oracle_attack">
+<span class="sig-prename descclassname"><span class="pre">toyotama.crypto.aes.</span></span><span class="sig-name descname"><span class="pre">padding_oracle_attack</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ciphertext</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">padding_oracle</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iv</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">b''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">block_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">16</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#toyotama.crypto.aes.padding_oracle_attack" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-toyotama.crypto.classical_cipher">
+<span id="toyotama-crypto-classical-cipher-module"></span><h2>toyotama.crypto.classical_cipher module<a class="headerlink" href="#module-toyotama.crypto.classical_cipher" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="toyotama.crypto.classical_cipher.rot">
+<span class="sig-prename descclassname"><span class="pre">toyotama.crypto.classical_cipher.</span></span><span class="sig-name descname"><span class="pre">rot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rotate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">13</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#toyotama.crypto.classical_cipher.rot" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">toyotama.crypto.classical_cipher.</span></span><span class="sig-name descname"><span class="pre">rot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rotate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">13</span></span></em><span class="sig-paren">)</span></dt>
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">toyotama.crypto.classical_cipher.</span></span><span class="sig-name descname"><span class="pre">rot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bytes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rotate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">13</span></span></em><span class="sig-paren">)</span></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="toyotama.crypto.classical_cipher.rot_bytes">
+<span class="sig-prename descclassname"><span class="pre">toyotama.crypto.classical_cipher.</span></span><span class="sig-name descname"><span class="pre">rot_bytes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bytes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rotate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">13</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#toyotama.crypto.classical_cipher.rot_bytes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="toyotama.crypto.classical_cipher.rot_str">
+<span class="sig-prename descclassname"><span class="pre">toyotama.crypto.classical_cipher.</span></span><span class="sig-name descname"><span class="pre">rot_str</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rotate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">13</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#toyotama.crypto.classical_cipher.rot_str" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="toyotama.crypto.classical_cipher.vigenere">
+<span class="sig-prename descclassname"><span class="pre">toyotama.crypto.classical_cipher.</span></span><span class="sig-name descname"><span class="pre">vigenere</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cipher</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#toyotama.crypto.classical_cipher.vigenere" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="toyotama.crypto.classical_cipher.xor_string">
+<span class="sig-prename descclassname"><span class="pre">toyotama.crypto.classical_cipher.</span></span><span class="sig-name descname"><span class="pre">xor_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#toyotama.crypto.classical_cipher.xor_string" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">toyotama.crypto.classical_cipher.</span></span><span class="sig-name descname"><span class="pre">xor_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span></em><span class="sig-paren">)</span></dt>
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">toyotama.crypto.classical_cipher.</span></span><span class="sig-name descname"><span class="pre">xor_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bytes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span></em><span class="sig-paren">)</span></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="toyotama.crypto.classical_cipher.xor_string_bytes">
+<span class="sig-prename descclassname"><span class="pre">toyotama.crypto.classical_cipher.</span></span><span class="sig-name descname"><span class="pre">xor_string_bytes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bytes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#toyotama.crypto.classical_cipher.xor_string_bytes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="toyotama.crypto.classical_cipher.xor_string_str">
+<span class="sig-prename descclassname"><span class="pre">toyotama.crypto.classical_cipher.</span></span><span class="sig-name descname"><span class="pre">xor_string_str</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#toyotama.crypto.classical_cipher.xor_string_str" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-toyotama.crypto.rng">
+<span id="toyotama-crypto-rng-module"></span><h2>toyotama.crypto.rng module<a class="headerlink" href="#module-toyotama.crypto.rng" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="toyotama.crypto.rng.lcg_crack">
+<span class="sig-prename descclassname"><span class="pre">toyotama.crypto.rng.</span></span><span class="sig-name descname"><span class="pre">lcg_crack</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">A</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">B</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">M</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#toyotama.crypto.rng.lcg_crack" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-toyotama.crypto.rsa">
+<span id="toyotama-crypto-rsa-module"></span><h2>toyotama.crypto.rsa module<a class="headerlink" href="#module-toyotama.crypto.rsa" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="toyotama.crypto.rsa.common_modulus_attack">
+<span class="sig-prename descclassname"><span class="pre">toyotama.crypto.rsa.</span></span><span class="sig-name descname"><span class="pre">common_modulus_attack</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">e1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">e2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#toyotama.crypto.rsa.common_modulus_attack" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="toyotama.crypto.rsa.lsb_decryption_oracle_attack">
+<span class="sig-prename descclassname"><span class="pre">toyotama.crypto.rsa.</span></span><span class="sig-name descname"><span class="pre">lsb_decryption_oracle_attack</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">e</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">oracle</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">progress</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#toyotama.crypto.rsa.lsb_decryption_oracle_attack" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>oracle: method</dt><dd><p>decryption oracle
+c*2**e = (2*m)**e (mod n) &gt;&gt; oracle &gt;&gt; m&amp;1</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="toyotama.crypto.rsa.wieners_attack">
+<span class="sig-prename descclassname"><span class="pre">toyotama.crypto.rsa.</span></span><span class="sig-name descname"><span class="pre">wieners_attack</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">e</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#toyotama.crypto.rsa.wieners_attack" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-toyotama.crypto.util">
+<span id="toyotama-crypto-util-module"></span><h2>toyotama.crypto.util module<a class="headerlink" href="#module-toyotama.crypto.util" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="toyotama.crypto.util.baby_giant">
+<span class="sig-prename descclassname"><span class="pre">toyotama.crypto.util.</span></span><span class="sig-name descname"><span class="pre">baby_giant</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">g</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#toyotama.crypto.util.baby_giant" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="toyotama.crypto.util.chinese_remainder">
+<span class="sig-prename descclassname"><span class="pre">toyotama.crypto.util.</span></span><span class="sig-name descname"><span class="pre">chinese_remainder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">A</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">M</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#toyotama.crypto.util.chinese_remainder" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="toyotama.crypto.util.extended_gcd">
+<span class="sig-prename descclassname"><span class="pre">toyotama.crypto.util.</span></span><span class="sig-name descname"><span class="pre">extended_gcd</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#toyotama.crypto.util.extended_gcd" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="toyotama.crypto.util.factorize">
+<span class="sig-prename descclassname"><span class="pre">toyotama.crypto.util.</span></span><span class="sig-name descname"><span class="pre">factorize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#toyotama.crypto.util.factorize" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="toyotama.crypto.util.factorize_from_ed">
+<span class="sig-prename descclassname"><span class="pre">toyotama.crypto.util.</span></span><span class="sig-name descname"><span class="pre">factorize_from_ed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">e</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">65537</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#toyotama.crypto.util.factorize_from_ed" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="toyotama.crypto.util.factorize_from_kphi">
+<span class="sig-prename descclassname"><span class="pre">toyotama.crypto.util.</span></span><span class="sig-name descname"><span class="pre">factorize_from_kphi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kphi</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#toyotama.crypto.util.factorize_from_kphi" title="Permalink to this definition">¶</a></dt>
+<dd><p>factorize by Miller-Rabin primality test
+n: p*q
+kphi: k*phi(n) = k*(p-1)*(q-1)</p>
+<p>kphi = 2**r * s</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="toyotama.crypto.util.mod_sqrt">
+<span class="sig-prename descclassname"><span class="pre">toyotama.crypto.util.</span></span><span class="sig-name descname"><span class="pre">mod_sqrt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#toyotama.crypto.util.mod_sqrt" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="toyotama.crypto.util.pohlig_hellman">
+<span class="sig-prename descclassname"><span class="pre">toyotama.crypto.util.</span></span><span class="sig-name descname"><span class="pre">pohlig_hellman</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">g</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#toyotama.crypto.util.pohlig_hellman" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-toyotama.crypto">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-toyotama.crypto" title="Permalink to this headline">¶</a></h2>
+</section>
+</section>
+
+
+          </div>
+          <div class="page-nav">
+            <div class="inner"><ul class="page-nav">
+</ul><div class="footer" role="contentinfo">
+      &#169; Copyright 2021, Laika.
+    <br>
+    Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.0.2 with <a href="https://github.com/schettino72/sphinx_press_theme">Press Theme</a> 0.7.3.
+</div>
+            </div>
+          </div>
+      </page>
+    </div></div>
+    
+    
+  </body>
+</html>
