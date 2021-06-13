@@ -14,6 +14,7 @@ setup(
     packages=find_packages(),
     py_modules=["toyotama", "log", "integer"],
     author="Laika",
+    author_email="laika@albina.cc",
     python_requires=">=3.9.*, <4",
     install_requires=_requires_from_file("requirements.txt"),
 )

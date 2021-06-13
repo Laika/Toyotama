@@ -1,18 +1,22 @@
 import sys
+import typing
 
 from toyotama.util.log import Logger, Style
 
 log = Logger()
 
 
-# |chosen_pt|FLAG|pad|
 def ecb_chosen_plaintext_attack(
-    encrypt_oracle,
-    plaintext_space=b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789{}_",
-    known_plaintext=b"",
-    block_size=16,
-    verbose=False,
+    encrypt_oracle: typing.Callable,
+    plaintext_space: bytes = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789{}_",
+    known_plaintext: bytes = b"",
+    block_size: int = 16,
+    verbose: bool = False,
 ):
+    """AES ECB mode chosen plaintext attack
+
+    This function helps solving chosen plaintext attack.
+    """
     from random import sample
 
     block_end = block_size * (len(known_plaintext) // (block_size - 2) + 1)
@@ -53,8 +57,26 @@ def ecb_chosen_plaintext_attack(
                 break
 
 
-# [bytes] plaintext >> padding_oracle >> [bool] padding is valid?
-def padding_oracle_attack(ciphertext, padding_oracle, iv=b"", block_size=16, verbose=False):
+def padding_oracle_attack(
+    ciphertext: bytes,
+    padding_oracle: typing.Callable,
+    iv: bytes = b"",
+    block_size: int = 16,
+    verbose: bool = False,
+) -> bytes:
+    """Padding Oracle Attack solver.
+
+    This function helps solving "Padding Oracle Attack"
+
+    Args:
+        ciphertext (bytes): The ciphertext.
+        padding_oracle (Callable): The padding oracle function. This function receives ciphertext and returns the ciphertext is valid or not.
+        iv (bytes, optional): An initialization vector. Defaults to b"".
+        block_size (int, optional): The block size of AES. Defaults to 16.
+        verbose (bool, optional): Show more information if True, otherwise no output.
+    Returns:
+        bytes: The plaintext
+    """
     cipher_block = [ciphertext[i : i + block_size] for i in range(0, len(ciphertext), block_size)]
     cipher_block.reverse()
     plaintext = b""
