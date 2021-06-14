@@ -104,18 +104,30 @@
 <span id="toyotama-pwn-fsa-module"></span><h2>toyotama.pwn.fsa module<a class="headerlink" href="#module-toyotama.pwn.fsa" title="Permalink to this headline">¶</a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="toyotama.pwn.fsa.fsa_write">
-<span class="sig-prename descclassname"><span class="pre">toyotama.pwn.fsa.</span></span><span class="sig-name descname"><span class="pre">fsa_write</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target_addr</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">contents</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nth_stack</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sofar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bits</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">64</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#toyotama.pwn.fsa.fsa_write" title="Permalink to this definition">¶</a></dt>
-<dd><p>target_addr: The address where the content will be written
-contents: What you want to write
-output: The number of characters which executable output
-sofar: The length of payload so far
-nth_stack: example</p>
-<blockquote>
-<div><p>“AAAA%p %p %p…”
+<span class="sig-prename descclassname"><span class="pre">toyotama.pwn.fsa.</span></span><span class="sig-name descname"><span class="pre">fsa_write</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target_addr</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">values</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nth_stack</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sofar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bits</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">64</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#toyotama.pwn.fsa.fsa_write" title="Permalink to this definition">¶</a></dt>
+<dd><p>Arbitrary write using format string bug</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>target_addr</strong> (<em>int</em>) – The address where the content will be written.</p></li>
+<li><p><strong>values</strong> (<em>int</em>) – The values to write.</p></li>
+<li><p><strong>nth_stack</strong> (<em>int</em>) – example
+“AAAA%p %p %p…”
 -&gt; AAAA0x1e 0xf7f6f580 0x804860b 0xf7f6f000 0xf7fbb2f0 (nil) 0x4141d402
--&gt; 7th (0x4141d402)</p>
-</div></blockquote>
-<p>offset: from this example, offset is 2 (0x4141d402)</p>
+-&gt; 7th (0x4141d402)</p></li>
+<li><p><strong>output</strong> (<em>int</em><em>, </em><em>optional</em>) – The number of characters which executable output.</p></li>
+<li><p><strong>sofar</strong> (<em>int</em><em>, </em><em>optional</em>) – The length of payload so far.</p></li>
+<li><p><strong>offset</strong> (<em>int</em><em>, </em><em>optional</em>) – From nth_stack’s example, offset is 2 (0x4141d402).</p></li>
+<li><p><strong>bits</strong> (<em>int</em><em>, </em><em>optional</em>) – The bits of the target binary.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The payload</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>bytes</p>
+</dd>
+</dl>
 </dd></dl>
 
 </section>
@@ -123,48 +135,71 @@ nth_stack: example</p>
 <span id="toyotama-pwn-util-module"></span><h2>toyotama.pwn.util module<a class="headerlink" href="#module-toyotama.pwn.util" title="Permalink to this headline">¶</a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="toyotama.pwn.util.fill">
-<span class="sig-prename descclassname"><span class="pre">toyotama.pwn.util.</span></span><span class="sig-name descname"><span class="pre">fill</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'A'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">byte</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#toyotama.pwn.util.fill" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<span class="sig-prename descclassname"><span class="pre">toyotama.pwn.util.</span></span><span class="sig-name descname"><span class="pre">fill</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">character</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">AnyStr</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">b'A'</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">AnyStr</span><a class="headerlink" href="#toyotama.pwn.util.fill" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate b”AAA…” padding</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>length</strong> (<em>int</em>) – The length of padding.</p></li>
+<li><p><strong>character</strong> (<em>str</em><em> or </em><em>bytes</em><em>, </em><em>optional</em>) – The character to fill.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The string by repeating <cite>character</cite> for <cite>length</cite> times</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>str or bytes</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="toyotama.pwn.util.p16">
-<span class="sig-prename descclassname"><span class="pre">toyotama.pwn.util.</span></span><span class="sig-name descname"><span class="pre">p16</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#toyotama.pwn.util.p16" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<span class="sig-prename descclassname"><span class="pre">toyotama.pwn.util.</span></span><span class="sig-name descname"><span class="pre">p16</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">bytes</span><a class="headerlink" href="#toyotama.pwn.util.p16" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pack 16bit integer</p>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="toyotama.pwn.util.p32">
-<span class="sig-prename descclassname"><span class="pre">toyotama.pwn.util.</span></span><span class="sig-name descname"><span class="pre">p32</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#toyotama.pwn.util.p32" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<span class="sig-prename descclassname"><span class="pre">toyotama.pwn.util.</span></span><span class="sig-name descname"><span class="pre">p32</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">bytes</span><a class="headerlink" href="#toyotama.pwn.util.p32" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pack 32bit integer</p>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="toyotama.pwn.util.p64">
-<span class="sig-prename descclassname"><span class="pre">toyotama.pwn.util.</span></span><span class="sig-name descname"><span class="pre">p64</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#toyotama.pwn.util.p64" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<span class="sig-prename descclassname"><span class="pre">toyotama.pwn.util.</span></span><span class="sig-name descname"><span class="pre">p64</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">bytes</span><a class="headerlink" href="#toyotama.pwn.util.p64" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pack 64bit integer</p>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="toyotama.pwn.util.p8">
-<span class="sig-prename descclassname"><span class="pre">toyotama.pwn.util.</span></span><span class="sig-name descname"><span class="pre">p8</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#toyotama.pwn.util.p8" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<span class="sig-prename descclassname"><span class="pre">toyotama.pwn.util.</span></span><span class="sig-name descname"><span class="pre">p8</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">bytes</span><a class="headerlink" href="#toyotama.pwn.util.p8" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pack 8bit integer</p>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="toyotama.pwn.util.u16">
-<span class="sig-prename descclassname"><span class="pre">toyotama.pwn.util.</span></span><span class="sig-name descname"><span class="pre">u16</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sign</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#toyotama.pwn.util.u16" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<span class="sig-prename descclassname"><span class="pre">toyotama.pwn.util.</span></span><span class="sig-name descname"><span class="pre">u16</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sign</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">bytes</span><a class="headerlink" href="#toyotama.pwn.util.u16" title="Permalink to this definition">¶</a></dt>
+<dd><p>Unpack 16bit integer</p>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="toyotama.pwn.util.u32">
-<span class="sig-prename descclassname"><span class="pre">toyotama.pwn.util.</span></span><span class="sig-name descname"><span class="pre">u32</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sign</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#toyotama.pwn.util.u32" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<span class="sig-prename descclassname"><span class="pre">toyotama.pwn.util.</span></span><span class="sig-name descname"><span class="pre">u32</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sign</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">bytes</span><a class="headerlink" href="#toyotama.pwn.util.u32" title="Permalink to this definition">¶</a></dt>
+<dd><p>Unpack 32bit integer</p>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="toyotama.pwn.util.u64">
-<span class="sig-prename descclassname"><span class="pre">toyotama.pwn.util.</span></span><span class="sig-name descname"><span class="pre">u64</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sign</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#toyotama.pwn.util.u64" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<span class="sig-prename descclassname"><span class="pre">toyotama.pwn.util.</span></span><span class="sig-name descname"><span class="pre">u64</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sign</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">bytes</span><a class="headerlink" href="#toyotama.pwn.util.u64" title="Permalink to this definition">¶</a></dt>
+<dd><p>Unpack 64bit integer</p>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="toyotama.pwn.util.u8">
-<span class="sig-prename descclassname"><span class="pre">toyotama.pwn.util.</span></span><span class="sig-name descname"><span class="pre">u8</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sign</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#toyotama.pwn.util.u8" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<span class="sig-prename descclassname"><span class="pre">toyotama.pwn.util.</span></span><span class="sig-name descname"><span class="pre">u8</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sign</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">bytes</span><a class="headerlink" href="#toyotama.pwn.util.u8" title="Permalink to this definition">¶</a></dt>
+<dd><p>Unpack 8bit integer</p>
+</dd></dl>
 
 </section>
 <section id="module-toyotama.pwn">

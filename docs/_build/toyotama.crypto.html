@@ -206,29 +206,77 @@
 </section>
 <section id="module-toyotama.crypto.rsa">
 <span id="toyotama-crypto-rsa-module"></span><h2>toyotama.crypto.rsa module<a class="headerlink" href="#module-toyotama.crypto.rsa" title="Permalink to this headline">¶</a></h2>
+<p>RSA utility</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="toyotama.crypto.rsa.common_modulus_attack">
-<span class="sig-prename descclassname"><span class="pre">toyotama.crypto.rsa.</span></span><span class="sig-name descname"><span class="pre">common_modulus_attack</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">e1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">e2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#toyotama.crypto.rsa.common_modulus_attack" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<span class="sig-prename descclassname"><span class="pre">toyotama.crypto.rsa.</span></span><span class="sig-name descname"><span class="pre">common_modulus_attack</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">e1</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">e2</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c1</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c2</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">N</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">int</span><a class="headerlink" href="#toyotama.crypto.rsa.common_modulus_attack" title="Permalink to this definition">¶</a></dt>
+<dd><p>Common Modulus Attack</p>
+<p>Common Modulus Attack</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>e1</strong> (<em>int</em>) – The first public exponent.</p></li>
+<li><p><strong>e2</strong> (<em>int</em>) – The second public exponent.</p></li>
+<li><p><strong>c1</strong> (<em>int</em>) – The first ciphertext.</p></li>
+<li><p><strong>c1</strong> – The second ciphertext.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The plaintext</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="toyotama.crypto.rsa.lsb_decryption_oracle_attack">
-<span class="sig-prename descclassname"><span class="pre">toyotama.crypto.rsa.</span></span><span class="sig-name descname"><span class="pre">lsb_decryption_oracle_attack</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">e</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">oracle</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">progress</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#toyotama.crypto.rsa.lsb_decryption_oracle_attack" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="simple">
-<dt>oracle: method</dt><dd><p>decryption oracle
-c*2**e = (2*m)**e (mod n) &gt;&gt; oracle &gt;&gt; m&amp;1</p>
+<span class="sig-prename descclassname"><span class="pre">toyotama.crypto.rsa.</span></span><span class="sig-name descname"><span class="pre">lsb_decryption_oracle_attack</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">N</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">e</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">oracle</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Callable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">progress</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#toyotama.crypto.rsa.lsb_decryption_oracle_attack" title="Permalink to this definition">¶</a></dt>
+<dd><p>LSB Decryption oracle attack</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>N</strong> (<em>int</em>) – The modulus.</p></li>
+<li><p><strong>e</strong> (<em>int</em>) – The exponent.</p></li>
+<li><p><strong>c</strong> (<em>int</em>) – The ciphertext.</p></li>
+<li><p><strong>oracle</strong> (<em>Callable</em>) – The decryption oracle.  c*2**e = (2*m)**e (mod n) &gt;&gt; oracle &gt;&gt; m&amp;1</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The plaintext</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>int</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="toyotama.crypto.rsa.wieners_attack">
-<span class="sig-prename descclassname"><span class="pre">toyotama.crypto.rsa.</span></span><span class="sig-name descname"><span class="pre">wieners_attack</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">e</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#toyotama.crypto.rsa.wieners_attack" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<span class="sig-prename descclassname"><span class="pre">toyotama.crypto.rsa.</span></span><span class="sig-name descname"><span class="pre">wieners_attack</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">e</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">N</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><a class="headerlink" href="#toyotama.crypto.rsa.wieners_attack" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wiener’s attack</p>
+<p>Wiener’s attack</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>e</strong> (<em>int</em>) – The public exponent.</p></li>
+<li><p><strong>N</strong> (<em>int</em>) – The modulus.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The private key. None if failed.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>int or None</p>
+</dd>
+</dl>
+</dd></dl>
 
 </section>
 <section id="module-toyotama.crypto.util">
 <span id="toyotama-crypto-util-module"></span><h2>toyotama.crypto.util module<a class="headerlink" href="#module-toyotama.crypto.util" title="Permalink to this headline">¶</a></h2>
+<p>Crypto Utility</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="toyotama.crypto.util.baby_giant">
 <span class="sig-prename descclassname"><span class="pre">toyotama.crypto.util.</span></span><span class="sig-name descname"><span class="pre">baby_giant</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">g</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#toyotama.crypto.util.baby_giant" title="Permalink to this definition">¶</a></dt>
@@ -236,18 +284,56 @@ c*2**e = (2*m)**e (mod n) &gt;&gt; oracle &gt;&gt; m&amp;1</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="toyotama.crypto.util.chinese_remainder">
-<span class="sig-prename descclassname"><span class="pre">toyotama.crypto.util.</span></span><span class="sig-name descname"><span class="pre">chinese_remainder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">A</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">M</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#toyotama.crypto.util.chinese_remainder" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<span class="sig-prename descclassname"><span class="pre">toyotama.crypto.util.</span></span><span class="sig-name descname"><span class="pre">chinese_remainder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">A</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">M</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">list</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">tuple</span><a class="headerlink" href="#toyotama.crypto.util.chinese_remainder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Chinese Remainder Theorem
+A = [a0, a1, a2, a3, …]
+M = [m0, m1, m2, m3, …]
+Compute X (mod Y = m0*m1*m2*…) such that these equations</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>x = a0 (mod m0)</p></li>
+<li><p>x = a1 (mod m1)</p></li>
+<li><p>x = a2 (mod m2)</p></li>
+<li><p>x = a3 (mod m3)</p></li>
+<li><p>…</p></li>
+</ul>
+</div></blockquote>
+<p>by Garner’s algorithm.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>A</strong> (<em>list</em><em>[</em><em>int</em><em>]</em>) – The list of value.</p></li>
+<li><p><strong>M</strong> (<em>list</em><em>[</em><em>int</em><em>]</em>) – The list of modulus.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>X, Y such that satisfy the equations</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>tuple[int, int]</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="toyotama.crypto.util.extended_gcd">
-<span class="sig-prename descclassname"><span class="pre">toyotama.crypto.util.</span></span><span class="sig-name descname"><span class="pre">extended_gcd</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#toyotama.crypto.util.extended_gcd" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="toyotama.crypto.util.factorize">
-<span class="sig-prename descclassname"><span class="pre">toyotama.crypto.util.</span></span><span class="sig-name descname"><span class="pre">factorize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#toyotama.crypto.util.factorize" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<span class="sig-prename descclassname"><span class="pre">toyotama.crypto.util.</span></span><span class="sig-name descname"><span class="pre">extended_gcd</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">A</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">B</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">tuple</span><a class="headerlink" href="#toyotama.crypto.util.extended_gcd" title="Permalink to this definition">¶</a></dt>
+<dd><p>Extended GCD.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>A</strong> (<em>int</em>) – The first value.</p></li>
+<li><p><strong>B</strong> (<em>int</em>) – The second value.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>(x, y, g) s.t. Ax + By = gcd(A, B) = g</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>tuple[int, int, int]</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="toyotama.crypto.util.factorize_from_ed">
@@ -265,8 +351,24 @@ kphi: k*phi(n) = k*(p-1)*(q-1)</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="toyotama.crypto.util.mod_sqrt">
-<span class="sig-prename descclassname"><span class="pre">toyotama.crypto.util.</span></span><span class="sig-name descname"><span class="pre">mod_sqrt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#toyotama.crypto.util.mod_sqrt" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<span class="sig-prename descclassname"><span class="pre">toyotama.crypto.util.</span></span><span class="sig-name descname"><span class="pre">mod_sqrt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">int</span><a class="headerlink" href="#toyotama.crypto.util.mod_sqrt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Mod Sqrt</p>
+<p>Compute x such that x*x == a (mod p)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>a</strong> – The value.</p></li>
+<li><p><strong>p</strong> – The modulus.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><cite>x</cite> such that x*x == a (mod p).</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="toyotama.crypto.util.pohlig_hellman">

@@ -1,22 +1,43 @@
+"""Crypto Utility
+"""
 from math import ceil, gcd, lcm
 
 import gmpy2
 
 
-def extended_gcd(a, b):
-    c0, c1 = a, b
-    a0, a1 = 1, 0
-    b0, b1 = 0, 1
+def extended_gcd(A: int, B: int) -> tuple[int, int, int]:
+    """Extended GCD.
 
-    while c1 != 0:
-        q, m = divmod(c0, c1)
-        c0, c1 = c1, m
-        a0, a1 = a1, a0 - q * a1
-        b0, b1 = b1, b0 - q * b1
-    return a0, b0, c0
+    Args:
+        A (int): The first value.
+        B (int): The second value.
+    Returns:
+        tuple[int, int, int]: (x, y, g) s.t. Ax + By = gcd(A, B) = g
+    """
+    g, c = A, B
+    x, a = 1, 0
+    y, b = 0, 1
+
+    while c != 0:
+        q, m = divmod(g, c)
+        g, c = c, m
+        x, a = a, x - q * a
+        y, b = b, y - q * b
+    assert A * x + B * y == gcd(A, B)
+    return x, y, g
 
 
-def mod_sqrt(a, p):
+def mod_sqrt(a: int, p: int) -> int:
+    """Mod Sqrt
+
+    Compute x such that x*x == a (mod p)
+
+    Args:
+        a: The value.
+        p: The modulus.
+    Returns:
+        int: `x` such that x*x == a (mod p).
+    """
     if gmpy2.legendre(a, p) != 1:
         return 0
     elif a == 0:
@@ -57,15 +78,25 @@ def mod_sqrt(a, p):
         r = m
 
 
-def factorize(x):
-    from factordb.factordb import FactorDB
+def chinese_remainder(A: list[int], M: list[int]) -> tuple[int, int]:
+    """Chinese Remainder Theorem
+    A = [a0, a1, a2, a3, ...]
+    M = [m0, m1, m2, m3, ...]
+    Compute X (mod Y = m0*m1*m2*...) such that these equations
+        - x = a0 (mod m0)
+        - x = a1 (mod m1)
+        - x = a2 (mod m2)
+        - x = a3 (mod m3)
+        - ...
+    by Garner's algorithm.
 
-    f = FactorDB(x)
-    f.connect()
-    return f.get_factor_list()
+    Args:
+        A (list[int]): The list of value.
+        M (list[int]): The list of modulus.
+    Returns:
+        tuple[int, int]: X, Y such that satisfy the equations
+    """
 
-
-def chinese_remainder(A, M):
     assert len(A) == len(M), "numbers and moduli are not the same length."
 
     n = len(A)
