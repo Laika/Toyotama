@@ -54,7 +54,6 @@ class Connect:
                 log.progress(f"Starting {program} ...")
             self.proc = subprocess.Popen(
                 program,
-                shell=True,
                 stdin=subprocess.PIPE,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT,
