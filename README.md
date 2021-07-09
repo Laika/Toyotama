@@ -6,7 +6,6 @@ CTF Library
 
 
 ## Notice
-* This is **CONFIDENTIAL** library.
 * No document. (for now)
 
 ## Usage
