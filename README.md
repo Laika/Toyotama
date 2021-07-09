@@ -1,6 +1,6 @@
 
 # Toyotama
-
+[![CodeFactor](https://www.codefactor.io/repository/github/laika/toyotama/badge)](https://www.codefactor.io/repository/github/laika/toyotama)
 ![](https://img.shields.io/badge/Python-3.9.*-52307c)  
 CTF Library
 
