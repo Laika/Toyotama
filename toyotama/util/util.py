@@ -68,8 +68,6 @@ def show_variables(symboltable, *args):
         else:
             if error == "Exception":
                 raise ValueError("undefined function is mixed in subspace?")
-            else:
-                return error
 
     names = [getvarname(var, symboltable) for var in args]
     maxlen_name = max([len(name) for name in names]) + 1
@@ -110,11 +108,11 @@ def extract_flag(s, head="{", tail="}", unique=True):
 
 @extract_flag.register(str)
 def extract_flag_str(s, head="{", tail="}", unique=True):
-    from re import compile, findall
+    import re
 
     patt = f"{head}.*?{tail}"
-    comp = compile(patt)
-    flags = findall(comp, s)
+    comp = re.compile(patt)
+    flags = re.findall(comp, s)
     if unique:
         flags = set(flags)
     if not flags:
@@ -125,11 +123,11 @@ def extract_flag_str(s, head="{", tail="}", unique=True):
 
 @extract_flag.register(bytes)
 def extract_flag_bytes(s, head="{", tail="}", unique=True):
-    from re import compile, findall
+    import re
 
     patt = f"{head}.*?{tail}".encode()
-    comp = compile(patt)
-    flags = findall(comp, s)
+    comp = re.compile(patt)
+    flags = re.findall(comp, s)
     if unique:
         flags = set(flags)
     if not flags:
