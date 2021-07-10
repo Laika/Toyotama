@@ -10,9 +10,7 @@ CTF Library
 
 ## Usage
 ### Install 
-`pip install git+ssh://git@github.com/wani-hackase/Toyotama.git`  
-or  
-`pip install git+https://github.com/wani-hackase/Toyotama`   
+`pip install toyotama`
 
 ### Uninstall
 `pip uninstall toyotama`  
