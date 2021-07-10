@@ -4,15 +4,13 @@
 ![](https://img.shields.io/badge/Python-3.9.*-52307c)  
 CTF Library
 
-
 ## Notice
 * No document. (for now)
 
-## Usage
-### Install 
+## Install 
 `pip install toyotama`
 
-### Uninstall
+## Uninstall
 `pip uninstall toyotama`  
 
 
