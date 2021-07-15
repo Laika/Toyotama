@@ -1,3 +1,4 @@
+import os
 import sys
 from collections import namedtuple
 
@@ -39,9 +40,38 @@ color = {
 Style = namedtuple("Style", list(color.keys()))(**color)
 
 
+class StdoutHook:
+    def __init__(self):
+        self.newline_count = 0
+
+    def write(self, text: str):
+        sys.__stdout__.write(text)
+        self.newline_count += text.count(os.linesep)
+
+    def flush(self):
+        sys.__stdout__.flush()
+
+
+class StderrHook:
+    def __init__(self):
+        self.newline_count = 0
+
+    def write(self, text: str):
+        sys.__stderr__.write(text)
+        self.newline_count += text.count(os.linesep)
+
+    def flush(self):
+        sys.__stderr__.flush()
+
+
+sys.stdout = StdoutHook()
+sys.stderr = StderrHook()
+
+
 class Logger:
     def __init__(self, fd=sys.stderr):
         self.fd = fd
+        self.ongoing_func = set()
 
     def __message(self, color: str, header: str, message: str):
         self.fd.write(f"{color}{header}{Style.RESET}  {message}\n")
@@ -66,3 +96,24 @@ class Logger:
 
     def recv(self, message: str):
         self.__message(Style.BG_DARKGRAY + Style.FG_WHITE, "RECV".center(WIDTH, " "), message)
+
+    def watch(self, func):
+        def wrapper(*args, **kwargs):
+            self.ongoing_func.add(func)
+            self.__message(
+                Style.BG_DEEPPURPLE + Style.FG_WHITE,
+                "RUN".center(WIDTH, " "),
+                f"{func.__name__}({','.join(map(str, args))})",
+            )
+            func(*args, **kwargs)
+            self.fd.write(f"\x1b[{sys.stdout.newline_count+1}F")
+            self.fd.write("\x1b[2K")
+            self.__message(
+                Style.BG_DARKGRAY + Style.FG_WHITE,
+                "DONE".center(WIDTH, " "),
+                f"{func.__name__}({','.join(map(str, args))})",
+            )
+            self.fd.write(f"\x1b[{sys.stdout.newline_count}E")
+            self.ongoing_func.discard(func)
+
+        return wrapper
