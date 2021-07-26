@@ -105,7 +105,7 @@ class Logger:
                 "RUN".center(WIDTH, " "),
                 f"{func.__name__}({','.join(map(str, args))})",
             )
-            func(*args, **kwargs)
+            return_value = func(*args, **kwargs)
             self.fd.write(f"\x1b[{sys.stdout.newline_count+1}F")
             self.fd.write("\x1b[2K")
             self.__message(
@@ -115,5 +115,6 @@ class Logger:
             )
             self.fd.write(f"\x1b[{sys.stdout.newline_count}E")
             self.ongoing_func.discard(func)
+            return return_value
 
         return wrapper
