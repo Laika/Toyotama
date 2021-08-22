@@ -43,7 +43,7 @@ def interact(symboltable):
     code.interact(local=symboltable)
 
 
-def show_variables(symboltable, *args):
+def printv(symboltable, *args):
     """Show the value and its type
 
     Parameters

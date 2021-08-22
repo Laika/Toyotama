@@ -22,24 +22,24 @@ def p64(x: int) -> bytes:
     return pack("<Q" if x > 0 else "<q", x)
 
 
-def u8(x: int, sign: bool = False) -> bytes:
-    """Unpack 8bit integer"""
-    return unpack("<B" if x > 0 else "<b", x)[0]
+def u8(x: bytes, sign: bool = False) -> bytes:
+    """Unpack 8bit byteseger"""
+    return unpack("<b" if sign else "<B", x)[0]
 
 
-def u16(x: int, sign: bool = False) -> bytes:
-    """Unpack 16bit integer"""
-    return unpack("<H" if x > 0 else "<h", x)[0]
+def u16(x: bytes, sign: bool = False) -> bytes:
+    """Unpack 16bit byteseger"""
+    return unpack("<h" if sign else "<H", x)[0]
 
 
-def u32(x: int, sign: bool = False) -> bytes:
-    """Unpack 32bit integer"""
-    return unpack("<I" if x > 0 else "<i", x)[0]
+def u32(x: bytes, sign: bool = False) -> bytes:
+    """Unpack 32bit byteseger"""
+    return unpack("<i" if sign else "<I", x)[0]
 
 
-def u64(x: int, sign: bool = False) -> bytes:
-    """Unpack 64bit integer"""
-    return unpack("<Q" if x > 0 else "<q", x)[0]
+def u64(x: bytes, sign: bool = False) -> bytes:
+    """Unpack 64bit byteseger"""
+    return unpack("<q" if sign else "<Q", x)[0]
 
 
 def fill(length: int, character: typing.AnyStr = b"A") -> typing.AnyStr:
