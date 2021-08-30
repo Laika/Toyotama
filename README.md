@@ -1,17 +1,23 @@
 
 # Toyotama
 [![CodeFactor](https://www.codefactor.io/repository/github/laika/toyotama/badge)](https://www.codefactor.io/repository/github/laika/toyotama)
-![](https://img.shields.io/badge/Python-3.9.*-52307c)  
+![](https://img.shields.io/badge/Python-3.9.*-1c0c28)
+[![](https://img.shields.io/pypi/v/toyotama?color=1c0c28&label=PyPI&logo=pypi&logoColor=white)](https://pypi.org/project/toyotama/)  
+
+
 CTF Library
 
 ## Notice
 * No document. (for now)
 
 ## Install 
-`pip install toyotama`
-
+```
+pip install toyotama
+```
 ## Uninstall
-`pip uninstall toyotama`  
+```
+pip uninstall toyotama
+```
 
 
 ## Examples
