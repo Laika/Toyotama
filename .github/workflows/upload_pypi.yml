@@ -4,19 +4,22 @@ on:
   push:
     branches:
       - master
+  pull_request:
+    branches:
+      - master
   release:
     types:
       - created
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python
       uses: actions/setup-python@v2
       with:
-        python-version: '3.x'
+        python-version: '3.9.6'
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
@@ -25,7 +28,7 @@ jobs:
       run: |
         python3 setup.py sdist --formats=gztar,zip
     - name: Publish a Python distribution to PyPI
-      if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
+      if: (github.event_name == 'push' || github.event_name == 'pull_request') && startsWith(github.ref, 'refs/tags/v')
       uses: pypa/gh-action-pypi-publish@master
       with:
         user: __token__
