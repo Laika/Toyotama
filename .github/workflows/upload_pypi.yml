@@ -25,7 +25,7 @@ jobs:
       run: |
         python3 setup.py sdist --formats=gztar,zip
     - name: Publish a Python distribution to PyPI
-      if: startsWith(github.event.ref, 'refs/tags') || github.event_name == 'release'
+      if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
       uses: pypa/gh-action-pypi-publish@master
       with:
         user: __token__
