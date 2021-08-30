@@ -64,13 +64,11 @@ class StderrHook:
         sys.__stderr__.flush()
 
 
-sys.stdout = StdoutHook()
-sys.stderr = StderrHook()
-
-
 class Logger:
-    def __init__(self, fd=sys.stderr):
-        self.fd = fd
+    def __init__(self):
+        sys.stdout = StdoutHook()
+        sys.stderr = StderrHook()
+        self.fd = sys.stderr
         self.ongoing_func = set()
 
     def __message(self, color: str, header: str, message: str):
