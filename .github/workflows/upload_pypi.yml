@@ -13,7 +13,7 @@ on:
 
 jobs:
   deploy:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python
@@ -27,6 +27,8 @@ jobs:
     - name: Build
       run: |
         python3 setup.py sdist --formats=gztar,zip
+    - name: dump context
+      run: echo '${{ toJSON(github) }}'
     - name: Publish a Python distribution to PyPI
       if: (github.event_name == 'push' || github.event_name == 'pull_request') && startsWith(github.ref, 'refs/tags/v')
       uses: pypa/gh-action-pypi-publish@master
