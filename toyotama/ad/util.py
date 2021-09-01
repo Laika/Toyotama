@@ -4,6 +4,7 @@
 from functools import singledispatch
 
 import requests
+
 from toyotama.util.log import Logger
 
 log = Logger()

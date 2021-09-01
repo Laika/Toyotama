@@ -95,3 +95,43 @@ class Int:
 
     def __ge__(self, other):
         return self.x >= other.x
+
+
+class UInt8(Int):
+    def __init__(self, value):
+        super().__init__(self, value, bits=8, signed=False)
+
+
+class UInt16(Int):
+    def __init__(self, value):
+        super().__init__(self, value, bits=16, signed=False)
+
+
+class UInt32(Int):
+    def __init__(self, value):
+        super().__init__(self, value, bits=32, signed=False)
+
+
+class UInt64(Int):
+    def __init__(self, value):
+        super().__init__(self, value, bits=64, signed=False)
+
+
+class Int8(Int):
+    def __init__(self, value):
+        super().__init__(self, value, bits=8, signed=True)
+
+
+class Int16(Int):
+    def __init__(self, value):
+        super().__init__(self, value, bits=16, signed=True)
+
+
+class Int32(Int):
+    def __init__(self, value):
+        super().__init__(self, value, bits=32, signed=True)
+
+
+class Int64(Int):
+    def __init__(self, value):
+        super().__init__(self, value, bits=64, signed=True)
