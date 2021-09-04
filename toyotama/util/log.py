@@ -66,8 +66,6 @@ class StderrHook:
 
 class Logger:
     def __init__(self):
-        sys.stdout = StdoutHook()
-        sys.stderr = StderrHook()
         self.fd = sys.stderr
         self.ongoing_func = set()
 
