@@ -4,7 +4,6 @@ import socket
 import subprocess
 import sys
 import threading
-
 from enum import Enum
 from string import printable
 from time import sleep
@@ -105,8 +104,8 @@ class Connect:
                 ret = self.sock.recv(n)
             elif self.mode == Mode.LOCAL:
                 ret = self.proc.stdout.read(n)
-        except Exception:
-            pass
+        except Exception as e:
+            log.warning(e)
 
         if not quiet and self.verbose:
             try:

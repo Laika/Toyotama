@@ -13,8 +13,8 @@ class Int:
             if sign:
                 return -((~self.__x + 1) & self.mask)
             return value & self.mask
-        else:
-            return self.__x & self.mask
+
+        return self.__x & self.mask
 
     @x.setter
     def x(self, value):

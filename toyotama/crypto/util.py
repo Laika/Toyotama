@@ -50,11 +50,11 @@ def mod_sqrt(a: int, p: int) -> int:
     """
     if gmpy2.legendre(a, p) != 1:
         return 0
-    elif a == 0:
+    if a == 0:
         return 0
-    elif p == 2:
+    if p == 2:
         return 0
-    elif p % 4 == 3:
+    if p % 4 == 3:
         return pow(a, (p + 1) >> 2, p)
 
     s = p - 1
@@ -140,9 +140,9 @@ def baby_giant(g, y, p, q=None):
     for i in range(m):
         if gmm in table.keys():
             return int(i * m + table[gmm])
-        else:
-            gmm *= gim
-            gmm %= p
+
+        gmm *= gim
+        gmm %= p
 
     return -1
 
