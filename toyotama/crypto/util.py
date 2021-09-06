@@ -1,8 +1,18 @@
 """Crypto Utility
 """
+from functools import reduce
 from math import ceil, gcd, lcm
+from operator import mul
 
 import gmpy2
+
+
+def i2b(x: int, byteorder="big"):
+    return x.to_bytes(x.bit_length() + 7 >> 3, byteorder=byteorder)
+
+
+def b2i(x: bytes, byteorder="big"):
+    return int.from_bytes(x, byteorder=byteorder)
 
 
 def extended_gcd(A: int, B: int) -> tuple[int, int, int]:
@@ -137,11 +147,11 @@ def baby_giant(g, y, p, q=None):
     return -1
 
 
-def pohlig_hellman(g, y, p):
-    phi_p = factorize(p - 1)
-    X = [baby_giant(pow(g, (p - 1) // q, p), pow(y, (p - 1) // q, p), p, q) for q in phi_p]
+def pohlig_hellman(g, y, factor):
+    p = reduce(mul, factor) + 1
+    X = [baby_giant(pow(g, (p - 1) // q, p), pow(y, (p - 1) // q, p), p, q) for q in factor]
 
-    x = chinese_remainder(X, phi_p)
+    x = chinese_remainder(X, factor)
     return x
 
 
