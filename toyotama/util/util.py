@@ -77,9 +77,8 @@ def printv(symboltable, *args):
         for k, v in symboltable.items():
             if id(v) == id(var):
                 return k
-        else:
-            if error == "Exception":
-                raise ValueError("undefined function is mixed in subspace?")
+        if error == "Exception":
+            raise ValueError("undefined function is mixed in subspace?")
 
     names = [getvarname(var, symboltable) for var in args]
     maxlen_name = max([len(name) for name in names]) + 1
