@@ -20,9 +20,7 @@ class Mode(Enum):
 
 
 class Connect:
-    def __init__(
-        self, target, mode=Mode.SOCKET, to=10.0, verbose=True, pause=True, raw_output=True, **args
-    ):
+    def __init__(self, target, mode=Mode.SOCKET, timeout=10.0, verbose=True, pause=True, raw_output=True, **args):
         if mode not in Mode:
             log.warning(f"Connect: {mode} is not defined.")
             log.information("Connect: Automatically set to 'SOCKET'.")
@@ -43,7 +41,7 @@ class Connect:
             if self.verbose:
                 log.progress(f"Connecting to {host!s}:{port}...")
             self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            self.sock.settimeout(to)
+            self.sock.settimeout(timeout)
             self.sock.connect((str(host), port))
             self.timeout = socket.timeout
 
@@ -193,9 +191,7 @@ class Connect:
         while t.is_alive():
             t.join(timeout=0.1)
 
-    def PoW(
-        self, hashtype, match, pts=printable, begin=False, hx=False, length=20, start=b"", end=b""
-    ):
+    def PoW(self, hashtype, match, pts=printable, begin=False, hx=False, length=20, start=b"", end=b""):
         import hashlib
         from itertools import product
 
@@ -211,18 +207,14 @@ class Connect:
         rand_length = length - len(start) - len(end)
 
         if begin:
-            log.progress(
-                f"Searching x such that {hashtype}({start} x {end})[:{len(match)}] == {match} ..."
-            )
+            log.progress(f"Searching x such that {hashtype}({start} x {end})[:{len(match)}] == {match} ...")
             for patt in product(pts, repeat=rand_length):
                 patt = start + bytes(patt) + end
                 h = hashlib.new(hashtype, patt).hexdigest()[: len(match)]
                 if h == match:
                     break
         else:
-            log.progress(
-                f"Searching x such that {hashtype}({start} x {end})[-{len(match)}:] == {match} ..."
-            )
+            log.progress(f"Searching x such that {hashtype}({start} x {end})[-{len(match)}:] == {match} ...")
             for patt in product(pts, repeat=rand_length):
                 patt = start + bytes(patt) + end
                 h = hashlib.new(hashtype, patt).hexdigest()[-len(match) :]

@@ -9,7 +9,7 @@ def _requires_from_file(filename):
 
 setup(
     name="toyotama",
-    version="0.9.2",
+    version="0.9.3",
     description="CTF libary",
     packages=find_packages(),
     py_modules=["toyotama", "log", "integer"],
