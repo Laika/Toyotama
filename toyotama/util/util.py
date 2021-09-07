@@ -1,5 +1,7 @@
 import code
 from functools import singledispatch
+from itertools import zip_longest
+
 
 from toyotama.util.log import Logger
 
@@ -16,6 +18,68 @@ class DotDict(dict):
             if hasattr(value, "keys"):
                 value = DotDict(value)
             self[key] = value
+
+
+class MarkdownTable:
+    def __init__(self, header=None, rows=None):
+        self.__header = header or ()
+        self.__rows = rows or []
+
+    @property
+    def header(self):
+        return self.__header
+
+    @header.setter
+    def header(self, header):
+        self.__header = header
+
+    @property
+    def rows(self):
+        return self.__rows
+
+    @rows.setter
+    def rows(self, rows):
+        self.__rows = rows
+
+    def __add__(self, other):
+        assert self.header == other.header, "The headers don't match."
+        return self.__rows + other.__rows
+
+    def __iadd__(self, other):
+        assert self.header == other.header, "The headers don't match."
+        self.__rows += other.__rows
+        return self
+
+    def __get_max_lengths(self):
+        array = [self.header] + self.rows
+        max_lengths = [max(len(str(s)) for s in ss) for ss in zip_longest(*array, fillvalue="")]
+        return max_lengths
+
+    def __get_printable_row(self, row):
+        max_lengths = self.__get_max_lengths()
+        return "| " + " | ".join((f"{r:<{m}}" for r, m in zip_longest(row, max_lengths, fillvalue=""))) + " |"
+
+    def __get_printable_header(self):
+        return self.__get_printable_row(self.header)
+
+    def __get_printable_border(self):
+        max_lengths = self.__get_max_lengths()
+        return "| " + " | ".join("-" * length for length in max_lengths) + " |"
+
+    def __get_table(self):
+        lines = []
+        lines.append(self.__get_printable_header())
+        lines.append(self.__get_printable_border())
+
+        for row in self.rows:
+            lines.append(self.__get_printable_row(row))
+
+        return lines
+
+    def show(self):
+        lines = self.__get_table()
+        for line in lines:
+            print(line)
 
 
 def interact(symboltable):
