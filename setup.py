@@ -13,7 +13,7 @@ def _requires_from_file(filename):
 
 metadata = dict(
     name="Toyotama",
-    version="0.9.3",
+    version="0.9.4",
     description="CTF library",
     packages=find_packages(),
     py_modules=["toyotama", "log", "integer"],
