@@ -37,6 +37,11 @@ def extended_gcd(A: int, B: int) -> tuple[int, int, int]:
     return x, y, g
 
 
+def legendre(a: int, p: int) -> int:
+    res = pow(a, (p - 1) // 2, p)
+    return -1 if res == p - 1 else res
+
+
 def mod_sqrt(a: int, p: int) -> int:
     """Mod Sqrt
 
@@ -48,24 +53,24 @@ def mod_sqrt(a: int, p: int) -> int:
     Returns:
         int: `x` such that x*x == a (mod p).
     """
-    if gmpy2.legendre(a, p) != 1:
+    if legendre(a, p) != 1:
         return 0
-    elif a == 0:
+    if a == 0:
         return 0
-    elif p == 2:
-        return 0
-    elif p % 4 == 3:
-        return pow(a, (p + 1) >> 2, p)
+    if p == 2:
+        return p
+    if p % 4 == 3:
+        return pow(a, (p + 1) // 4, p)
 
     s = p - 1
     e = (s & -s).bit_length() - 1
     s >>= e
 
     n = 2
-    while gmpy2.legendre(n, p) != -1:
+    while legendre(n, p) != -1:
         n += 1
 
-    x = pow(a, (s + 1) >> 1, p)
+    x = pow(a, (s + 1) // 2, p)
     b = pow(a, s, p)
     g = pow(n, s, p)
     r = e
@@ -79,7 +84,7 @@ def mod_sqrt(a: int, p: int) -> int:
             t = pow(t, 2, p)
 
         if m == 0:
-            return x % p
+            return x
 
         gs = pow(g, 1 << (r - m - 1), p)
         g = gs * gs % p
@@ -140,9 +145,9 @@ def baby_giant(g, y, p, q=None):
     for i in range(m):
         if gmm in table.keys():
             return int(i * m + table[gmm])
-        else:
-            gmm *= gim
-            gmm %= p
+
+        gmm *= gim
+        gmm %= p
 
     return -1
 

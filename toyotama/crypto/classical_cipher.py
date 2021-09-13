@@ -49,9 +49,10 @@ def XOR(A: typing.Union[str, bytes], B: typing.Union[str, bytes]):
         str or bytes: The result of `A XOR B`.
     """
 
+
     if isinstance(A, str) and isinstance(B, bytes) or isinstance(A, bytes) and isinstance(B, str):
         raise TypeError("The type of A and B is not match.")
     if isinstance(A, str):
         return "".join(chr(ord(a) ^ ord(b)) for a, b in zip(A, B))
 
-    return bytes([a ^ b for a, b in zip(A, B)])
+    return bytes(a ^ b for a, b in zip(A, B))
