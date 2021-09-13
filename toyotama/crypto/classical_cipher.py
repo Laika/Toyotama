@@ -37,22 +37,19 @@ def rot(plaintext: typing.Union[str, bytes], rotate: int = 13):
     return r
 
 
-def XOR(A: typing.Union[str, bytes], B: typing.Union[str, bytes]):
+def XOR(*array: tuple[bytes]):
     """XOR strings
 
     Calculate `A XOR B`.
 
     Args:
-        A (str or bytes): The first string.
-        B (str or bytes): The second string.
+        A (bytes): The first string.
+        B (bytes): The second string.
     Returns:
-        str or bytes: The result of `A XOR B`.
+        bytes: The result of `A XOR B`.
     """
-
-
-    if isinstance(A, str) and isinstance(B, bytes) or isinstance(A, bytes) and isinstance(B, str):
-        raise TypeError("The type of A and B is not match.")
-    if isinstance(A, str):
-        return "".join(chr(ord(a) ^ ord(b)) for a, b in zip(A, B))
-
-    return bytes(a ^ b for a, b in zip(A, B))
+    array = list(array)
+    X = array.pop()
+    for Y in array:
+        X = bytes(x ^ y for x, y in zip(X, Y))
+    return X
