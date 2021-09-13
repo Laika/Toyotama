@@ -35,21 +35,3 @@ def rot(plaintext: typing.Union[str, bytes], rotate: int = 13):
                 r += c
 
     return r
-
-
-def XOR(*array: tuple[bytes]):
-    """XOR strings
-
-    Calculate `A XOR B`.
-
-    Args:
-        A (bytes): The first string.
-        B (bytes): The second string.
-    Returns:
-        bytes: The result of `A XOR B`.
-    """
-    array = list(array)
-    X = array.pop()
-    for Y in array:
-        X = bytes(x ^ y for x, y in zip(X, Y))
-    return X

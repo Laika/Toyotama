@@ -7,6 +7,34 @@ from operator import mul
 import gmpy2
 
 
+def XOR(*array: tuple[bytes]):
+    """XOR strings
+
+    Calculate `A XOR B`.
+
+    Args:
+        A (bytes): The first string.
+        B (bytes): The second string.
+    Returns:
+        bytes: The result of `A XOR B`.
+    """
+    array = list(array)
+    X = array.pop()
+    for Y in array:
+        X = bytes(x ^ y for x, y in zip(X, Y))
+    return X
+
+
+def ROTL(data, shift: int, block_size: int = 16):
+    shift %= block_size
+    return data[shift:] + data[:shift]
+
+
+def ROTR(data, shift: int, block_size: int = 16):
+    shift %= block_size
+    return data[-shift:] + data[:-shift]
+
+
 def i2b(x: int, byteorder="big"):
     return x.to_bytes(x.bit_length() + 7 >> 3, byteorder=byteorder)
 
