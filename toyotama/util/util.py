@@ -13,11 +13,18 @@ class DotDict(dict):
     __setattr__ = dict.__setitem__
     __delattr__ = dict.__delitem__
 
-    def __init__(self, dct):
-        for key, value in dct.items():
-            if hasattr(value, "keys"):
-                value = DotDict(value)
-            self[key] = value
+    def __init__(self, data):
+        if isinstance(data, dict):
+            for key, value in data.items():
+                if hasattr(value, "keys"):
+                    value = DotDict(value)
+                if isinstance(value, list):
+                    self[key] = DotDict(value)
+                else:
+                    self[key] = value
+        elif isinstance(data, list):
+            for i, v in enumerate(data):
+                self[i] = DotDict(v)
 
 
 class MarkdownTable:
@@ -68,13 +75,18 @@ class MarkdownTable:
 
     def __get_table(self):
         lines = []
-        lines.append(self.__get_printable_header())
-        lines.append(self.__get_printable_border())
+        if self.header:
+            lines.append(self.__get_printable_header())
+            lines.append(self.__get_printable_border())
 
         for row in self.rows:
             lines.append(self.__get_printable_row(row))
 
         return lines
+
+    def dump(self):
+        lines = self.__get_table()
+        return "\n".join(lines)
 
     def show(self):
         lines = self.__get_table()
