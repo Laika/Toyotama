@@ -1,7 +1,5 @@
 import typing
 
-from functools import singledispatch
-
 
 def rot(plaintext: typing.Union[str, bytes], rotate: int = 13):
     """ROTxx
@@ -25,13 +23,13 @@ def rot(plaintext: typing.Union[str, bytes], rotate: int = 13):
             else:
                 r += c
     else:
-        r = b""
+        r = []
         for c in plaintext:
             if ord("A") <= c <= ord("Z"):
-                r += chr((c - ord("A") + rotate) % 26 + ord("A"))
-            elif "a" <= c <= "z":
-                r += chr((c - ord("a") + rotate) % 26 + ord("a"))
+                r.append((c - ord("A") + rotate) % 26 + ord("A"))
+            elif ord("a") <= c <= ord("z"):
+                r.append((c - ord("a") + rotate) % 26 + ord("a"))
             else:
-                r += c
+                r.append(c)
 
-    return r
+    return bytes(r)
