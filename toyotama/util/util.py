@@ -339,6 +339,10 @@ def urldecode(s, encoding="shift-jis"):
     return unquote_plus(s, encoding=encoding)
 
 
+def to_block(X, block_size: int = 16):
+    return [X[i : i + block_size] for i in range(0, len(X), block_size)]
+
+
 @singledispatch
 def b64_padding(s):
     raise TypeError("s must be str or bytes.")
