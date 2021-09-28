@@ -1,6 +1,5 @@
 """RSA utility
 """
-
 import typing
 from math import ceil
 
@@ -73,9 +72,7 @@ def wieners_attack(e: int, N: int) -> typing.Optional[int]:
     return None
 
 
-def lsb_decryption_oracle_attack(
-    N: int, e: int, c: int, oracle: typing.Callable, progress: bool = True
-):
+def lsb_decryption_oracle_attack(N: int, e: int, c: int, oracle: typing.Callable, progress: bool = True):
     """LSB Decryption oracle attack
 
     Args:

@@ -14,6 +14,7 @@ class ELF:
         self.got = self.__get_relocations()
         self.string = self.__get_strings()
         self.info = self.__get_information()
+        self.symbols = self.__get_symbols()
 
     def __get_functions(self):
         functions = DotDict(self.__r.cmdj("aflj"))
@@ -22,7 +23,7 @@ class ELF:
 
     def __get_relocations(self):
         relocations = DotDict(self.__r.cmdj("irj"))
-        results = {relocation.name: relocation.vaddr for relocation in relocations.values()}
+        results = {relocation.name: relocation.vaddr for relocation in relocations.values() if "name" in relocation.keys()}
         return DotDict(results)
 
     def __get_strings(self):
@@ -32,7 +33,13 @@ class ELF:
 
     def __get_information(self):
         info = DotDict(self.__r.cmdj("iIj"))
-        return DotDict(info)
+        return info
+
+    def __get_symbols(self):
+        symbols = DotDict(self.__r.cmdj("isj"))
+        print(symbols)
+        results = {symbol.name: symbol.vaddr for symbol in symbols.values()}
+        return DotDict(results)
 
     def __str__(self):
         enabled = lambda x: "Enabled" if x else "Disabled"
