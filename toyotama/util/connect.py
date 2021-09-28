@@ -92,9 +92,12 @@ class Connect:
     def sendline(self, message):
         self.send(message, end=b"\n")
 
-    def sendlineafter(self, term, message):
+    def sendafter(self, term, message, end=b""):
         self.recvuntil(term=term)
-        self.send(message, end=b"\n")
+        self.send(message, end=end)
+
+    def sendlineafter(self, term, message):
+        self.sendafter(term, message, end=b"\n")
 
     def recv(self, n=2048, quiet=False):
         sleep(0.05)
