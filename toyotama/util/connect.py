@@ -1,5 +1,6 @@
 import fcntl
 import os
+import re
 import socket
 import subprocess
 import sys
@@ -151,6 +152,17 @@ class Connect:
     def recvline(self, repeat=1):
         buf = [self.recvuntil(term=b"\n") for i in range(repeat)]
         return buf.pop() if len(buf) == 1 else buf
+
+    def recvint(self):
+        pattern = r"(?P<name>.*) *[=:] *(?P<value>.*)"
+        pattern = re.compile(pattern)
+        line = pattern.match(self.recvline().decode())
+        name = line.group("name").strip()
+        value = int(line.group("value"), 0)
+
+        if self.verbose:
+            log.information(f"{name}: {value}")
+        return value
 
     def interactive(self):
         if self.verbose:
