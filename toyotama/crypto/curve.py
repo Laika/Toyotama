@@ -8,6 +8,9 @@ class Curve:
         self.gx = gx
         self.gy = gy
 
+    def __repr__(self):
+        return f"Curve(name='{self.name}',p={self.p},a={self.a},b={self.b},order={self.order},gx={self.gx},gy={self.gy})"
+
 
 P192 = Curve(
     "P192",
