@@ -55,9 +55,7 @@ def ecb_chosen_plaintext_attack(
                     f"{log.colored(Style.Color.RED, known_plaintext[-1:].decode())}"
                     f"{log.colored(Style.MAGENTA, chr(c))}"
                 )
-            payload = (
-                b"\x00" * (block_end - len(known_plaintext) - 1) + known_plaintext + bytearray([c])
-            )
+            payload = b"\x00" * (block_end - len(known_plaintext) - 1) + known_plaintext + bytearray([c])
             enc_block = encrypt_oracle(payload)[block_end - block_size : block_end]
             if encrypted_block == enc_block:
                 known_plaintext += bytearray([c])

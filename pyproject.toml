@@ -1,0 +1,38 @@
+[tool.poetry]
+name = "toyotama"
+version = "0.9.4"
+description = "CTF library"
+authors = ["Laika <laika@albina.cc>"]
+maintainers = ["Laika <laika@albina.cc>"]
+license = "MIT"
+readme = "README.md"
+
+repository = "https://github.com/Laika/Toyotama"
+homepage = "https://github.com/Laika/Toyotama"
+keywords = ["CTF"]
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Operating System :: POSIX :: Linux",
+]
+
+packages = [
+  { include = "toyotama" },
+]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+gmpy2 = "^2.1.2"
+r2pipe = "^1.6.5"
+requests = "^2.27.1"
+
+[tool.poetry.dev-dependencies]
+black = "^22.1.0"
+autopep8 = "^1.6.0"
+isort = "^5.10.1"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

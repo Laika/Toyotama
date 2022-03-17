@@ -1,7 +1,7 @@
 """RSA utility
 """
-import typing
 from math import ceil
+from typing import Callable
 
 import gmpy2
 from toyotama.crypto.util import extended_gcd
@@ -27,7 +27,7 @@ def common_modulus_attack(e1: int, e2: int, c1: int, c2: int, N: int) -> int:
     return pow(c1, s1, N) * pow(c2, s2, N) % N
 
 
-def wieners_attack(e: int, N: int) -> typing.Optional[int]:
+def wieners_attack(e: int, N: int) -> int | None:
     """Wiener's attack
 
     Wiener's attack
@@ -72,7 +72,7 @@ def wieners_attack(e: int, N: int) -> typing.Optional[int]:
     return None
 
 
-def lsb_decryption_oracle_attack(N: int, e: int, c: int, oracle: typing.Callable, progress: bool = True):
+def lsb_decryption_oracle_attack(N: int, e: int, c: int, oracle: Callable, progress: bool = True):
     """LSB Decryption oracle attack
 
     Args:

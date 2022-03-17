@@ -36,30 +36,31 @@ class Connect:
             _, host, port = target.split()
             target = {"host": host, "port": int(port)}
 
-        if self.mode == Mode.SOCKET:
-            host, port = target["host"], target["port"]
-            if self.verbose:
-                log.progress(f"Connecting to {host!s}:{port}...")
-            self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            self.sock.settimeout(timeout)
-            self.sock.connect((str(host), port))
-            self.timeout = socket.timeout
+        match self.mode:
+            case Mode.SOCKET:
+                host, port = target["host"], target["port"]
+                if self.verbose:
+                    log.progress(f"Connecting to {host!s}:{port}...")
+                self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                self.sock.settimeout(timeout)
+                self.sock.connect((str(host), port))
+                self.timeout = socket.timeout
 
-        if self.mode == Mode.LOCAL:
-            program = target["program"]
-            self.wait = "wait" in args and args["wait"]
-            if self.verbose:
-                log.progress(f"Starting {program} ...")
-            self.proc = subprocess.Popen(
-                program,
-                stdin=subprocess.PIPE,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.STDOUT,
-            )
-            if self.verbose:
-                log.information(f"PID: {self.proc.pid}")
-            self.set_nonblocking(self.proc.stdout)
-            self.timeout = None
+            case Mode.LOCAL:
+                program = target["program"]
+                self.wait = "wait" in args and args["wait"]
+                if self.verbose:
+                    log.progress(f"Starting {program} ...")
+                self.proc = subprocess.Popen(
+                    program,
+                    stdin=subprocess.PIPE,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.STDOUT,
+                )
+                if self.verbose:
+                    log.information(f"PID: {self.proc.pid}")
+                self.set_nonblocking(self.proc.stdout)
+                self.timeout = None
 
     def set_nonblocking(self, fh):
         fd = fh.fileno()
@@ -90,12 +91,12 @@ class Connect:
         except Exception:
             self.is_alive = False
 
-    def sendline(self, message):
-        self.send(message, end=b"\n")
-
     def sendafter(self, term, message, end=b""):
         self.recvuntil(term=term)
         self.send(message, end=end)
+
+    def sendline(self, message):
+        self.send(message, end=b"\n")
 
     def sendlineafter(self, term, message):
         self.sendafter(term, message, end=b"\n")
