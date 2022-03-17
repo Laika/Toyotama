@@ -7,7 +7,7 @@ from operator import mul
 import gmpy2
 
 
-def XOR(*array: tuple[bytes]):
+def XOR(*array: tuple[bytes]) -> bytes:
     """XOR strings
 
     Calculate `A XOR B`.
@@ -26,20 +26,26 @@ def XOR(*array: tuple[bytes]):
 
 
 def ROTL(data, shift: int, block_size: int = 16):
+    """Rotate left
+    Calculate ROTL
+    """
     shift %= block_size
     return data[shift:] + data[:shift]
 
 
 def ROTR(data, shift: int, block_size: int = 16):
+    """Rotate right
+    Calculate ROTR
+    """
     shift %= block_size
     return data[-shift:] + data[:-shift]
 
 
-def i2b(x: int, byteorder="big"):
+def i2b(x: int, byteorder="big") -> bytes:
     return x.to_bytes(x.bit_length() + 7 >> 3, byteorder=byteorder)
 
 
-def b2i(x: bytes, byteorder="big"):
+def b2i(x: bytes, byteorder="big") -> int:
     return int.from_bytes(x, byteorder=byteorder)
 
 
@@ -157,7 +163,7 @@ def chinese_remainder(A: list[int], M: list[int]) -> tuple[int, int]:
     return a1, m1
 
 
-def baby_giant(g, y, p, q=None):
+def bsgs(g, y, p, q=None):
     if not q:
         q = p
     m = ceil(gmpy2.isqrt(q))
@@ -182,7 +188,7 @@ def baby_giant(g, y, p, q=None):
 
 def pohlig_hellman(g, y, factor):
     p = reduce(mul, factor) + 1
-    X = [baby_giant(pow(g, (p - 1) // q, p), pow(y, (p - 1) // q, p), p, q) for q in factor]
+    X = [bsgs(pow(g, (p - 1) // q, p), pow(y, (p - 1) // q, p), p, q) for q in factor]
 
     x = chinese_remainder(X, factor)
     return x

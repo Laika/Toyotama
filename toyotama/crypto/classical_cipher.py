@@ -1,7 +1,4 @@
-import typing
-
-
-def rot(plaintext: typing.Union[str, bytes], rotate: int = 13):
+def rot(plaintext: str | bytes, rotate: int = 13) -> bytes:
     """ROTxx
 
     Rotate a string.
@@ -14,22 +11,14 @@ def rot(plaintext: typing.Union[str, bytes], rotate: int = 13):
     """
     rotate %= 26
     if isinstance(plaintext, str):
-        r = ""
-        for c in plaintext:
-            if "A" <= c <= "Z":
-                r += chr((ord(c) - ord("A") + rotate) % 26 + ord("A"))
-            elif "a" <= c <= "z":
-                r += chr((ord(c) - ord("a") + rotate) % 26 + ord("a"))
-            else:
-                r += c
-    else:
-        r = []
-        for c in plaintext:
-            if ord("A") <= c <= ord("Z"):
-                r.append((c - ord("A") + rotate) % 26 + ord("A"))
-            elif ord("a") <= c <= ord("z"):
-                r.append((c - ord("a") + rotate) % 26 + ord("a"))
-            else:
-                r.append(c)
+        plaintext = plaintext.encode()
+    r = []
+    for c in plaintext:
+        if ord("A") <= c <= ord("Z"):
+            r.append((c - ord("A") + rotate) % 26 + ord("A"))
+        elif ord("a") <= c <= ord("z"):
+            r.append((c - ord("a") + rotate) % 26 + ord("a"))
+        else:
+            r.append(c)
 
     return bytes(r)

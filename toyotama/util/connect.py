@@ -20,11 +20,12 @@ class Mode(Enum):
 
 
 class Connect:
-    def __init__(self, target, mode=Mode.SOCKET, timeout=10.0, verbose=True, pause=True, raw_output=True, **args):
+    def __init__(self, target, mode=Mode.SOCKET, timeout=20.0, verbose=True, pause=True, raw_output=True, **args):
+        self.mode = mode
         if mode not in Mode:
             log.warning(f"Connect: {mode} is not defined.")
             log.information("Connect: Automatically set to 'SOCKET'.")
-        self.mode = mode
+            self.mode = Mode.SOCKET
         self.verbose = verbose
         self.pause = pause
         self.raw_output = raw_output
@@ -76,10 +77,13 @@ class Connect:
         msg += end
 
         try:
-            if self.mode == Mode.SOCKET:
-                self.sock.sendall(msg)
-            elif self.mode == Mode.LOCAL:
-                self.proc.stdin.write(msg)
+            match self.mode:
+                case Mode.SOCKET:
+                    self.sock.sendall(msg)
+
+                case Mode.LOCAL:
+                    self.proc.stdin.write(msg)
+
             if self.verbose:
                 try:
                     if self.raw_output:
@@ -91,12 +95,12 @@ class Connect:
         except Exception:
             self.is_alive = False
 
+    def sendline(self, message):
+        self.send(message, end=b"\n")
+
     def sendafter(self, term, message, end=b""):
         self.recvuntil(term=term)
         self.send(message, end=end)
-
-    def sendline(self, message):
-        self.send(message, end=b"\n")
 
     def sendlineafter(self, term, message):
         self.sendafter(term, message, end=b"\n")
@@ -122,20 +126,21 @@ class Connect:
                 log.recv(ret)
         return ret
 
-    def recvuntil(self, term=b"\n"):
+    def recvuntil(self, term=b"\n") -> bytes:
         ret = b""
         if isinstance(term, str):
             term = term.encode()
         while not ret.endswith(term):
             try:
-                if self.mode == Mode.SOCKET:
-                    ret += self.sock.recv(1)
-                if self.mode == Mode.LOCAL:
-                    print(self.proc.stdout)
-                    ret += self.proc.stdout.read(1)
+                match self.mode:
+                    case Mode.SOCKET:
+                        ret += self.sock.recv(1)
+
+                    case Mode.LOCAL:
+                        ret += self.proc.stdout.read(1)
             except self.timeout:
                 if not ret.endswith(term):
-                    log.warning(f"recvuntil: Not ends with {repr(term)} (Timeout)")
+                    log.warning(f"recvuntil: Not ends with {term!r} (Timeout)")
                 break
             except Exception:
                 sleep(0.05)
@@ -150,20 +155,23 @@ class Connect:
 
         return ret
 
-    def recvline(self, repeat=1):
+    def recvline(self, repeat=1) -> bytes | list[bytes]:
         buf = [self.recvuntil(term=b"\n") for i in range(repeat)]
         return buf.pop() if len(buf) == 1 else buf
 
-    def recvint(self):
+    def recvvalue(self, parse=lambda x: x):
         pattern = r"(?P<name>.*) *[=:] *(?P<value>.*)"
         pattern = re.compile(pattern)
         line = pattern.match(self.recvline().decode())
         name = line.group("name").strip()
-        value = int(line.group("value"), 0)
+        value = parse(line.group("value"))
 
         if self.verbose:
             log.information(f"{name}: {value}")
         return value
+
+    def recvint(self) -> int:
+        return self.recvvalue(parse=lambda x: int(x, 0))
 
     def interactive(self):
         if self.verbose:
@@ -206,7 +214,7 @@ class Connect:
         while t.is_alive():
             t.join(timeout=0.1)
 
-    def PoW(self, hashtype, match, pts=printable, begin=False, hx=False, length=20, start=b"", end=b""):
+    def PoW(self, hashtype, match, pts=printable, begin=False, hex=False, length=20, start=b"", end=b""):
         import hashlib
         from itertools import product
 
@@ -237,24 +245,25 @@ class Connect:
                     break
 
         log.information(f"Found.  {hashtype}('{patt.decode()}') == {h}")
-        if hx:
+        if hex:
             patt = patt.hex()
         self.sendline(patt)
 
     def __del__(self):
-        if self.mode == Mode.SOCKET:
-            self.sock.close()
-            if self.verbose:
-                log.progress("Disconnected.")
+        match self.mode:
+            case Mode.SOCKET:
+                self.sock.close()
+                if self.verbose:
+                    log.progress("Disconnected.")
 
-        elif self.mode == Mode.LOCAL:
-            if self.wait:
-                self.proc.communicate(None)
-            elif self.proc.poll() is None:
-                self.proc.terminate()
+            case Mode.LOCAL:
+                if self.wait:
+                    self.proc.communicate(None)
+                elif self.proc.poll() is None:
+                    self.proc.terminate()
 
-            if self.verbose:
-                log.progress("Stopped.")
+        if self.verbose:
+            log.progress("Stopped.")
         if self.pause:
             if self.verbose:
                 log.information("Press any key to close.")

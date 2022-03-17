@@ -4,37 +4,65 @@ from collections import namedtuple
 
 WIDTH = 8
 
+
+def rgb_to_ansi_color_code(rgb: str) -> str:
+    rgb = rgb.lstrip("#")
+    assert len(rgb) == 6
+    r, g, b = rgb[0:2], rgb[2:4], rgb[4:6]
+    return r, g, b
+
+
+def fg(r, g, b) -> str:
+    return f"\x1b[38;2;{r};{g};{b}m"
+
+
+def bg(r, g, b) -> str:
+    return f"\x1b[48;2;{r};{g};{b}m"
+
+
+RED = "#DC3545"
+YELLOW = "#FFC107"
+BLUE = "#0057d9"
+VIOLET = "#800080"
+DEEP_PURPLE = "#700070"
+ORANGE = "#E05a00"
+LIGHT_GRAY = "#C0C0C0"
+GRAY = "#696969"
+DARK_GRAY = "#282d33"
+WHITE = "#FFFFFF"
+BLACK = "#202020"
+
 color = {
     "RESET": "\x1b[0m",
     "BOLD": "\x1b[1m",
-    "FG_RED": f"\x1b[38;2;{0xdc};{0x35};{0x45}m",
-    "BG_RED": f"\x1b[48;2;{0xdc};{0x35};{0x45}m",
+    "FG_RED": fg(RED),
+    "BG_RED": bg(RED),
     "GREEN": "\x1b[38;5;2m",
-    "FG_YELLOW": f"\x1b[38;2;{0xff};{0xc1};{0x07}m",
-    "BG_YELLOW": f"\x1b[48;2;{0xff};{0xc1};{0x07}m",
-    "FG_BLUE": f"\x1b[38;2;{0x00};{0x57};{0xd9}m",
-    "BG_BLUE": f"\x1b[48;2;{0x00};{0x57};{0xd9}m",
+    "FG_YELLOW": fg(YELLOW),
+    "BG_YELLOW": bg(YELLOW),
+    "FG_BLUE": fg(BLUE),
+    "BG_BLUE": bg(BLUE),
     "FG_MAGENTA": "\x1b[38;5;5m",
     "BG_MAGENTA": "\x1b[48;5;5m",
     "CYAN": "\x1b[38;5;6m",
     "PURPLE": "\x1b[38;5;93m",
     "VIOLET": "\x1b[38;5;128m",
-    "FG_VIOLET": f"\x1b[38;2;{0x80};{0x00};{0x80}m",
-    "BG_VIOLET": f"\x1b[48;2;{0x80};{0x00};{0x80}m",
-    "FG_DEEPPURPLE": f"\x1b[38;2;{0x70};{0x00};{0x70}m",
-    "BG_DEEPPURPLE": f"\x1b[48;2;{0x70};{0x00};{0x70}m",
-    "FG_ORANGE": f"\x1b[38;2;{0xe0};{0x5a};{0x00}m",
-    "BG_ORANGE": f"\x1b[48;2;{0xe0};{0x5a};{0x00}m",
-    "FG_LIGHTGRAY": f"\x1b[38;2;{0xc0};{0xc0};{0xc0}m",
-    "BG_LIGHTGRAY": f"\x1b[48;2;{0xc0};{0xc0};{0xc0}m",
-    "FG_GRAY": f"\x1b[38;2;{0x69};{0x69};{0x69}m",
-    "BG_GRAY": f"\x1b[48;2;{0x69};{0x69};{0x69}m",
-    "FG_DARKGRAY": f"\x1b[38;2;{0x28};{0x2d};{0x33}m",
-    "BG_DARKGRAY": f"\x1b[48;2;{0x28};{0x2d};{0x33}m",
-    "FG_WHITE": f"\x1b[38;2;{0xff};{0xff};{0xff}m",
-    "BG_WHITE": f"\x1b[48;2;{0xff};{0xff};{0xff}m",
-    "FG_BLACK": f"\x1b[38;2;{0x20};{0x20};{0x20}m",
-    "BG_BLACK": f"\x1b[48;2;{0x20};{0x20};{0x20}m",
+    "FG_VIOLET": fg(VIOLET),
+    "BG_VIOLET": bg(VIOLET),
+    "FG_DEEPPURPLE": fg(DEEP_PURPLE),
+    "BG_DEEPPURPLE": bg(DEEP_PURPLE),
+    "FG_ORANGE": fg(ORANGE),
+    "BG_ORANGE": bg(ORANGE),
+    "FG_LIGHTGRAY": fg(LIGHT_GRAY),
+    "BG_LIGHTGRAY": bg(LIGHT_GRAY),
+    "FG_GRAY": fg(GRAY),
+    "BG_GRAY": bg(GRAY),
+    "FG_DARKGRAY": fg(DARK_GRAY),
+    "BG_DARKGRAY": bg(DARK_GRAY),
+    "FG_WHITE": fg(WHITE),
+    "BG_WHITE": bg(WHITE),
+    "FG_BLACK": fg(BLACK),
+    "BG_BLACK": bg(BLACK),
 }
 
 Style = namedtuple("Style", list(color.keys()))(**color)
