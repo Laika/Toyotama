@@ -8,15 +8,17 @@ WIDTH = 8
 def rgb_to_ansi_color_code(rgb: str) -> str:
     rgb = rgb.lstrip("#")
     assert len(rgb) == 6
-    r, g, b = rgb[0:2], rgb[2:4], rgb[4:6]
+    r, g, b = map(lambda x: int(x, 16), (rgb[0:2], rgb[2:4], rgb[4:6]))
     return r, g, b
 
 
-def fg(r, g, b) -> str:
+def fg(rgb) -> str:
+    r, g, b = rgb_to_ansi_color_code(rgb)
     return f"\x1b[38;2;{r};{g};{b}m"
 
 
-def bg(r, g, b) -> str:
+def bg(rgb) -> str:
+    r, g, b = rgb_to_ansi_color_code(rgb)
     return f"\x1b[48;2;{r};{g};{b}m"
 
 

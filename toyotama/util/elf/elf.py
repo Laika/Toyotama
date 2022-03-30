@@ -1,13 +1,13 @@
 from pathlib import Path
 
-from toyotama.util.util import DotDict, MarkdownTable
-
 import r2pipe
+from toyotama.util.util import DotDict, MarkdownTable
 
 
 class ELF:
     def __init__(self, filename: str, analyze_level: int = 4):
         self.filename = Path(filename)
+        self.base = 0x000000
         self.__r = r2pipe.open(filename)
         self.__r.cmd("a" * analyze_level)
         self.plt = self.__get_functions()
@@ -18,17 +18,17 @@ class ELF:
 
     def __get_functions(self):
         functions = DotDict(self.__r.cmdj("aflj"))
-        results = {function.name: function.offset for function in functions.values()}
+        results = {function.name: self.base + function.offset for function in functions.values()}
         return DotDict(results)
 
     def __get_relocations(self):
         relocations = DotDict(self.__r.cmdj("irj"))
-        results = {relocation.name: relocation.vaddr for relocation in relocations.values() if "name" in relocation.keys()}
+        results = {relocation.name: self.base + relocation.vaddr for relocation in relocations.values() if "name" in relocation.keys()}
         return DotDict(results)
 
     def __get_strings(self):
         strings = DotDict(self.__r.cmdj("izj"))
-        results = {string.string: string.vaddr for string in strings.values()}
+        results = {string.string: self.base + string.vaddr for string in strings.values()}
         return DotDict(results)
 
     def __get_information(self):
@@ -37,8 +37,7 @@ class ELF:
 
     def __get_symbols(self):
         symbols = DotDict(self.__r.cmdj("isj"))
-        print(symbols)
-        results = {symbol.name: symbol.vaddr for symbol in symbols.values()}
+        results = {symbol.name: self.base + symbol.vaddr for symbol in symbols.values()}
         return DotDict(results)
 
     def __str__(self):
@@ -57,8 +56,7 @@ class ELF:
 
         return result
 
-    def __repr__(self):
-        return self.__str__()
+    __repr__ = __str__
 
 
 # class Struct:

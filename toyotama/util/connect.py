@@ -80,7 +80,6 @@ class Connect:
             match self.mode:
                 case Mode.SOCKET:
                     self.sock.sendall(msg)
-
                 case Mode.LOCAL:
                     self.proc.stdin.write(msg)
 
@@ -109,10 +108,11 @@ class Connect:
         sleep(0.05)
         ret = b""
         try:
-            if self.mode == Mode.SOCKET:
-                ret = self.sock.recv(n)
-            elif self.mode == Mode.LOCAL:
-                ret = self.proc.stdout.read(n)
+            match self.mode:
+                case Mode.SOCKET:
+                    ret = self.sock.recv(n)
+                case Mode.LOCAL:
+                    ret = self.proc.stdout.read(n)
         except Exception as e:
             log.warning(e)
 
@@ -135,7 +135,6 @@ class Connect:
                 match self.mode:
                     case Mode.SOCKET:
                         ret += self.sock.recv(1)
-
                     case Mode.LOCAL:
                         ret += self.proc.stdout.read(1)
             except self.timeout:
