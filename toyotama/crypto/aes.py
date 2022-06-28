@@ -1,13 +1,18 @@
 import sys
-import typing
+from itertools import pairwise
+from random import sample
+from typing import Callable
 
+from toyotama.crypto.util import xor
+from toyotama.util.connect import Connect
 from toyotama.util.log import Logger, Style
+from toyotama.util.util import to_block
 
 log = Logger()
 
 
 def ecb_chosen_plaintext_attack(
-    encrypt_oracle: typing.Callable[[bytes], bool],
+    encrypt_oracle: Callable[[bytes], bool],
     plaintext_space: bytes = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789{}_",
     known_plaintext: bytes = b"",
     block_size: int = 16,
@@ -26,7 +31,6 @@ def ecb_chosen_plaintext_attack(
     Returns:
         bytes: The plaintext.
     """
-    from random import sample
 
     block_end = block_size * (len(known_plaintext) // (block_size - 2) + 1)
     for _ in range(1, 100):
@@ -55,9 +59,7 @@ def ecb_chosen_plaintext_attack(
                     f"{log.colored(Style.Color.RED, known_plaintext[-1:].decode())}"
                     f"{log.colored(Style.MAGENTA, chr(c))}"
                 )
-            payload = (
-                b"\x00" * (block_end - len(known_plaintext) - 1) + known_plaintext + bytearray([c])
-            )
+            payload = b"\x00" * (block_end - len(known_plaintext) - 1) + known_plaintext + bytearray([c])
             enc_block = encrypt_oracle(payload)[block_end - block_size : block_end]
             if encrypted_block == enc_block:
                 known_plaintext += bytearray([c])
@@ -66,73 +68,101 @@ def ecb_chosen_plaintext_attack(
                 break
 
 
-def padding_oracle_attack(
-    ciphertext: bytes,
-    padding_oracle: typing.Callable,
-    iv: bytes = b"",
-    block_size: int = 16,
-    verbose: bool = False,
-) -> bytes:
-    """Padding Oracle Attack solver.
+class PKCS7PaddingOracleAttack:
+    def __init__(
+        self,
+        padding_oracle: Callable[[bytes], bool] = None,
+        block_size: int = 16,
+        debug: bool = False,
+    ):
+        self.padding_oracle = padding_oracle
+        self.block_size = block_size
+        self.debug = debug
 
-    This function helps solving "Padding Oracle Attack"
+    @staticmethod
+    def _xor(a: bytearray, b: bytearray) -> bytearray:
+        assert len(a) == len(b)
+        return bytearray([x ^ y for x, y in zip(a, b)])
 
-    Args:
-        ciphertext (bytes): The ciphertext.
-        padding_oracle (Callable): The padding oracle function. This function receives ciphertext and returns the ciphertext is valid or not.
-        iv (bytes, optional): An initialization vector. Defaults to b"".
-        block_size (int, optional): The block size of AES. Defaults to 16.
-        verbose (bool, optional): Show more information if True, otherwise no output.
-    Returns:
-        bytes: The plaintext
-    """
-    cipher_block = [ciphertext[i : i + block_size] for i in range(0, len(ciphertext), block_size)]
-    cipher_block.reverse()
-    plaintext = b""
+    def _make_padding_block(self, n: int) -> bytearray:
+        assert 0 <= n <= self.block_size
+        return bytearray([n] * n).rjust(self.block_size, b"\0")
 
-    def is_valid(c_target, d_prev, nth_byte, i):
-        attempt_byte = bytes.fromhex(f"{i:02x}")
-        adjusted_bytes = bytes(c ^ nth_byte for c in d_prev)
+    def set_padding_oracle(self, padding_oracle: Callable[[bytes], bool]):
+        self.padding_oracle = padding_oracle
 
-        payload = b"\x00" * (block_size - nth_byte) + attempt_byte + adjusted_bytes + c_target
-        if verbose:
-            sys.stdout.write(
-                "\033[2k\033[g"
-                + log.colored(Style.GREY, repr(b"\x00" * (block_size - nth_byte))[2:-1])
-                + log.colored(Style.RED, repr(attempt_byte)[2:-1])
-                + log.colored(Style.MAGENTA, repr(adjusted_bytes)[2:-1])
-                + log.colored(Style.DARK_GREY, repr(c_target)[2:-1])
-            )
-            sys.stdout.flush()
+    def solve_decrypted_block(self, ct_target: bytes) -> bytes:
+        """
+        [_____ct_____]   [_ct_target__]
+              |                |
+              +--------+       |
+                       | [ Decryption ]
+                       |       | <- d
+                       |       |
+                       +-------x (XOR)
+                               |
+                         [ Plain text ]
+        """
+        ct = bytearray([0 for _ in range(self.block_size)])
+        d = bytearray([0 for _ in range(self.block_size)])
 
-        return padding_oracle(payload)
+        for i in range(self.block_size - 1, -1, -1):
+            padding = self.block_size - i
 
-    for _ in range(len(cipher_block) - 1):
-        c_target, c_prev = cipher_block[:2]
-        print(cipher_block)
-        cipher_block.pop(0)
-        nth_byte = 1
-        i = 0
-        m = d_prev = b""
-        while True:
-            if is_valid(c_target, d_prev, nth_byte, i):
-                m += bytes.fromhex(f"{i^nth_byte^c_prev[-nth_byte]:02x}")
-                d_prev = bytes.fromhex(f"{i^nth_byte:02x}") + d_prev
-                nth_byte += 1
-                i = 0
-                if nth_byte <= block_size:
-                    continue
-                break
-            i += 1
-            if i > 0xFF:
-                log.error("[padding_oracle_attack] Not Found")
-                return None
-        plaintext = m[::-1] + plaintext
+            # Bruteforce one byte
+            for c in range(0x100):
+                ct[i] = c
+                if self.padding_oracle(bytes(ct + ct_target)):
+                    # Recalculate d
+                    d = self._xor(ct, self._make_padding_block(padding))
 
-        if verbose:
-            print()
-            log.information(f"Decrypt(c{len(cipher_block)}): {repr(d_prev)[2:-1]}")
-            log.information(f"m{len(cipher_block)}: {repr(m[::-1])[2:-1]}")
-            log.information(f"plaintext: {repr(plaintext)[2:-1]}")
+                    if i == 0:
+                        break
 
-    return plaintext
+                    # Recalculate next c
+                    ct = self._xor(d, self._make_padding_block(padding + 1))
+                    break
+            else:
+                raise ValueError("Padding Oracle Attack failed.")
+        return d
+
+    def decryption_attack(self, iv: bytes, ciphertext: bytes) -> bytes:
+        """Padding oracle decryption attack.
+        This function helps solving "Padding Oracle Attack"
+
+        Args:
+            iv (bytes, optional): An initialization vector.
+            ciphertext (bytes): A ciphertext.
+        Returns:
+            bytes: decrypt(ciphertext)
+        """
+        ciphertext_block: list[bytes] = [iv] + to_block(ciphertext)
+        plaintext_block = b""
+
+        for ct1, ct2 in pairwise(ciphertext_block):
+            plaintext_block += xor(ct1, self.solve_decrypted_block(ct2))
+
+        return plaintext_block
+
+    def encryption_attack():
+        ...
+
+
+def test_padding():
+    _r = Connect("nc localhost 50000")
+
+    def oracle(ciphertext: bytes) -> bool:
+        _r.sendlineafter(b"> ", ciphertext.hex())
+        result = _r.recvline().decode().strip()
+        return result == "ok"
+
+    ciphertext = bytes.fromhex(_r.recvline().decode())
+    iv = bytes.fromhex(_r.recvline().decode())
+    po = PKCS7PaddingOracleAttack()
+    po.set_padding_oracle(oracle)
+    result = po.decryption_attack(iv, ciphertext)
+    print(result)
+
+
+if __name__ == "__main__":
+    test_padding()
