@@ -45,7 +45,7 @@ def ecb_chosen_plaintext_attack(
         if len(known_plaintext) % block_size == block_size - 1:
             block_end += block_size
 
-        chosen_plaintext = b"\x00" * (block_end - len(known_plaintext) - 1)
+        chosen_plaintext = bytes(block_end - len(known_plaintext) - 1)
         encrypted_block = encrypt_oracle(chosen_plaintext)
         encrypted_block = encrypted_block[block_end - block_size : block_end]
 
@@ -71,7 +71,7 @@ def ecb_chosen_plaintext_attack(
 class PKCS7PaddingOracleAttack:
     def __init__(
         self,
-        padding_oracle: Callable[[bytes], bool] = None,
+        padding_oracle: Callable[[bytes, bytes], bool] = None,
         block_size: int = 16,
         debug: bool = False,
     ):
@@ -88,10 +88,10 @@ class PKCS7PaddingOracleAttack:
         assert 0 <= n <= self.block_size
         return bytearray([n] * n).rjust(self.block_size, b"\0")
 
-    def set_padding_oracle(self, padding_oracle: Callable[[bytes], bool]):
+    def set_padding_oracle(self, padding_oracle: Callable[[bytes, bytes], bool]):
         self.padding_oracle = padding_oracle
 
-    def solve_decrypted_block(self, ct_target: bytes) -> bytes:
+    def solve_decrypted_block(self, ct_target: bytes, iv: bytes = b"") -> bytes:
         """
         [_____ct_____]   [_ct_target__]
               |                |
@@ -103,6 +103,7 @@ class PKCS7PaddingOracleAttack:
                                |
                          [ Plain text ]
         """
+        iv = iv or bytes(self.block_size)
         ct = bytearray([0 for _ in range(self.block_size)])
         d = bytearray([0 for _ in range(self.block_size)])
 
@@ -112,7 +113,7 @@ class PKCS7PaddingOracleAttack:
             # Bruteforce one byte
             for c in range(0x100):
                 ct[i] = c
-                if self.padding_oracle(bytes(ct + ct_target)):
+                if self.padding_oracle(bytes(ct + ct_target), iv):
                     # Recalculate d
                     d = self._xor(ct, self._make_padding_block(padding))
 
@@ -126,13 +127,13 @@ class PKCS7PaddingOracleAttack:
                 raise ValueError("Padding Oracle Attack failed.")
         return d
 
-    def decryption_attack(self, iv: bytes, ciphertext: bytes) -> bytes:
+    def decryption_attack(self, ciphertext: bytes, iv: bytes) -> bytes:
         """Padding oracle decryption attack.
-        This function helps solving "Padding Oracle Attack"
+        This function helps solving padding oracle decryption attack.
 
         Args:
-            iv (bytes, optional): An initialization vector.
             ciphertext (bytes): A ciphertext.
+            iv (bytes): An initialization vector.
         Returns:
             bytes: decrypt(ciphertext)
         """
@@ -140,19 +141,39 @@ class PKCS7PaddingOracleAttack:
         plaintext_block = b""
 
         for ct1, ct2 in pairwise(ciphertext_block):
-            plaintext_block += xor(ct1, self.solve_decrypted_block(ct2))
+            plaintext_block += xor(ct1, self.solve_decrypted_block(ct2, iv))
 
         return plaintext_block
 
-    def encryption_attack():
-        ...
+    def encryption_attack(self, plaintext: bytes, ciphertext: bytes, iv: bytes) -> tuple[bytes, bytes]:
+        """Padding oracle encryption attack.
+        This function helps solving padding oracle encryption attack.
+
+        Args:
+            plaintext (bytes): A plaintext.
+            ciphertext (bytes): A ciphertext.
+            iv (bytes): An initialization vector.
+        Returns:
+            tuple[bytes, bytes]: iv and ciphertext.
+        """
+
+        plaintext_block: list[bytes] = to_block(plaintext)
+        ciphertext_block: list[bytes] = to_block(ciphertext)
+        tampered_ciphertext_block: list[bytes] = [ciphertext_block.pop()]
+        while plaintext_block:
+            pt, ct = plaintext_block.pop(), tampered_ciphertext_block[0]
+            tampered_ciphertext_block = [xor(pt, self.solve_decrypted_block(ct, iv))] + tampered_ciphertext_block
+
+        iv = tampered_ciphertext_block.pop(0)
+        tampered_ciphertext = b"".join(tampered_ciphertext_block)
+        return tampered_ciphertext, iv
 
 
 def test_padding():
     _r = Connect("nc localhost 50000")
 
-    def oracle(ciphertext: bytes) -> bool:
-        _r.sendlineafter(b"> ", ciphertext.hex())
+    def oracle(ciphertext: bytes, iv: bytes) -> bool:
+        _r.sendlineafter(b"> ", (iv + ciphertext).hex())
         result = _r.recvline().decode().strip()
         return result == "ok"
 
@@ -160,8 +181,15 @@ def test_padding():
     iv = bytes.fromhex(_r.recvline().decode())
     po = PKCS7PaddingOracleAttack()
     po.set_padding_oracle(oracle)
-    result = po.decryption_attack(iv, ciphertext)
-    print(result)
+    # plaintext = po.decryption_attack(ciphertext, iv)
+    # print(plaintext)
+
+    tampered_plaintext = b"FLAG{Y0u_hav3_succ33ded_1n_tamp3r1n9_padding_oracle_@ttack}\x05\x05\x05\x05\x05"
+    assert len(tampered_plaintext) == 64
+    tampered_ciphertext, iv = po.encryption_attack(tampered_plaintext, ciphertext, iv)
+    _r.sendlineafter(b"> ", (iv + tampered_ciphertext).hex())
+    _r.recvline().decode()
+    _r.recvline().decode()
 
 
 if __name__ == "__main__":
