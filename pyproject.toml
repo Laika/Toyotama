@@ -17,8 +17,6 @@ classifiers = [
 ]
 packages = [
   { include = "toyotama" },
-  { include = "log" },
-  { include = "integer" },
 ]
 
 
