@@ -2,7 +2,6 @@ import code
 from functools import singledispatch
 from itertools import zip_longest
 
-
 from toyotama.util.log import Logger
 
 log = Logger()
@@ -339,8 +338,8 @@ def urldecode(s, encoding="shift-jis"):
     return unquote_plus(s, encoding=encoding)
 
 
-def to_block(X, block_size: int = 16):
-    return [X[i : i + block_size] for i in range(0, len(X), block_size)]
+def to_block(x, block_size: int = 16):
+    return [x[i : i + block_size] for i in range(0, len(x), block_size)]
 
 
 @singledispatch
