@@ -7,7 +7,7 @@ from operator import mul
 import gmpy2
 
 
-def XOR(*array: tuple[bytes]):
+def xor(*array: tuple[bytes]):
     """XOR strings
 
     Calculate `A XOR B`.
@@ -18,11 +18,14 @@ def XOR(*array: tuple[bytes]):
     Returns:
         bytes: The result of `A XOR B`.
     """
-    array = list(array)
-    X = array.pop()
-    for Y in array:
-        X = bytes(x ^ y for x, y in zip(X, Y))
-    return X
+    if len(array) == 0:
+        return None
+
+    ret = bytes(len(array[0]))
+    assert all(len(arr) == len(array[0]) for arr in array), "The lengths of all values must be same."
+    for block in array:
+        ret = bytes(x ^ y for x, y in zip(ret, block))
+    return ret
 
 
 def ROTL(data, shift: int, block_size: int = 16):
