@@ -28,7 +28,7 @@ def xor(*array: tuple[bytes]):
     return ret
 
 
-def ROTL(data, shift: int, block_size: int = 16):
+def rotl(data, shift: int, block_size: int = 16):
     """Rotate left
     Calculate ROTL
     """
@@ -36,7 +36,7 @@ def ROTL(data, shift: int, block_size: int = 16):
     return data[shift:] + data[:shift]
 
 
-def ROTR(data, shift: int, block_size: int = 16):
+def rotr(data, shift: int, block_size: int = 16):
     """Rotate right
     Calculate ROTR
     """
@@ -52,25 +52,25 @@ def b2i(x: bytes, byteorder="big") -> int:
     return int.from_bytes(x, byteorder=byteorder)
 
 
-def extended_gcd(A: int, B: int) -> tuple[int, int, int]:
+def extended_gcd(a: int, b: int) -> tuple[int, int, int]:
     """Extended GCD.
 
     Args:
-        A (int): The first value.
-        B (int): The second value.
+        a (int): The first value.
+        b (int): The second value.
     Returns:
         tuple[int, int, int]: (x, y, g) s.t. Ax + By = gcd(A, B) = g
     """
-    g, c = A, B
-    x, a = 1, 0
-    y, b = 0, 1
+    g, c = a, b
+    x, a_ = 1, 0
+    y, b_ = 0, 1
 
     while c != 0:
         q, m = divmod(g, c)
         g, c = c, m
-        x, a = a, x - q * a
-        y, b = b, y - q * b
-    assert A * x + B * y == gcd(A, B)
+        x, a_ = a_, x - q * a_
+        y, b_ = b_, y - q * b_
+    assert a * x + b * y == gcd(a, b)
     return x, y, g
 
 
@@ -130,7 +130,7 @@ def mod_sqrt(a: int, p: int) -> int:
         r = m
 
 
-def chinese_remainder(A: list[int], M: list[int]) -> tuple[int, int]:
+def chinese_remainder(a: list[int], m: list[int]) -> tuple[int, int]:
     """Chinese Remainder Theorem
     A = [a0, a1, a2, a3, ...]
     M = [m0, m1, m2, m3, ...]
@@ -143,18 +143,18 @@ def chinese_remainder(A: list[int], M: list[int]) -> tuple[int, int]:
     by Garner's algorithm.
 
     Args:
-        A (list[int]): The list of value.
-        M (list[int]): The list of modulus.
+        a (list[int]): The list of value.
+        m (list[int]): The list of modulus.
     Returns:
         tuple[int, int]: X, Y such that satisfy the equations
     """
 
-    assert len(A) == len(M), "numbers and moduli are not the same length."
+    assert len(a) == len(m), "The length of a and m must be same."
 
-    n = len(A)
-    a1, m1 = A[0], M[0]
+    n = len(a)
+    a1, m1 = a[0], m[0]
     for i in range(1, n):
-        a2, m2 = A[i], M[i]
+        a2, m2 = a[i], m[i]
         g = gcd(m1, m2)
         if a1 % g != a2 % g:
             return 0, 0
@@ -191,9 +191,9 @@ def bsgs(g, y, p, q=None):
 
 def pohlig_hellman(g, y, factor):
     p = reduce(mul, factor) + 1
-    X = [bsgs(pow(g, (p - 1) // q, p), pow(y, (p - 1) // q, p), p, q) for q in factor]
+    x = [bsgs(pow(g, (p - 1) // q, p), pow(y, (p - 1) // q, p), p, q) for q in factor]
 
-    x = chinese_remainder(X, factor)
+    x = chinese_remainder(x, factor)
     return x
 
 
