@@ -2,9 +2,9 @@ import code
 from functools import singledispatch
 from itertools import zip_longest
 
-from toyotama.util.log import Logger
+from toyotama.util.log import get_logger
 
-log = Logger()
+logger = get_logger()
 
 
 class DotDict(dict):
@@ -161,9 +161,9 @@ def printv(symboltable, *args):
     for name, value in zip(names, args):
         typ = f"<{type(value).__name__}>"
         if name.endswith("_addr"):
-            log.information(f"{name.ljust(maxlen_name)}{typ.rjust(maxlen_type)}: {value:#x}")
+            logger.info(f"{name.ljust(maxlen_name)}{typ.rjust(maxlen_type)}: {value:#x}")
         else:
-            log.information(f"{name.ljust(maxlen_name)}{typ.rjust(maxlen_type)}: {value}")
+            logger.info(f"{name.ljust(maxlen_name)}{typ.rjust(maxlen_type)}: {value}")
 
 
 @singledispatch
@@ -202,7 +202,7 @@ def extract_flag_str(s, head="{", tail="}", unique=True):
     if unique:
         flags = set(flags)
     if not flags:
-        log.error(f"the pattern {head}.*?{tail} does not exist.")
+        logger.error(f"the pattern {head}.*?{tail} does not exist.")
         return None
     return flags
 
@@ -217,7 +217,7 @@ def extract_flag_bytes(s, head="{", tail="}", unique=True):
     if unique:
         flags = set(flags)
     if not flags:
-        log.error(f"The pattern {head}.*?{tail} does not exist.")
+        logger.error(f"The pattern {head}.*?{tail} does not exist.")
         return None
     return flags
 

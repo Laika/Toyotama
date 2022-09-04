@@ -1,8 +1,20 @@
-import os
+import logging
 import sys
 from collections import namedtuple
 
 WIDTH = 8
+
+RED = "#DC3545"
+YELLOW = "#FFC107"
+BLUE = "#0057d9"
+VIOLET = "#800080"
+DEEP_PURPLE = "#700070"
+ORANGE = "#E05a00"
+LIGHT_GRAY = "#C0C0C0"
+GRAY = "#696969"
+DARK_GRAY = "#282d33"
+WHITE = "#FFFFFF"
+BLACK = "#202020"
 
 
 def rgb_to_ansi_color_code(rgb: str) -> str:
@@ -21,18 +33,6 @@ def bg(rgb) -> str:
     r, g, b = rgb_to_ansi_color_code(rgb)
     return f"\x1b[48;2;{r};{g};{b}m"
 
-
-RED = "#DC3545"
-YELLOW = "#FFC107"
-BLUE = "#0057d9"
-VIOLET = "#800080"
-DEEP_PURPLE = "#700070"
-ORANGE = "#E05a00"
-LIGHT_GRAY = "#C0C0C0"
-GRAY = "#696969"
-DARK_GRAY = "#282d33"
-WHITE = "#FFFFFF"
-BLACK = "#202020"
 
 color = {
     "RESET": "\x1b[0m",
@@ -70,77 +70,49 @@ color = {
 Style = namedtuple("Style", list(color.keys()))(**color)
 
 
-class StdoutHook:
-    def __init__(self):
-        self.newline_count = 0
+class CustomFormatter(logging.Formatter):
+    def __init__(self, colored=True):
+        self.fmt = "[%(levelname)s] %(message)s"
+        self.date_format = "%Y-%m-%dT%T"
+        self.FORMATS = {}
+        if colored:
+            self.FORMATS = {
+                logging.DEBUG: Style.FG_GRAY + self.fmt + Style.RESET,
+                logging.INFO: Style.FG_BLUE + self.fmt + Style.RESET,
+                logging.WARNING: Style.FG_YELLOW + self.fmt + Style.RESET,
+                logging.ERROR: Style.FG_RED + self.fmt + Style.RESET,
+                logging.CRITICAL: Style.FG_DEEPPURPLE + self.fmt + Style.RESET,
+            }
+        else:
+            self.FORMATS = {
+                logging.DEBUG: self.fmt,
+                logging.INFO: self.fmt,
+                logging.WARNING: self.fmt,
+                logging.ERROR: self.fmt,
+                logging.CRITICAL: self.fmt,
+            }
 
-    def write(self, text: str):
-        sys.__stdout__.write(text)
-        self.newline_count += text.count(os.linesep)
-
-    def flush(self):
-        sys.__stdout__.flush()
+    def format(self, record):
+        log_format = self.FORMATS.get(record.levelno)
+        formatter = logging.Formatter(log_format, self.date_format)
+        return formatter.format(record)
 
 
-class StderrHook:
-    def __init__(self):
-        self.newline_count = 0
+def get_logger(name="toyotama", loglevel="INFO", colored=True):
+    logging._srcfile = None
+    logging.logThreads = False
+    logging.logProcesses = False
+    logging.logMultiprocessing = False
 
-    def write(self, text: str):
-        sys.__stderr__.write(text)
-        self.newline_count += text.count(os.linesep)
+    logger = logging.getLogger(name)
+    if logger.handlers:
+        return logger
 
-    def flush(self):
-        sys.__stderr__.flush()
+    loglevel = getattr(logging, loglevel.upper(), logging.INFO)
+    logger.setLevel(loglevel)
 
+    handler = logging.StreamHandler()
+    handler.setFormatter(CustomFormatter(colored=colored))
+    logger.addHandler(handler)
 
-class Logger:
-    def __init__(self):
-        self.fd = sys.stderr
-        self.ongoing_func = set()
-
-    def __message(self, color: str, header: str, message: str):
-        self.fd.write(f"{color}{header}{Style.RESET}  {message}\n")
-
-    def colored(self, color: str, message: str):
-        self.__message(color, "", message)
-
-    def information(self, message: str):
-        self.__message(Style.BG_BLUE + Style.FG_WHITE, "INFO".center(WIDTH, " "), message)
-
-    def progress(self, message: str):
-        self.__message(Style.BG_VIOLET + Style.FG_WHITE, "PROG".center(WIDTH, " "), message)
-
-    def warning(self, message: str):
-        self.__message(Style.BG_YELLOW + Style.FG_BLACK, "WARN".center(WIDTH, " "), message)
-
-    def error(self, message: str):
-        self.__message(Style.BG_RED + Style.FG_WHITE, "FAIL".center(WIDTH, " "), message)
-
-    def send(self, message: str):
-        self.__message(Style.BG_GRAY + Style.FG_BLACK, "SEND".center(WIDTH, " "), message)
-
-    def recv(self, message: str):
-        self.__message(Style.BG_DARKGRAY + Style.FG_WHITE, "RECV".center(WIDTH, " "), message)
-
-    def watch(self, func):
-        def wrapper(*args, **kwargs):
-            self.ongoing_func.add(func)
-            self.__message(
-                Style.BG_DEEPPURPLE + Style.FG_WHITE,
-                "RUN".center(WIDTH, " "),
-                f"{func.__name__}({','.join(map(str, args))})",
-            )
-            return_value = func(*args, **kwargs)
-            self.fd.write(f"\x1b[{sys.stdout.newline_count+1}F")
-            self.fd.write("\x1b[2K")
-            self.__message(
-                Style.BG_DARKGRAY + Style.FG_WHITE,
-                "DONE".center(WIDTH, " "),
-                f"{func.__name__}({','.join(map(str, args))})",
-            )
-            self.fd.write(f"\x1b[{sys.stdout.newline_count}E")
-            self.ongoing_func.discard(func)
-            return return_value
-
-        return wrapper
+    return logger

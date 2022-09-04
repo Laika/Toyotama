@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "toyotama"
-version = "0.9.4"
+version = "0.9.5"
 description = "Python library for CTF."
 authors = ["Laika <laika@albina.cc>"]
 maintainers = ["Laika <laika@albina.cc>"]
@@ -10,11 +10,11 @@ repository = "https://github.com/Laika/Toyotama"
 homepage = "https://github.com/Laika/Toyotama"
 keywords = ["CTF"]
 classifiers = [
-    "License :: OSI Approved :: MIT License",
-    "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.9",
-    "Programming Language :: Python :: 3.10",
-    "Operating System :: POSIX :: Linux",
+  "License :: OSI Approved :: MIT License",
+  "Topic :: Software Development :: Libraries :: Python Modules",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Operating System :: POSIX :: Linux",
 ]
 packages = [
   { include = "toyotama" },

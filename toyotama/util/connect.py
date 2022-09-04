@@ -5,16 +5,16 @@ import socket
 import subprocess
 import sys
 import threading
-from enum import Enum
+from enum import IntEnum
 from string import printable
 from time import sleep
 
-from toyotama.util.log import Logger
+from toyotama.util.log import get_logger
 
-log = Logger()
+logger = get_logger(__name__)
 
 
-class Mode(Enum):
+class Mode(IntEnum):
     SOCKET = 1
     LOCAL = 2
 
@@ -23,8 +23,8 @@ class Connect:
     def __init__(self, target, mode=Mode.SOCKET, timeout=20.0, verbose=True, pause=True, raw_output=True, **args):
         self.mode = mode
         if mode not in Mode:
-            log.warning(f"Connect: {mode} is not defined.")
-            log.information("Connect: Automatically set to 'SOCKET'.")
+            logger.warning(f"Connect: {mode} is not defined.")
+            logger.info("Connect: Automatically set to 'SOCKET'.")
             self.mode = Mode.SOCKET
         self.verbose = verbose
         self.pause = pause
@@ -41,7 +41,7 @@ class Connect:
             case Mode.SOCKET:
                 host, port = target["host"], target["port"]
                 if self.verbose:
-                    log.progress(f"Connecting to {host!s}:{port}...")
+                    logger.info(f"Connecting to {host!s}:{port}...")
                 self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                 self.sock.settimeout(timeout)
                 self.sock.connect((str(host), port))
@@ -51,7 +51,7 @@ class Connect:
                 program = target["program"]
                 self.wait = "wait" in args and args["wait"]
                 if self.verbose:
-                    log.progress(f"Starting {program} ...")
+                    logger.info(f"Starting {program} ...")
                 self.proc = subprocess.Popen(
                     program,
                     stdin=subprocess.PIPE,
@@ -59,7 +59,7 @@ class Connect:
                     stderr=subprocess.STDOUT,
                 )
                 if self.verbose:
-                    log.information(f"PID: {self.proc.pid}")
+                    logger.info(f"PID: {self.proc.pid}")
                 self.set_nonblocking(self.proc.stdout)
                 self.timeout = None
 
@@ -86,11 +86,11 @@ class Connect:
             if self.verbose:
                 try:
                     if self.raw_output:
-                        log.send(msg)
+                        logger.info(f"<] {msg}")
                     else:
-                        log.send(msg.decode())
+                        logger.info(f"<] {msg.decode()}")
                 except Exception:
-                    log.send(msg)
+                    logger.info(f"<] {msg}")
         except Exception:
             self.is_alive = False
 
@@ -114,16 +114,16 @@ class Connect:
                 case Mode.LOCAL:
                     ret = self.proc.stdout.read(n)
         except Exception as e:
-            log.warning(e)
+            logger.warning(e)
 
         if not quiet and self.verbose:
             try:
                 if self.raw_output:
-                    log.recv(ret)
+                    logger.info(f"[> {ret}")
                 else:
-                    log.recv(ret.decode())
+                    logger.info(f"[> {ret.decode()}")
             except Exception:
-                log.recv(ret)
+                logger.info(f"[> {ret}")
         return ret
 
     def recvuntil(self, term=b"\n") -> bytes:
@@ -139,18 +139,18 @@ class Connect:
                         ret += self.proc.stdout.read(1)
             except self.timeout:
                 if not ret.endswith(term):
-                    log.warning(f"recvuntil: Not ends with {term!r} (Timeout)")
+                    logger.warning(f"recvuntil: Not ends with {term!r} (Timeout)")
                 break
             except Exception:
                 sleep(0.05)
         if self.verbose:
             try:
                 if self.raw_output:
-                    log.recv(ret)
+                    logger.info(f"[> {ret}")
                 else:
-                    log.recv(ret.decode())
+                    logger.info(f"[> {ret.decode()}")
             except Exception:
-                log.recv(ret)
+                logger.info(f"[> {ret}")
 
         return ret
 
@@ -166,7 +166,7 @@ class Connect:
         value = parse(line.group("value"))
 
         if self.verbose:
-            log.information(f"{name}: {value}")
+            logger.info(f"{name}: {value}")
         return value
 
     def recvint(self) -> int:
@@ -174,7 +174,7 @@ class Connect:
 
     def interactive(self):
         if self.verbose:
-            log.information("Switching to interactive mode")
+            logger.info("Switching to interactive mode")
 
         go = threading.Event()
 
@@ -187,7 +187,7 @@ class Connect:
                         stdout.buffer.write(cur)
                         stdout.flush()
                 except EOFError:
-                    log.information("Got EOF while reading in interactive")
+                    logger.info("Got EOF while reading in interactive")
                     break
 
         t = threading.Thread(target=recv_thread)
@@ -203,11 +203,11 @@ class Connect:
                         self.send(data)
                     except EOFError:
                         go.set()
-                        log.information("Got EOF while reading in interactive")
+                        logger.info("Got EOF while reading in interactive")
                 else:
                     go.set()
         except KeyboardInterrupt:
-            log.information("Interrupted")
+            logger.info("Interrupted")
             go.set()
 
         while t.is_alive():
@@ -229,21 +229,21 @@ class Connect:
         rand_length = length - len(start) - len(end)
 
         if begin:
-            log.progress(f"Searching x such that {hashtype}({start} x {end})[:{len(match)}] == {match} ...")
+            logger.info(f"Searching x such that {hashtype}({start} x {end})[:{len(match)}] == {match} ...")
             for patt in product(pts, repeat=rand_length):
                 patt = start + bytes(patt) + end
                 h = hashlib.new(hashtype, patt).hexdigest()[: len(match)]
                 if h == match:
                     break
         else:
-            log.progress(f"Searching x such that {hashtype}({start} x {end})[-{len(match)}:] == {match} ...")
+            logger.info(f"Searching x such that {hashtype}({start} x {end})[-{len(match)}:] == {match} ...")
             for patt in product(pts, repeat=rand_length):
                 patt = start + bytes(patt) + end
                 h = hashlib.new(hashtype, patt).hexdigest()[-len(match) :]
                 if h == match:
                     break
 
-        log.information(f"Found.  {hashtype}('{patt.decode()}') == {h}")
+        logger.inf(f"Found.  {hashtype}('{patt.decode()}') == {h}")
         if hex:
             patt = patt.hex()
         self.sendline(patt)
@@ -253,7 +253,7 @@ class Connect:
             case Mode.SOCKET:
                 self.sock.close()
                 if self.verbose:
-                    log.progress("Disconnected.")
+                    logger.info("Disconnected.")
 
             case Mode.LOCAL:
                 if self.wait:
@@ -262,8 +262,8 @@ class Connect:
                     self.proc.terminate()
 
         if self.verbose:
-            log.progress("Stopped.")
+            logger.info("Stopped.")
         if self.pause:
             if self.verbose:
-                log.information("Press any key to close.")
+                logger.info("Press any key to close.")
             input()

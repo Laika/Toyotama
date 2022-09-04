@@ -1,7 +1,7 @@
 from toyotama.pwn.util import p32, p64
-from toyotama.util.log import Logger
+from toyotama.util.log import get_logger
 
-log = Logger()
+logger = get_logger()
 
 
 def fsa_write_32(target_addr: int, value: int, nth_stack: int, offset: int = 0, each: int = 4):
@@ -79,7 +79,7 @@ def fsa_write_64(target_addr: int, value: int, nth_stack: int, offset: int = 0, 
     }
 
     value = value % (1 << 8 * each)
-    assert value < 10 ** 10 and nth_stack < 10 ** 3  # To fix the payload's length
+    assert value < 10**10 and nth_stack < 10**3
     tentative_payload = b"A" * (-offset % byte_len)
     tentative_payload += f"%{value:010}c%{nth_stack:03}${format_string[each]}".encode()
     tentative_payload += b"A" * (-len(tentative_payload) % byte_len)
@@ -92,6 +92,6 @@ def fsa_write_64(target_addr: int, value: int, nth_stack: int, offset: int = 0, 
     payload += p64(target_addr)
 
     if b"\0" in payload.strip(b"\0"):
-        log.warning("The payload includes some null bytes.")
+        logger.warning("The payload includes some null bytes.")
 
     return payload

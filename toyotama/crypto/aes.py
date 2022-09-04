@@ -5,10 +5,10 @@ from typing import Callable
 
 from toyotama.crypto.util import xor
 from toyotama.util.connect import Connect
-from toyotama.util.log import Logger, Style
+from toyotama.util.log import get_logger
 from toyotama.util.util import to_block
 
-log = Logger()
+logger = get_logger()
 
 
 def ecb_chosen_plaintext_attack(
@@ -40,7 +40,7 @@ def ecb_chosen_plaintext_attack(
 
         # get the encrypted block which includes the beginning of FLAG
         if verbose:
-            log.progress("Getting the encrypted block which includes the beginning of FLAG")
+            logger.info("Getting the encrypted block which includes the beginning of FLAG")
 
         if len(known_plaintext) % block_size == block_size - 1:
             block_end += block_size
@@ -51,14 +51,8 @@ def ecb_chosen_plaintext_attack(
 
         # bruteforcing all of the characters in plaintext_space
         if verbose:
-            log.progress("Bruteforcing all of the characters in plaintext_space")
+            logger.info("Bruteforcing all of the characters in plaintext_space")
         for c in plaintext_space:
-            if verbose:
-                sys.stderr.write(
-                    f"\r{log.colored(Style.Color.GREY, known_plaintext[:-1].decode())}"
-                    f"{log.colored(Style.Color.RED, known_plaintext[-1:].decode())}"
-                    f"{log.colored(Style.MAGENTA, chr(c))}"
-                )
             payload = b"\x00" * (block_end - len(known_plaintext) - 1) + known_plaintext + bytearray([c])
             enc_block = encrypt_oracle(payload)[block_end - block_size : block_end]
             if encrypted_block == enc_block:
