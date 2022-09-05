@@ -22,7 +22,7 @@ class Mode(IntEnum):
     LOCAL = 2
 
 
-class Connect:
+class _Connect:
     def __init__(self, target, mode=Mode.SOCKET, timeout=20.0, verbose=True, pause=True, raw_output=True, **args):
         """_summary_
 
