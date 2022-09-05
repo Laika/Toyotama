@@ -1,5 +1,5 @@
-from toyotama.pwn.util import p32, p64
-from toyotama.util.log import get_logger
+from .util import p32, p64
+from ..util.log import get_logger
 
 logger = get_logger()
 

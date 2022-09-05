@@ -3,7 +3,7 @@ import string
 from functools import singledispatch
 from itertools import zip_longest
 
-from toyotama.util.log import get_logger
+from .log import get_logger
 
 logger = get_logger()
 

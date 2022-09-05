@@ -12,7 +12,7 @@ from string import printable
 from time import sleep
 from typing import Callable
 
-from toyotama.util.log import get_logger
+from .log import get_logger
 
 logger = get_logger(__name__)
 

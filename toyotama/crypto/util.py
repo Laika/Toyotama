@@ -6,7 +6,7 @@ from operator import mul
 
 import gmpy2
 
-from toyotama.util.log import get_logger
+from ..util.log import get_logger
 
 logger = get_logger()
 

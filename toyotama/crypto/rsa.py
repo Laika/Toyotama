@@ -5,8 +5,8 @@ from typing import Callable
 
 import gmpy2
 
-from toyotama.crypto.util import extended_gcd
-from toyotama.util.log import get_logger
+from .util import extended_gcd
+from ..util.log import get_logger
 
 logger = get_logger()
 

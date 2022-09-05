@@ -1,6 +1,6 @@
 import logging
 
-from toyotama.terminal.style import Style
+from ..terminal.style import Style
 
 WIDTH = 8
 
