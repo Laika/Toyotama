@@ -1,7 +1,8 @@
 from pathlib import Path
 
 import r2pipe
-from toyotama.util.util import DotDict, MarkdownTable
+
+from ..util import MarkdownTable
 
 
 class ELF:
@@ -17,28 +18,28 @@ class ELF:
         self.symbols = self.__get_symbols()
 
     def __get_functions(self):
-        functions = DotDict(self.__r.cmdj("aflj"))
+        functions = self.__r.cmdj("aflj")
         results = {function.name: self.base + function.offset for function in functions.values()}
-        return DotDict(results)
+        return results
 
     def __get_relocations(self):
-        relocations = DotDict(self.__r.cmdj("irj"))
+        relocations = self.__r.cmdj("irj")
         results = {relocation.name: self.base + relocation.vaddr for relocation in relocations.values() if "name" in relocation.keys()}
-        return DotDict(results)
+        return results
 
     def __get_strings(self):
-        strings = DotDict(self.__r.cmdj("izj"))
+        strings = self.__r.cmdj("izj")
         results = {string.string: self.base + string.vaddr for string in strings.values()}
-        return DotDict(results)
+        return results
 
     def __get_information(self):
-        info = DotDict(self.__r.cmdj("iIj"))
+        info = self.__r.cmdj("iIj")
         return info
 
     def __get_symbols(self):
-        symbols = DotDict(self.__r.cmdj("isj"))
+        symbols = self.__r.cmdj("isj")
         results = {symbol.name: self.base + symbol.vaddr for symbol in symbols.values()}
-        return DotDict(results)
+        return results
 
     def __str__(self):
         enabled = lambda x: "Enabled" if x else "Disabled"
@@ -57,28 +58,3 @@ class ELF:
         return result
 
     __repr__ = __str__
-
-
-# class Struct:
-#    def __init__(self, name: str, field: dict):
-#        self.name = name
-#        self._field = field
-#
-#    def __getattr__(self, name):
-#        if name in self._field.keys():
-#            return self._field[name]
-#        raise AttributeError
-#
-#    def __str__(self):
-#        return "".join(f"{value.type}\t{key}" for key, value in self._field.items())
-#
-#
-# class Function:
-#    def __init__(self, name: str, address: int, size: int, elf=None):
-#        self.name = name
-#        self.address = address
-#        self.size = size
-#        self.elf = elf
-#
-#    def __repr__(self):
-#        return f"{self.__class__.__name__}(name={self.name}, address={self.address:#x}, size={self.size:#x}, elf={self.elf})"

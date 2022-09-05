@@ -1,4 +1,5 @@
 import fcntl
+import hashlib
 import os
 import re
 import socket
@@ -6,8 +7,10 @@ import subprocess
 import sys
 import threading
 from enum import IntEnum
+from itertools import product
 from string import printable
 from time import sleep
+from typing import Callable
 
 from toyotama.util.log import get_logger
 
@@ -21,6 +24,16 @@ class Mode(IntEnum):
 
 class Connect:
     def __init__(self, target, mode=Mode.SOCKET, timeout=20.0, verbose=True, pause=True, raw_output=True, **args):
+        """_summary_
+
+        Args:
+            target (_type_): _description_
+            mode (_type_, optional): _description_. Defaults to Mode.SOCKET.
+            timeout (float, optional): _description_. Defaults to 20.0.
+            verbose (bool, optional): _description_. Defaults to True.
+            pause (bool, optional): _description_. Defaults to True.
+            raw_output (bool, optional): _description_. Defaults to True.
+        """
         self.mode = mode
         if mode not in Mode:
             logger.warning(f"Connect: {mode} is not defined.")
@@ -64,11 +77,22 @@ class Connect:
                 self.timeout = None
 
     def set_nonblocking(self, fh):
+        """Set nonblocking.
+
+        Args:
+            fh (_type_): _description_
+        """
         fd = fh.fileno()
         fl = fcntl.fcntl(fd, fcntl.F_GETFL)
         fcntl.fcntl(fd, fcntl.F_SETFL, fl | os.O_NONBLOCK)
 
-    def send(self, msg, end=b""):
+    def send(self, msg: int | str | bytes, end: str | bytes = b""):
+        """_summary_
+
+        Args:
+            msg (int | str | bytes): _description_
+            end (str | bytes, optional): _description_. Defaults to b"".
+        """
         if isinstance(msg, int):
             msg = str(msg).encode()
         if isinstance(msg, str):
@@ -94,17 +118,17 @@ class Connect:
         except Exception:
             self.is_alive = False
 
-    def sendline(self, message):
+    def sendline(self, message: str | bytes):
         self.send(message, end=b"\n")
 
-    def sendafter(self, term, message, end=b""):
+    def sendafter(self, term: bytes | str, message: bytes | str, end: bytes | str = b""):
         self.recvuntil(term=term)
         self.send(message, end=end)
 
-    def sendlineafter(self, term, message):
+    def sendlineafter(self, term: bytes | str, message: bytes | str):
         self.sendafter(term, message, end=b"\n")
 
-    def recv(self, n=2048, quiet=False):
+    def recv(self, n: int = 2048, quiet: bool = False):
         sleep(0.05)
         ret = b""
         try:
@@ -126,7 +150,7 @@ class Connect:
                 logger.info(f"[> {ret}")
         return ret
 
-    def recvuntil(self, term=b"\n") -> bytes:
+    def recvuntil(self, term: bytes | str = b"\n") -> bytes:
         ret = b""
         if isinstance(term, str):
             term = term.encode()
@@ -154,11 +178,19 @@ class Connect:
 
         return ret
 
-    def recvline(self, repeat=1) -> bytes | list[bytes]:
+    def recvline(self, repeat: int = 1) -> bytes | list[bytes]:
         buf = [self.recvuntil(term=b"\n") for i in range(repeat)]
         return buf.pop() if len(buf) == 1 else buf
 
-    def recvvalue(self, parse=lambda x: x):
+    def recvvalue(self, parse: Callable = lambda x: x):
+        """Receive a value and parse it.
+
+        Args:
+            parse (_type_, optional): _description_. Defaults to lambdax:x.
+
+        Returns:
+            _type_: _description_
+        """
         pattern = r"(?P<name>.*) *[=:] *(?P<value>.*)"
         pattern = re.compile(pattern)
         line = pattern.match(self.recvline().decode())
@@ -170,9 +202,15 @@ class Connect:
         return value
 
     def recvint(self) -> int:
+        """Receive a value and convert to an integer.
+
+        Returns:
+            int: _description_
+        """
         return self.recvvalue(parse=lambda x: int(x, 0))
 
     def interactive(self):
+        """Start an interactive shell."""
         if self.verbose:
             logger.info("Switching to interactive mode")
 
@@ -214,8 +252,6 @@ class Connect:
             t.join(timeout=0.1)
 
     def PoW(self, hashtype, match, pts=printable, begin=False, hex=False, length=20, start=b"", end=b""):
-        import hashlib
-        from itertools import product
 
         if isinstance(hashtype, bytes):
             hashtype = hashtype.decode()

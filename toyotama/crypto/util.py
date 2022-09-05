@@ -6,25 +6,31 @@ from operator import mul
 
 import gmpy2
 
+from toyotama.util.log import get_logger
 
-def xor(*array: tuple[bytes]):
+logger = get_logger()
+
+
+def xor(*array: tuple[bytes], strict: bool = True) -> bytes:
     """XOR strings
 
     Calculate `A XOR B`.
 
     Args:
-        A (bytes): The first string.
-        B (bytes): The second string.
+        A (bytes): A first string.
+        B (bytes): A second string.
     Returns:
         bytes: The result of `A XOR B`.
     """
+
     if len(array) == 0:
         return None
 
     ret = bytes(len(array[0]))
-    assert all(len(arr) == len(array[0]) for arr in array), "The lengths of all values must be same."
+
     for block in array:
-        ret = bytes(x ^ y for x, y in zip(ret, block))
+        ret = bytes(x ^ y for x, y in zip(ret, block, strict=strict))
+
     return ret
 
 
@@ -45,10 +51,28 @@ def rotr(data, shift: int, block_size: int = 16):
 
 
 def i2b(x: int, byteorder="big") -> bytes:
+    """Convert int to bytes.
+
+    Args:
+        x (int): A value.
+        byteorder (str, optional): Byteorder. Defaults to "big".
+
+    Returns:
+        bytes: Result.
+    """
     return x.to_bytes(x.bit_length() + 7 >> 3, byteorder=byteorder)
 
 
 def b2i(x: bytes, byteorder="big") -> int:
+    """Convert bytes to int.
+
+    Args:
+        x (bytes): A value.
+        byteorder (str, optional): Byteorder. Defaults to "big".
+
+    Returns:
+        int: Result.
+    """
     return int.from_bytes(x, byteorder=byteorder)
 
 
@@ -221,3 +245,21 @@ def factorize_from_kphi(n, kphi):
 
 def factorize_from_ed(n, d, e=0x10001):
     return factorize_from_kphi(n, e * d - 1)
+
+
+def inverse(a: int, n: int) -> int:
+    """Calculate modular inverse.
+
+    Args:
+        a (int): A value.
+        n (int): A modulus.
+
+    Returns:
+        int: _description_
+    """
+    x, _, g = extended_gcd(a, n)
+    if g != 1:
+        logger.warning("No inverse for the given modulus.")
+        return None
+
+    return x % n

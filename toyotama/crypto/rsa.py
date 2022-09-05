@@ -73,7 +73,19 @@ def wieners_attack(e: int, N: int) -> int | None:
     return None
 
 
-def lsb_decryption_oracle_attack(N: int, e: int, c: int, oracle: Callable, progress: bool = True):
+def lsb_decryption_oracle_attack(N: int, e: int, c: int, oracle: Callable, debug: bool = True) -> int:
+    """Perform LSB Decryption oracle attack.
+
+    Args:
+        N (int): A modulus.
+        e (int): A public exponent.
+        c (int): A ciphertext.
+        oracle (Callable): A decryption oracle. (2**e)*c = (2*m)**e (mod n) => oracle => m&1
+        debug (bool, optional): Show debug log. Defaults to True.
+
+    Returns:
+        int: _description_
+    """
     """LSB Decryption oracle attack
 
     Args:
@@ -84,6 +96,7 @@ def lsb_decryption_oracle_attack(N: int, e: int, c: int, oracle: Callable, progr
     Returns:
         int: The plaintext
     """
+
     from fractions import Fraction
 
     lb, ub = 0, N
@@ -91,7 +104,7 @@ def lsb_decryption_oracle_attack(N: int, e: int, c: int, oracle: Callable, progr
     i = 0
     nl = N.bit_length()
     while ub - lb > 1:
-        if progress:
+        if debug:
             logger.info(f"{(100*i//nl):>3}% [{i:>4}/{nl}]")
 
         mid = Fraction(lb + ub, 2)
