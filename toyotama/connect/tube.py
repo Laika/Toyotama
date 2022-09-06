@@ -87,7 +87,7 @@ class Tube(metaclass=ABCMeta):
 
         try:
             while not go.isSet():
-                sys.stdout.write(f"{Style.FG_VIOLET}[T]${Style.RESET} ")
+                sys.stdout.write(f"{Style.FG_VIOLET}>{Style.RESET} ")
                 sys.stdout.flush()
                 data = sys.stdin.readline()
                 if data:
