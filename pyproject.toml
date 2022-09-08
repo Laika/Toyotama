@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "toyotama"
-version = "0.9.6"
+version = "0.9.7"
 description = "Python library for CTF."
 authors = ["Laika <laika@albina.cc>"]
 maintainers = ["Laika <laika@albina.cc>"]
