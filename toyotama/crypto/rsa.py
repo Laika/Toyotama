@@ -1,12 +1,14 @@
 """RSA utility
 """
-from math import ceil
+from functools import reduce
+from math import ceil, isqrt
+from operator import mul
 from typing import Callable
 
 import gmpy2
 
-from toyotama.crypto.util import extended_gcd
-from toyotama.util.log import get_logger
+from ..util.log import get_logger
+from .util import extended_gcd, i2b, inverse
 
 logger = get_logger()
 
@@ -73,7 +75,19 @@ def wieners_attack(e: int, N: int) -> int | None:
     return None
 
 
-def lsb_decryption_oracle_attack(N: int, e: int, c: int, oracle: Callable, progress: bool = True):
+def lsb_decryption_oracle_attack(N: int, e: int, c: int, oracle: Callable, debug: bool = True) -> int:
+    """Perform LSB Decryption oracle attack.
+
+    Args:
+        N (int): A modulus.
+        e (int): A public exponent.
+        c (int): A ciphertext.
+        oracle (Callable): A decryption oracle. (2**e)*c = (2*m)**e (mod n) => oracle => m&1
+        debug (bool, optional): Show debug log. Defaults to True.
+
+    Returns:
+        int: _description_
+    """
     """LSB Decryption oracle attack
 
     Args:
@@ -84,6 +98,7 @@ def lsb_decryption_oracle_attack(N: int, e: int, c: int, oracle: Callable, progr
     Returns:
         int: The plaintext
     """
+
     from fractions import Fraction
 
     lb, ub = 0, N
@@ -91,7 +106,7 @@ def lsb_decryption_oracle_attack(N: int, e: int, c: int, oracle: Callable, progr
     i = 0
     nl = N.bit_length()
     while ub - lb > 1:
-        if progress:
+        if debug:
             logger.info(f"{(100*i//nl):>3}% [{i:>4}/{nl}]")
 
         mid = Fraction(lb + ub, 2)
@@ -103,3 +118,54 @@ def lsb_decryption_oracle_attack(N: int, e: int, c: int, oracle: Callable, progr
         i += 1
 
     return ceil(lb)
+
+
+class RSASolver:
+    def __init__(self):
+        self.checkers = [self._check_wieners_attack, self._check_modulus]
+        self.n = None
+        self.e = None
+        self.d = None
+        self.m = None
+        self.c = None
+        self.factors = []
+        self.phi = None
+        self.kphi = None
+        self.factorized = False
+
+    def solve(self, plaintext: bool = True) -> int | bytes | None:
+        for checker in self.checkers:
+            checker()
+
+        if self.factorized and self.e and self.n:
+            self.phi = reduce(mul, (p**k - p ** (k - 1) for p, k in self.factors))
+            self.d = inverse(self.e, self.phi)
+            self.m = pow(self.c, self.d, self.n)
+            if plaintext:
+                return i2b(self.m)
+            return self.m
+
+        logger.warning("No solution found.")
+
+    def _check_wieners_attack(self):
+        if self.e is None or self.n is None:
+            logger.warning("Either e or n is not set.")
+        m = wieners_attack(self.e, self.n)
+        if m:
+            logger.info("Wiener's attack succeeded.")
+            m = i2b(m)
+            return m
+
+    def _check_modulus(self):
+        if self.n is None:
+            logger.warning("n is not set.")
+            return
+
+        # Perfect root
+        _p = isqrt(self.n)
+        if _p**2 == self.n:
+            self.add_factor(_p, 2)
+            self.factorized = True
+
+    def add_factor(self, p, k=1):
+        self.factors.append((p, k))

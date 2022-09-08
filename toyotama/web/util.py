@@ -1,6 +1,7 @@
-def session_falsification(data, secret_key):
-    import flask.sessions
+import flask.sessions
 
+
+def session_falsification(data, secret_key):
     class App:
         def __init__(self, secret_key):
             self.secret_key = secret_key

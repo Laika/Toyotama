@@ -1,8 +1,9 @@
 import code
+import string
 from functools import singledispatch
 from itertools import zip_longest
 
-from toyotama.util.log import get_logger
+from .log import get_logger
 
 logger = get_logger()
 
@@ -223,9 +224,9 @@ def extract_flag_bytes(s, head="{", tail="}", unique=True):
 
 
 def random_string(
-    length,
-    plaintext_space="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789",
-    byte=True,
+    length: int,
+    alphabet: str | bytes = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789",
+    byte: bool = True,
 ):
     """Generate random string
 
@@ -234,7 +235,7 @@ def random_string(
     length: int
         Length of random string
 
-    plaintext_space: iterable
+    alphabet: str | bytes
         Each character is picked from `plaintext_space`
 
 
@@ -253,10 +254,10 @@ def random_string(
 
     from random import choices
 
-    rnd = choices(plaintext_space, k=length)
-    if isinstance(plaintext_space, bytes):
+    rnd = choices(alphabet, k=length)
+    if isinstance(alphabet, bytes):
         rnd = bytes(rnd)
-    if isinstance(plaintext_space, str):
+    if isinstance(alphabet, str):
         rnd = "".join(rnd)
     return rnd
 
@@ -382,3 +383,41 @@ def binary_to_image(data, padding=5, size=5, rev=False, image_size=(1000, 1000))
             x += 1
 
     return image.crop((0, 0, 2 * padding + w * size, 2 * padding + h * size))
+
+
+def de_bruijn(length: int, alphabet, *, n: int = 4) -> str:
+    k = len(alphabet)
+    a = [0] * n * k
+    sequence = []
+
+    def db(t, p):
+        if t > n:
+            if n % p == 0:
+                sequence.extend(a[1 : p + 1])
+        else:
+            a[t] = a[t - p]
+            db(t + 1, p)
+            for j in range(a[t - p] + 1, k):
+                a[t] = j
+                db(t + 1, t)
+
+    db(1, 1)
+    return "".join(alphabet[i] for i in sequence)[:length]
+
+
+class CyclicString:
+    def __init__(self, alphabet=string.ascii_uppercase + string.ascii_lowercase):
+        self.alphabet = alphabet
+        self.generated = ""
+
+    def generate(self, length: int) -> str:
+        if length <= len(self.generated):
+            return self.generated
+        self.generated = de_bruijn(length, self.alphabet)
+        return self.generated
+
+    def find(self, subseq: str) -> int:
+        if any(c not in self.alphabet for c in subseq):
+            return -1
+
+        return self.generated.find(subseq)

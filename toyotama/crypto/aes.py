@@ -3,10 +3,10 @@ from itertools import pairwise
 from random import sample
 from typing import Callable
 
-from toyotama.crypto.util import xor
-from toyotama.util.connect import Connect
-from toyotama.util.log import get_logger
-from toyotama.util.util import to_block
+from ..connect.socket import Socket
+from ..util.log import get_logger
+from ..util.util import to_block
+from .util import xor
 
 logger = get_logger()
 
@@ -164,7 +164,7 @@ class PKCS7PaddingOracleAttack:
 
 
 def test_padding():
-    _r = Connect("nc localhost 50000")
+    _r = Socket("nc localhost 50000")
 
     def oracle(ciphertext: bytes, iv: bytes) -> bool:
         _r.sendlineafter(b"> ", (iv + ciphertext).hex())

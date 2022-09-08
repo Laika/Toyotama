@@ -1,8 +1,8 @@
 from pathlib import Path
 
-from toyotama.util.integer import Int32, Int64, UInt16, UInt32, UInt64, UInt8
-from toyotama.util.log import Logger
-from toyotama.util.util import DotDict
+from ..integer import Int32, Int64, UInt16, UInt32, UInt64, UInt8
+from ..log import Logger
+from ..util import DotDict
 
 from . import const
 from . import struct

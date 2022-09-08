@@ -5,7 +5,7 @@ from functools import singledispatch
 
 import requests
 
-from toyotama.util.log import get_logger
+from ..util.log import get_logger
 
 logger = get_logger()
 
