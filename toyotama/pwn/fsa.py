@@ -1,5 +1,5 @@
-from .util import p32, p64
 from ..util.log import get_logger
+from .util import p32, p64
 
 logger = get_logger()
 

@@ -1,7 +1,7 @@
 """Crypto Utility
 """
 from functools import reduce
-from math import ceil, gcd, lcm
+from math import ceil, gcd, isqrt, lcm
 from operator import mul
 
 import gmpy2
@@ -193,7 +193,7 @@ def chinese_remainder(a: list[int], m: list[int]) -> tuple[int, int]:
 def bsgs(g, y, p, q=None):
     if not q:
         q = p
-    m = ceil(gmpy2.isqrt(q))
+    m = ceil(isqrt(q))
     table = {}
     b = 1
     for i in range(m):
