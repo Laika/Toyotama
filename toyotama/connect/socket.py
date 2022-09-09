@@ -32,7 +32,7 @@ class Socket(Tube):
 
         return buf
 
-    def send(self, msg: bytes | int | str, term: bytes | int | str):
+    def send(self, msg: bytes | int | str, term: bytes | int | str = b""):
         if isinstance(msg, int):
             msg = str(msg).encode()
         if isinstance(msg, str):

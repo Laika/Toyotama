@@ -58,11 +58,11 @@ class Tube(metaclass=ABCMeta):
         ...
 
     def sendline(self, msg: bytes | int | str):
-        self.send(msg, end=b"\n")
+        self.send(msg, term=b"\n")
 
     def sendlineafter(self, term: bytes | str, msg: bytes | int | str):
         data = self.recvuntil(term)
-        self.sendline(msg, end=b"\n")
+        self.sendline(msg)
         return data
 
     def interactive(self):
