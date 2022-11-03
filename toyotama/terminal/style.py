@@ -2,7 +2,7 @@ from collections import namedtuple
 
 RED = "#DC3545"
 YELLOW = "#FFC107"
-BLUE = "#0057d9"
+BLUE = "#1E8CFB"
 GREEN = "#228B22"
 MAGENTA = "#FF00FF"
 CYAN = "#00FFFF"

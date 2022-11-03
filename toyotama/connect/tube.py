@@ -1,3 +1,4 @@
+import ast
 import re
 import sys
 import threading
@@ -16,7 +17,7 @@ class Tube(metaclass=ABCMeta):
         ...
 
     @abstractmethod
-    def recv(self, n: int = 4096, quiet: bool = False):
+    def recv(self, n: int = 4096, debug: bool = False):
         ...
 
     def recvuntil(self, term: bytes | str) -> bytes | str:
@@ -25,33 +26,35 @@ class Tube(metaclass=ABCMeta):
             term = term.encode()
 
         while not buf.endswith(term):
-            buf += self.recv(1, quiet=True)
+            buf += self.recv(1, debug=False)
 
-        logger.info(f"[> {buf}")
+        logger.info(f"[> {buf!r}")
 
         return buf
 
-    def recvline(self, repeat: int = 1) -> bytes | str:
-        buf = [self.recvuntil(term=b"\n") for _ in range(repeat)]
-        return buf.pop() if len(buf) == 1 else buf
+    def recvlines(self, repeat: int) -> list[bytes | str]:
+        return [self.recvline() for _ in range(repeat)]
 
-    def recvlineafter(self, term: bytes | str) -> bytes | str:
+    def recvline(self) -> bytes | str:
+        return self.recvuntil(term=b"\n")
+
+    def recvlineafter(self, term: bytes | str) -> bytes | str | list[bytes | str]:
         self.recvuntil(term)
         return self.recvline()
 
-    def recvvalue(self, parse: Callable = lambda x: x):
-        pattern = r"(?P<name>.*) *[=:] *(?P<value>.*)"
-        pattern = re.compile(pattern)
+    def recvvalue(self, parser: Callable = lambda x: ast.literal_eval(x)):
+        pattern_raw = r"(?P<name>.*) *[=:] *(?P<value>.*)"
+        pattern = re.compile(pattern_raw)
         line = pattern.match(self.recvline().decode())
         name = line.group("name").strip()
-        value = parse(line.group("value"))
+        value = parser(line.group("value"))
 
-        logger.info(f"{name}: {value}")
+        logger.debug(f"{name}: {value}")
 
         return value
 
     def recvint(self) -> int:
-        return self.recvvalue(parse=lambda x: int(x, 0))
+        return self.recvvalue(parser=lambda x: int(x, 0))
 
     @abstractmethod
     def send(self, msg: int | str | bytes, term: str | bytes = b""):
@@ -73,7 +76,7 @@ class Tube(metaclass=ABCMeta):
         def recv_thread():
             while not go.isSet():
                 try:
-                    buf = self.recv(quiet=True)
+                    buf = self.recv(debug=False)
                     if buf:
                         sys.stdout.write(buf.decode())
                         sys.stdout.flush()

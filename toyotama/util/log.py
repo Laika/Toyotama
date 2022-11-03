@@ -33,7 +33,7 @@ class CustomFormatter(logging.Formatter):
         return formatter.format(record)
 
 
-def get_logger(name="toyotama", loglevel="INFO", colored=True):
+def get_logger(name="toyotama", loglevel="DEBUG", colored=True):
     logging._srcfile = None
     logging.logThreads = False
     logging.logProcesses = False

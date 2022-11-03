@@ -14,13 +14,14 @@ classifiers = [
   "Topic :: Software Development :: Libraries :: Python Modules",
   "Programming Language :: Python :: 3",
   "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
   "Operating System :: POSIX :: Linux",
 ]
 packages = [
   { include = "toyotama" },
 ]
 [tool.poetry.dependencies]
-python = "^3.10"
+python = ">=3.8"
 gmpy2 = "^2.1.2"
 r2pipe = "^1.6.5"
 requests = "^2.27.1"

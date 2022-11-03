@@ -13,13 +13,13 @@ logger = get_logger()
 
 
 class Process(Tube):
-    def __init__(self, args: list[str], env: list[str] = None):
+    def __init__(self, args: list[str], env: dict[str, str] | None = None):
         super().__init__()
-        self.path = Path(args[0])
-        self.args = args
-        self.env = env
+        self.path: Path = Path(args[0])
+        self.args: list[str] = args
+        self.env: dict[str, str] | None = env
         self.proc = None
-        self.returncode = None
+        self.returncode: int | None = None
 
         master, slave = pty.openpty()
         tty.setraw(master)
@@ -52,42 +52,51 @@ class Process(Tube):
     def _poll(self):
         self.proc.poll()
         if self.proc.returncode and self.returncode is None:
-            self.returncode = self.proc.returncode
-            logger.error(f"{self.path!s} terminated: {signal.strsignal(-self.returncode)} (PID={self.proc.pid})")
+            self.returncode = -self.proc.returncode
+            logger.error(f"{self.path!s} terminated: {signal.strsignal(self.returncode)} (PID={self.proc.pid})")
 
         return self.returncode
 
     def _is_alive(self):
         return self._poll() is None
 
-    def recv(self, n=4096, quiet=False) -> bytes:
+    def recv(self, n: int = 4096, debug: bool = True) -> bytes:
         try:
             buf = self.proc.stdout.read(n)
         except Exception as e:
             logger.error(e)
-            return None
+            return b""
 
-        if not quiet:
-            logger.info(f"[> {buf}")
+        if debug:
+            logger.debug(f"[> {buf!r}")
 
         self._poll()
 
-        return buf
+        return buf or b""
 
-    def send(self, msg: bytes | int | str):
+    def send(self, msg: bytes | int | str, term: bytes | str = b"", debug: bool = True):
         self._poll()
         if isinstance(msg, str):
             msg = msg.encode()
         if isinstance(msg, int):
             msg = str(msg).encode()
 
+        msg += term
+
         try:
             self.proc.stdin.write(msg)
             self.proc.stdin.flush()
+            if debug:
+                logger.debug(f"<] {msg!r}")
         except IOError:
             logger.warning("Broken pipe")
         except Exception as e:
             logger.error(e)
+
+    def gdb(self, script: list[str] | None = None):
+        self.gdb = subprocess.run(
+            ["tmux", "split-window", "-h", "-c", "", "--", "gdb", "-p", str(self.pid)],
+        )
 
     def close(self):
         if self.proc is None:
