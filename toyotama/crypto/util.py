@@ -11,7 +11,7 @@ from ..util.log import get_logger
 logger = get_logger()
 
 
-def xor(*array: tuple[bytes], strict: bool = False) -> bytes:
+def xor(*array: bytes, strict: bool = False) -> bytes:
     """XOR strings
 
     Calculate `A XOR B`.
