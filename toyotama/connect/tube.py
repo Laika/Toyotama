@@ -57,11 +57,11 @@ class Tube(metaclass=ABCMeta):
         return self.recvvalue(parser=lambda x: int(x, 0))
 
     @abstractmethod
-    def send(self, msg: int | str | bytes, term: str | bytes = b""):
+    def send(self, message: int | str | bytes, term: str | bytes = b""):
         ...
 
-    def sendline(self, msg: bytes | int | str):
-        self.send(msg, term=b"\n")
+    def sendline(self, message: bytes | int | str):
+        self.send(message, term=b"\n")
 
     def sendlineafter(self, term: bytes | str, msg: bytes | int | str):
         data = self.recvuntil(term)
@@ -74,7 +74,7 @@ class Tube(metaclass=ABCMeta):
         go = threading.Event()
 
         def recv_thread():
-            while not go.isSet():
+            while not go.is_set():
                 try:
                     buf = self.recv(debug=False)
                     if buf:
@@ -89,7 +89,7 @@ class Tube(metaclass=ABCMeta):
         t.start()
 
         try:
-            while not go.isSet():
+            while not go.is_set():
                 sys.stdout.write(f"{Style.FG_VIOLET}>{Style.RESET} ")
                 sys.stdout.flush()
                 data = sys.stdin.readline()

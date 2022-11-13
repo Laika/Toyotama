@@ -21,8 +21,9 @@ class Socket(Tube):
         return self.sock
 
     def recv(self, n: int = 4096, debug: bool = True):
+        buf = b""
         try:
-            buf = self.sock.recv(n)
+            buf += self.sock.recv(n)
         except Exception as e:
             logger.error(e)
 
@@ -31,23 +32,22 @@ class Socket(Tube):
 
         return buf
 
-    def send(self, message: bytes | int | str, term_char: bytes | str = b""):
-        msg: bytes = b""
-        term: bytes = b""
+    def send(self, message: bytes | int | str, term: bytes | str = b""):
+        payload = b""
 
-        if isinstance(term_char, str):
-            term = term_char.encode()
+        if isinstance(term, str):
+            term = term.encode()
 
-        if isinstance(msg, int):
-            msg += str(msg).encode()
-        if isinstance(msg, str):
-            msg += msg.encode()
+        if isinstance(message, int):
+            payload += str(message).encode()
+        if isinstance(message, str):
+            payload += message.encode()
 
-        msg += term
+        payload += term
 
         try:
-            self.sock.sendall(msg)
-            logger.debug(f"<] {msg!r}")
+            self.sock.sendall(payload)
+            logger.debug(f"<] {payload!r}")
         except Exception as e:
             self.is_alive = False
             logger.error(e)
