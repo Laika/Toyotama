@@ -20,7 +20,7 @@ class Tube(metaclass=ABCMeta):
     def recv(self, n: int = 4096, debug: bool = False):
         ...
 
-    def recvuntil(self, term: bytes | str) -> bytes | str:
+    def recvuntil(self, term: bytes) -> bytes:
         buf = b""
         if isinstance(term, str):
             term = term.encode()
@@ -32,13 +32,13 @@ class Tube(metaclass=ABCMeta):
 
         return buf
 
-    def recvlines(self, repeat: int) -> list[bytes | str]:
+    def recvlines(self, repeat: int) -> bytes:
         return [self.recvline() for _ in range(repeat)]
 
-    def recvline(self) -> bytes | str:
+    def recvline(self) -> bytes:
         return self.recvuntil(term=b"\n")
 
-    def recvlineafter(self, term: bytes | str) -> bytes | str | list[bytes | str]:
+    def recvlineafter(self, term: bytes) -> bytes | list[bytes]:
         self.recvuntil(term)
         return self.recvline()
 
@@ -57,13 +57,13 @@ class Tube(metaclass=ABCMeta):
         return self.recvvalue(parser=lambda x: int(x, 0))
 
     @abstractmethod
-    def send(self, message: int | str | bytes, term: str | bytes = b""):
+    def send(self, message: bytes | str | int, term: bytes = b""):
         ...
 
-    def sendline(self, message: bytes | int | str):
+    def sendline(self, message: bytes | int):
         self.send(message, term=b"\n")
 
-    def sendlineafter(self, term: bytes | str, msg: bytes | int | str):
+    def sendlineafter(self, term: bytes, msg: bytes | int):
         data = self.recvuntil(term)
         self.sendline(msg)
         return data

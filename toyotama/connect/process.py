@@ -74,14 +74,15 @@ class Process(Tube):
 
         return buf or b""
 
-    def send(self, msg: bytes | int | str, term: bytes | str = b"", debug: bool = True):
+    def send(self, message: bytes | str | int, term: bytes = b"", debug: bool = True):
         self._poll()
-        if isinstance(msg, str):
-            msg = msg.encode()
-        if isinstance(msg, int):
-            msg = str(msg).encode()
+        payload = b""
+        if isinstance(message, str):
+            payload += message.encode()
+        if isinstance(message, int):
+            payload += str(message).encode()
 
-        msg += term
+        payload += term
 
         try:
             self.proc.stdin.write(msg)

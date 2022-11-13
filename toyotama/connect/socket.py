@@ -7,7 +7,7 @@ logger = get_logger()
 
 
 class Socket(Tube):
-    def __init__(self, target: str, timeout: float = 20.0):
+    def __init__(self, target: str, timeout: float = 30.0):
         super().__init__()
         _, host, port = target.split()
         self.host: str = host
@@ -32,7 +32,7 @@ class Socket(Tube):
 
         return buf
 
-    def send(self, message: bytes | int | str, term: bytes | str = b""):
+    def send(self, message: bytes | int | str, term: bytes = b""):
         payload = b""
 
         if isinstance(term, str):
