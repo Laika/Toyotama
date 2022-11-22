@@ -8,25 +8,6 @@ from .log import get_logger
 logger = get_logger()
 
 
-class DotDict(dict):
-    __getattr__ = dict.__getitem__
-    __setattr__ = dict.__setitem__
-    __delattr__ = dict.__delitem__
-
-    def __init__(self, data):
-        if isinstance(data, dict):
-            for key, value in data.items():
-                if hasattr(value, "keys"):
-                    value = DotDict(value)
-                if isinstance(value, list):
-                    self[key] = DotDict(value)
-                else:
-                    self[key] = value
-        elif isinstance(data, list):
-            for i, v in enumerate(data):
-                self[i] = DotDict(v)
-
-
 class MarkdownTable:
     def __init__(self, header=None, rows=None):
         self.__header = header or ()

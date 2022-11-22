@@ -18,7 +18,7 @@ class Process(Tube):
         self.path: Path = Path(args[0])
         self.args: list[str] = args
         self.env: dict[str, str] | None = env
-        self.proc = None
+        self.proc: subprocess.Popen
         self.returncode: int | None = None
 
         master, slave = pty.openpty()

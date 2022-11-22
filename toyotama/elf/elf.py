@@ -29,7 +29,7 @@ class ELF:
         return self._base
 
     @base.setter
-    def base(self, value: int) -> int:
+    def base(self, value: int) -> None:
         self._base = value
 
     def rop_gadget(self, pattern: str):

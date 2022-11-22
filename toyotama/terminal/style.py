@@ -16,20 +16,22 @@ WHITE = "#FFFFFF"
 BLACK = "#202020"
 
 
-def rgb_to_ansi_color_code(rgb: str) -> str:
+def hex_to_ansi_color_code(rgb: str) -> tuple[int, int, int]:
     rgb = rgb.lstrip("#")
-    assert len(rgb) == 6
+    if len(rgb) != 6:
+        return 0, 0, 0
+
     r, g, b = map(lambda x: int(x, 16), (rgb[0:2], rgb[2:4], rgb[4:6]))
     return r, g, b
 
 
 def fg(rgb) -> str:
-    r, g, b = rgb_to_ansi_color_code(rgb)
+    r, g, b = hex_to_ansi_color_code(rgb)
     return f"\x1b[38;2;{r};{g};{b}m"
 
 
 def bg(rgb) -> str:
-    r, g, b = rgb_to_ansi_color_code(rgb)
+    r, g, b = hex_to_ansi_color_code(rgb)
     return f"\x1b[48;2;{r};{g};{b}m"
 
 
