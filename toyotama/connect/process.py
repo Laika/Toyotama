@@ -61,6 +61,8 @@ class Process(Tube):
         return self._poll() is None
 
     def recv(self, n: int = 4096, debug: bool = True) -> bytes:
+        if self.proc.stdout is None:
+            return b""
         try:
             buf = self.proc.stdout.read(n)
         except Exception as e:
@@ -74,7 +76,9 @@ class Process(Tube):
 
         return buf or b""
 
-    def send(self, message: bytes | str | int, term: bytes = b"", debug: bool = True):
+    def send(self, message: bytes | str | int, term: bytes | str = b"", debug: bool = True):
+        if self.proc.stdin is None:
+            return
         self._poll()
         payload = b""
         if isinstance(message, str):
@@ -82,13 +86,16 @@ class Process(Tube):
         if isinstance(message, int):
             payload += str(message).encode()
 
+        if isinstance(term, str):
+            term = term.encode()
+
         payload += term
 
         try:
-            self.proc.stdin.write(msg)
+            self.proc.stdin.write(payload)
             self.proc.stdin.flush()
             if debug:
-                logger.debug(f"<] {msg!r}")
+                logger.debug(f"<] {payload!r}")
         except IOError:
             logger.warning("Broken pipe")
         except Exception as e:

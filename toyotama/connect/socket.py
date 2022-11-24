@@ -20,7 +20,9 @@ class Socket(Tube):
     def _socket(self):
         return self.sock
 
-    def recv(self, n: int = 4096, debug: bool = True):
+    def recv(self, n: int = 4096, debug: bool = True) -> bytes:
+        if self.sock is None:
+            return b""
         buf = b""
         try:
             buf += self.sock.recv(n)
@@ -32,16 +34,19 @@ class Socket(Tube):
 
         return buf
 
-    def send(self, message: bytes | int | str, term: bytes = b""):
-        payload = b""
+    def send(self, message: bytes | str | int, term: bytes | str = b""):
+        if self.sock is None:
+            return
 
-        if isinstance(term, str):
-            term = term.encode()
+        payload = b""
 
         if isinstance(message, int):
             payload += str(message).encode()
         if isinstance(message, str):
             payload += message.encode()
+
+        if isinstance(term, str):
+            term = term.encode()
 
         payload += term
 

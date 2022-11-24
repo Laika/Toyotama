@@ -4,7 +4,7 @@ import sys
 import threading
 import time
 from abc import ABCMeta, abstractmethod
-from typing import Callable
+from typing import Any, Callable
 
 from ..terminal.style import Style
 from ..util.log import get_logger
@@ -20,32 +20,34 @@ class Tube(metaclass=ABCMeta):
     def recv(self, n: int = 4096, debug: bool = False):
         ...
 
-    def recvuntil(self, term: bytes) -> bytes:
+    def recvuntil(self, term: bytes | str) -> bytes:
         buf = b""
         if isinstance(term, str):
             term = term.encode()
 
         while not buf.endswith(term):
-            buf += self.recv(1, debug=False)
+            buf += self.recv(1, debug=False) or b""
 
         logger.info(f"[> {buf!r}")
 
         return buf
 
-    def recvlines(self, repeat: int) -> bytes:
+    def recvlines(self, repeat: int) -> list[bytes]:
         return [self.recvline() for _ in range(repeat)]
 
     def recvline(self) -> bytes:
         return self.recvuntil(term=b"\n")
 
-    def recvlineafter(self, term: bytes) -> bytes | list[bytes]:
+    def recvlineafter(self, term: bytes | str) -> bytes | list[bytes]:
         self.recvuntil(term)
         return self.recvline()
 
-    def recvvalue(self, parser: Callable = lambda x: ast.literal_eval(x)):
+    def recvvalue(self, parser: Callable = lambda x: ast.literal_eval(x)) -> Any:
         pattern_raw = r"(?P<name>.*) *[=:] *(?P<value>.*)"
         pattern = re.compile(pattern_raw)
         line = pattern.match(self.recvline().decode())
+        if not line:
+            return None
         name = line.group("name").strip()
         value = parser(line.group("value"))
 
@@ -57,15 +59,20 @@ class Tube(metaclass=ABCMeta):
         return self.recvvalue(parser=lambda x: int(x, 0))
 
     @abstractmethod
-    def send(self, message: bytes | str | int, term: bytes = b""):
+    def send(self, message: bytes | str | int, term: bytes | str = b""):
         ...
 
-    def sendline(self, message: bytes | int):
+    def sendline(self, message: bytes | str | int):
         self.send(message, term=b"\n")
 
-    def sendlineafter(self, term: bytes, msg: bytes | int):
+    def sendafter(self, term: bytes | str, message: bytes | str | int):
         data = self.recvuntil(term)
-        self.sendline(msg)
+        self.send(message)
+        return data
+
+    def sendlineafter(self, term: bytes | str, message: bytes | str | int):
+        data = self.recvuntil(term)
+        self.sendline(message)
         return data
 
     def interactive(self):
