@@ -1,4 +1,5 @@
 from pathlib import Path
+import re
 
 import r2pipe
 
@@ -11,11 +12,13 @@ logger = get_logger()
 class ELF:
     def __init__(self, filename: str, level: int = 4):
         self.filename = Path(filename)
+        with open(self.filename) as f:
+            self.bin = bytearray(f.read())
 
         self._base = 0x000000
-        logger.info(f"Open {self.filename!s}")
+        logger.info(f'[{self.__class__.__name__}] Open "{self.filename!s}"')
         self._r = r2pipe.open(filename)
-        logger.info(f"[r2pipe] {'a'*level}")
+        logger.info(f"[{self.__class__.__name__}] {'a'*level}")
         self._r.cmd("a" * level)
 
         self._funcs = self._get_funcs()
@@ -51,7 +54,7 @@ class ELF:
             return {reloc["name"]: self._base + reloc["vaddr"] for reloc in self._relocs if "name" in reloc.keys()}
 
         for reloc in self._relocs:
-            if "name" in reloc.keys() and reloc["name"] == target:
+            if "name" in reloc.keys() and re.search(target, reloc["name"]):
                 return self._base + reloc["vaddr"]
 
         return None
@@ -61,7 +64,7 @@ class ELF:
             return {func["name"]: self._base + func["offset"] for func in self._funcs}
 
         for func in self._funcs:
-            if func["name"].removeprefix("sym.").removeprefix("imp.") == target:
+            if re.search(target, func["name"]):
                 return self._base + func["offset"]
 
         return None
@@ -71,7 +74,7 @@ class ELF:
             return {str_["string"]: self._base + str_["vaddr"] for str_ in self._strs}
 
         for str_ in self._strs:
-            if str_["string"] == target:
+            if re.search(target, str_["string"]):
                 return self._base + str_["vaddr"]
 
         return None
@@ -81,7 +84,7 @@ class ELF:
             return {sym["name"]: self._base + sym["vaddr"] for sym in self._syms}
 
         for sym in self._syms:
-            if sym["name"] == target:
+            if re.search(target, sym["name"]):
                 return self._base + sym["vaddr"]
 
         return None
@@ -126,6 +129,22 @@ class ELF:
         result += mt.dump()
 
         return result
+
+    def asm(address: int, assembly):
+        self.bin[address] = assembly
+
+    def save(self, name: str):
+        with open(name, "wb") as f:
+            f.write(self.bin)
+        log.info(f"Saved {name!s}")
+
+    def find(self, target) -> dict:
+        results = {}
+        results |= {"plt": self.plt(target)}
+        results |= {"str": self.str(target)}
+        results |= {"sym": self.sym(target)}
+        results |= {"got": self.got(target)}
+        return results
 
     # alias
     relocs = got

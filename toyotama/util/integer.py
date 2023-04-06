@@ -79,25 +79,31 @@ class Int:
         return Int(self.x & other.x, self.bits, self.signed)
 
     def __eq__(self, other):
+        if not isinstance(other, Int):
+            return NotImplemented
         return self.x == other.x
 
-    def __ne__(self, other):
-        return self.x != other.x
-
     def __lt__(self, other):
+        if not isinstance(other, Int):
+            return NotImplemented
         return self.x < other.x
 
-    def __gt__(self, other):
-        return self.x > other.x
-
     def __le__(self, other):
-        return self.x <= other.x
+        return self.__lt__(other) or self.__eq__(other)
+
+    def __gt__(self, other):
+        return not __self.__le__(other)
 
     def __ge__(self, other):
-        return self.x >= other.x
+        return not __lt__(other)
 
 
 class UInt8(Int):
+    def __init__(self, value):
+        super().__init__(self, value, bits=8, signed=False)
+
+
+class UChar(Int):
     def __init__(self, value):
         super().__init__(self, value, bits=8, signed=False)
 

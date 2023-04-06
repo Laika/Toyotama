@@ -17,7 +17,7 @@ class Tube(metaclass=ABCMeta):
         ...
 
     @abstractmethod
-    def recv(self, n: int = 4096, debug: bool = False):
+    def recv(self, n: int = 4096, debug: bool = False) -> bytes:
         ...
 
     def recvuntil(self, term: bytes | str) -> bytes:
@@ -28,7 +28,7 @@ class Tube(metaclass=ABCMeta):
         while not buf.endswith(term):
             buf += self.recv(1, debug=False) or b""
 
-        logger.info(f"[> {buf!r}")
+        logger.debug(f"[> {buf!r}")
 
         return buf
 
@@ -42,7 +42,7 @@ class Tube(metaclass=ABCMeta):
         self.recvuntil(term)
         return self.recvline()
 
-    def recvvalue(self, parser: Callable = lambda x: ast.literal_eval(x)) -> Any:
+    def recvvalue(self, parser: Callable = ast.literal_eval) -> Any:
         pattern_raw = r"(?P<name>.*) *[=:] *(?P<value>.*)"
         pattern = re.compile(pattern_raw)
         line = pattern.match(self.recvline().decode())

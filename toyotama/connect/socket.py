@@ -41,13 +41,13 @@ class Socket(Tube):
         payload = b""
 
         if isinstance(message, int):
-            payload += str(message).encode()
+            message = str(message).encode()
         if isinstance(message, str):
-            payload += message.encode()
+            message = message.encode()
+        payload += message
 
         if isinstance(term, str):
             term = term.encode()
-
         payload += term
 
         try:

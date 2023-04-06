@@ -7,7 +7,7 @@ WIDTH = 8
 
 class CustomFormatter(logging.Formatter):
     def __init__(self, colored=True):
-        self.fmt = "[%(levelname)s] %(message)s"
+        self.fmt = "[ %(levelname)7s | %(asctime)s ] %(message)s"
         self.date_format = "%Y-%m-%dT%T"
         self.FORMATS = {}
         if colored:
