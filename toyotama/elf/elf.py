@@ -1,5 +1,5 @@
-from pathlib import Path
 import re
+from pathlib import Path
 
 import r2pipe
 
@@ -12,7 +12,7 @@ logger = get_logger()
 class ELF:
     def __init__(self, filename: str, level: int = 4):
         self.filename = Path(filename)
-        with open(self.filename) as f:
+        with open(self.filename, "rb") as f:
             self.bin = bytearray(f.read())
 
         self._base = 0x000000

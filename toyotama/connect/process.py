@@ -65,6 +65,8 @@ class Process(Tube):
             return b""
         try:
             buf = self.proc.stdout.read(n)
+            if buf:
+                self.recv_bytes += len(buf)
         except Exception as e:
             logger.error(e)
             return b""
@@ -93,6 +95,7 @@ class Process(Tube):
 
         try:
             self.proc.stdin.write(payload)
+            self.send_bytes += len(payload)
             self.proc.stdin.flush()
             if debug:
                 logger.debug(f"<] {payload!r}")

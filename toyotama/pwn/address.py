@@ -1,9 +1,17 @@
 from toyotama.pwn.util import p8, p16, p32, p64
 
 
-class Address(object):
+class Address(int):
     def __init__(self, address: int):
+        super().__init__()
         self.address = address
+
+    def __str__(self) -> str:
+        res = hex(self.address)
+        return res
+
+    def hex(self) -> str:
+        return hex(self.address)
 
     def __add__(self, o):
         if not isinstance(o, int):

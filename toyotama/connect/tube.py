@@ -14,7 +14,8 @@ logger = get_logger()
 
 class Tube(metaclass=ABCMeta):
     def __init__(self):
-        ...
+        self.recv_bytes = 0
+        self.send_bytes = 0
 
     @abstractmethod
     def recv(self, n: int = 4096, debug: bool = False) -> bytes:

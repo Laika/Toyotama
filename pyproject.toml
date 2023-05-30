@@ -17,9 +17,8 @@ classifiers = [
   "Programming Language :: Python :: 3.11",
   "Operating System :: POSIX :: Linux",
 ]
-packages = [
-  { include = "toyotama" },
-]
+packages = [{ include = "toyotama" }]
+
 [tool.poetry.dependencies]
 python = ">=3.8"
 gmpy2 = "^2.1.2"

@@ -29,6 +29,8 @@ class Socket(Tube):
         except Exception as e:
             logger.error(e)
 
+        self.recv_bytes += len(buf)
+
         if debug:
             logger.debug(f"[> {buf!r}")
 
@@ -50,12 +52,25 @@ class Socket(Tube):
             term = term.encode()
         payload += term
 
+        self.send_bytes += len(payload)
+
         try:
             self.sock.sendall(payload)
             logger.debug(f"<] {payload!r}")
         except Exception as e:
             self.is_alive = False
             logger.error(e)
+
+    def pow(pattern: bytes, start: str | None = None, end: str | None = None, hash_func: str = "sha256") -> str:
+        command = "pow"
+        args = ["--hash", hash_func]
+        if start:
+            args += ["--start", start]
+        if end:
+            args += ["--end", end]
+        args += [pattern]
+        r = subprocess.run([command, *args], capture_output=True).stdout.decode().strip()
+        return r
 
     def close(self):
         if self.sock:
