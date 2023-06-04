@@ -100,7 +100,7 @@ class Tube(metaclass=ABCMeta):
                 try:
                     buf = self.recv(debug=False)
                     if buf:
-                        sys.stdout.write(buf.decode())
+                        sys.stdout.buffer.write(buf)
                         sys.stdout.flush()
                 except EOFError:
                     logger.error("❌ Got EOF while reading in interactive")
