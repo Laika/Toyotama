@@ -42,14 +42,10 @@ class Socket(Tube):
 
         payload = b""
 
-        if isinstance(message, int):
-            message = str(message).encode()
-        if isinstance(message, str):
-            message = message.encode()
+        message = self._to_bytes(message)
         payload += message
 
-        if isinstance(term, str):
-            term = term.encode()
+        term = self._to_bytes(term)
         payload += term
 
         self.send_bytes += len(payload)

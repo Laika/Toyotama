@@ -13,6 +13,8 @@ logger = get_logger()
 
 
 class Tube(metaclass=ABCMeta):
+    INPUT_READ_DELAY: float = 0.05
+
     def __init__(self):
         self.recv_bytes = 0
         self.send_bytes = 0
@@ -21,10 +23,19 @@ class Tube(metaclass=ABCMeta):
     def recv(self, n: int = 4096, debug: bool = False) -> bytes:
         ...
 
+    def _to_bytes(self, value: bytes | str | int, encode: str = "utf-8") -> bytes:
+        if isinstance(value, bytes):
+            return value
+        if isinstance(value, str):
+            return value.encode(encode)
+        if isinstance(value, int):
+            return str(value).encode(encode)
+
+        raise ValueError(f"Cannot convert {value!r} to bytes.")
+
     def recvuntil(self, term: bytes | str) -> bytes:
         buf = b""
-        if isinstance(term, str):
-            term = term.encode()
+        term = self._to_bytes(term)
 
         while not buf.endswith(term):
             buf += self.recv(1, debug=False) or b""
@@ -33,11 +44,11 @@ class Tube(metaclass=ABCMeta):
 
         return buf
 
-    def recvlines(self, repeat: int) -> list[bytes]:
-        return [self.recvline() for _ in range(repeat)]
-
     def recvline(self) -> bytes:
         return self.recvuntil(term=b"\n")
+
+    def recvlines(self, repeat: int) -> list[bytes]:
+        return [self.recvline() for _ in range(repeat)]
 
     def recvlineafter(self, term: bytes | str) -> bytes | list[bytes]:
         self.recvuntil(term)
@@ -59,6 +70,9 @@ class Tube(metaclass=ABCMeta):
     def recvint(self) -> int:
         return self.recvvalue(parser=lambda x: int(x, 0))
 
+    def recvhex(self) -> bytes:
+        return self.recvvalue(parser=lambda x: bytes.fromhex(x))
+
     @abstractmethod
     def send(self, message: bytes | str | int, term: bytes | str = b""):
         ...
@@ -66,7 +80,7 @@ class Tube(metaclass=ABCMeta):
     def sendline(self, message: bytes | str | int):
         self.send(message, term=b"\n")
 
-    def sendafter(self, term: bytes | str, message: bytes | str | int):
+    def sendafter(self, term: bytes | str, message: bytes | str | int) -> bytes:
         data = self.recvuntil(term)
         self.send(message)
         return data
@@ -77,7 +91,7 @@ class Tube(metaclass=ABCMeta):
         return data
 
     def interactive(self):
-        logger.info("Switching to interactive mode.")
+        logger.info("🔄 Switching to interactive mode.")
 
         go = threading.Event()
 
@@ -89,7 +103,7 @@ class Tube(metaclass=ABCMeta):
                         sys.stdout.write(buf.decode())
                         sys.stdout.flush()
                 except EOFError:
-                    logger.error("Got EOF while reading in interactive")
+                    logger.error("❌ Got EOF while reading in interactive")
                     break
 
         t = threading.Thread(target=recv_thread)
@@ -106,16 +120,36 @@ class Tube(metaclass=ABCMeta):
                         self.send(data)
                     except EOFError:
                         go.set()
-                        logger.error("Got EOF while reading in interactive.")
+                        logger.error("❌ Got EOF while reading in interactive.")
                 else:
                     go.set()
-                time.sleep(0.05)
+                time.sleep(self.INPUT_READ_DELAY)
         except KeyboardInterrupt:
-            logger.warning("Interrupted")
+            logger.warning("⏸️ Interrupted")
             go.set()
 
         while t.is_alive():
             t.join(timeout=0.1)
+
+    def cmd(self, command: bytes | str, term: bytes | str = b"$ "):
+        self.sendlineafter(term, command)
+
+    def send_payload(self, payload: bytes | str, block_size: int = 1024):
+        payload = self._to_bytes(payload)
+
+        self.cmd("cd /tmp")
+        logger.info(f"Sending payload.")
+        for i in range(0, len(payload), block_size):
+            logger.info(f"Uploading... {i}/{len(payload)}[{i / len(payload):.2%}]")
+            self.cmd('echo "{payload[i : i + block_size]}" >>exploit-b64')
+
+        self.cmd("base64 -d exploit-b64 >exploit")
+        self.cmd("rm exploit-b64")
+        self.cmd("chmod +x exploit")
+
+        logger.info("Uploaded to /tmp/exploit")
+
+        self.interactive()
 
     def __enter__(self):
         return self
