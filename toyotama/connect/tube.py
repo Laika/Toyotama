@@ -1,4 +1,5 @@
 import ast
+import base64
 import re
 import sys
 import threading
@@ -134,17 +135,18 @@ class Tube(metaclass=ABCMeta):
     def cmd(self, command: bytes | str, term: bytes | str = b"$ "):
         self.sendlineafter(term, command)
 
-    def send_payload(self, payload: bytes | str, block_size: int = 1024):
+    def send_payload(self, payload: bytes | str, block_size: int = 512):
         payload = self._to_bytes(payload)
+        payload = base64.b64encode(payload).decode()
 
         self.cmd("cd /tmp")
         logger.info(f"Sending payload.")
         for i in range(0, len(payload), block_size):
             logger.info(f"Uploading... {i}/{len(payload)}[{i / len(payload):.2%}]")
-            self.cmd('echo "{payload[i : i + block_size]}" >>exploit-b64')
+            self.cmd(f'echo "{payload[i : i + block_size]}" >>exploit-b64')
 
-        self.cmd("base64 -d exploit-b64 >exploit")
-        self.cmd("rm exploit-b64")
+        self.cmd(":")
+        self.cmd("base64 -d exploit-b64 > exploit")
         self.cmd("chmod +x exploit")
 
         logger.info("Uploaded to /tmp/exploit")

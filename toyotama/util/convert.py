@@ -1,3 +1,5 @@
+from functools import singledispatch
+
 from PIL import Image, ImageDraw
 
 from .log import get_logger
@@ -39,7 +41,6 @@ def b64_padding_bytes(s):
 
 
 def binary_to_image(data, padding=5, size=5, rev=False, image_size=(1000, 1000)):
-
     bk, wh = (0, 0, 0), (255, 255, 255)
     image = Image.new("RGB", image_size, wh)
     rect = Image.new("RGB", (size, size))

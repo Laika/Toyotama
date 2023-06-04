@@ -4,8 +4,8 @@ from random import sample
 from typing import Callable
 
 from ..connect.socket import Socket
+from ..util.convert import to_block
 from ..util.log import get_logger
-from ..util.util import to_block
 from .util import xor
 
 logger = get_logger()
@@ -34,7 +34,6 @@ def ecb_chosen_plaintext_attack(
 
     block_end = block_size * (len(known_plaintext) // (block_size - 2) + 1)
     for _ in range(1, 100):
-
         # shuffle plaintext_space to reduce complexity
         plaintext_space = bytes(sample(bytearray(plaintext_space), len(plaintext_space)))
 
