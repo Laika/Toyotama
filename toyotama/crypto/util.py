@@ -265,6 +265,10 @@ def inverse(a: int, n: int) -> int:
     return x % n
 
 
+def is_square(n: int):
+    return isqrt(n) ** 2 == n
+
+
 def solve_quadratic_equation(a: int, b: int, c: int) -> tuple[int, int]:
     D = b * b - 4 * a * c
     x = -b + isqrt(D) // (2 * a)

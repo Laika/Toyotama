@@ -2,7 +2,7 @@ from toyotama.pwn.address import Address
 from toyotama.pwn.util import p64
 
 
-class ROP(object):
+class ROP:
     def __init__(self):
         self.chain = []
 
@@ -20,6 +20,6 @@ class ROP(object):
             elif isinstance(x, Address):
                 payload += pack(x.address)
             else:
-                raise TypeError("Unsupported type: {}".format(type(x)))
+                raise TypeError(f"Unsupported type: {type(x)}")
 
         return payload

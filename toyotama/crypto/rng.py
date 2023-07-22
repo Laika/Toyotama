@@ -3,26 +3,26 @@ from functools import reduce
 from math import gcd
 
 
-def lcg_crack(X, A=None, B=None, M=None):
-    n = len(X)
-    if not M:
+def lcg_crack(x, a=None, b=None, m=None):
+    n = len(x)
+    if not m:
         if n >= 6:
-            Y = [x - y for x, y in itertools.pairwise(X)]
+            Y = [x - y for x, y in itertools.pairwise(x)]
             Z = [x * z - y * y for x, y, z in zip(Y, Y[1:], Y[2:])]
-            M = abs(reduce(gcd, Z))
+            m = abs(reduce(gcd, Z))
 
         elif n >= 3:
-            assert A and B, "Can't crack"
-            M = gcd(X[2] - A * X[1] - B, X[1] - A * X[0] - B)
+            assert a and b, "Can't crack"
+            m = gcd(x[2] - a * x[1] - b, x[1] - a * x[0] - b)
         else:
             assert False, "Can't crack"
 
-    if not A:
+    if not a:
         if n >= 3:
-            A = (X[2] - X[1]) * pow(X[1] - X[0], -1, M) % M
+            a = (x[2] - x[1]) * pow(x[1] - x[0], -1, m) % m
 
-    if not B:
+    if not b:
         if n >= 2:
-            B = (X[1] - A * X[0]) % M
+            b = (x[1] - a * x[0]) % m
 
-    return A, B, M
+    return a, b, m

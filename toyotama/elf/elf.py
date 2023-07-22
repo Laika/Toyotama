@@ -1,6 +1,7 @@
 import re
 from pathlib import Path
 
+import lief
 import r2pipe
 
 from ..util import MarkdownTable
@@ -10,14 +11,14 @@ logger = get_logger()
 
 
 class ELF:
-    def __init__(self, filename: str, level: int = 4):
-        self.filename = Path(filename)
-        with open(self.filename, "rb") as f:
-            self.bin = bytearray(f.read())
+    def __init__(self, path: str, level: int = 4):
+        self.elf = lief.parse(path)
+
+        self.path = Path(path)
 
         self._base = 0x000000
-        logger.info(f'[{self.__class__.__name__}] Open "{self.filename!s}"')
-        self._r = r2pipe.open(filename)
+        logger.info(f'[{self.__class__.__name__}] Open "{self.path!s}"')
+        self._r = r2pipe.open(path)
         logger.info(f"[{self.__class__.__name__}] {'a'*level}")
         self._r.cmd("a" * level)
 
@@ -115,7 +116,7 @@ class ELF:
 
     def __str__(self):
         enabled = lambda x: "Enabled" if x else "Disabled"
-        result = f"{self.filename.resolve()!s}\n"
+        result = f"{self.path.resolve()!s}\n"
         mt = MarkdownTable(
             rows=[
                 ["Arch", self._info["arch"]],
@@ -150,8 +151,3 @@ class ELF:
     relocs = got
     funcs = plt
     __repr__ = __str__
-
-
-class LIBC(ELF):
-    def __init__(self, filename: str, level: int = 1):
-        super().__init__(filename, level)

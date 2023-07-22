@@ -17,14 +17,14 @@ class Address(int):
         if not isinstance(o, int):
             raise TypeError("Invalid type")
 
-        return self.address + o
+        return Address(self.address + o)
 
     def __sub__(self, o):
         if isinstance(o, Address):
-            return abs(self.address - o.address)
+            return Address(abs(self.address - o.address))
 
         elif isinstance(o, int):
-            return self.address - o
+            return Address(self.address - o)
 
         else:
             raise TypeError("Invalid type")

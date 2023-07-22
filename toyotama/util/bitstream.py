@@ -3,7 +3,7 @@
 # logger = get_logger(__name__)
 
 
-class BitStream(object):
+class BitStream:
     def __init__(self, value: bytes | int | str, string_limit: int = 200):
         self.bitstream: list[int] = []
         self.string_limit = string_limit

@@ -18,7 +18,7 @@ class Process(Tube):
         self.path: Path = Path(args[0])
         self.args: list[str] = args
         self.env: dict[str, str] | None = env
-        self.proc: subprocess.Popen
+        self.proc: subprocess.Popen | None
         self.returncode: int | None = None
 
         master, slave = pty.openpty()
@@ -37,6 +37,10 @@ class Process(Tube):
         except Exception as e:
             logger.error(e)
 
+        if self.proc is None:
+            logger.error("Failed to create a new process")
+            return
+
         if master:
             self.proc.stdout = os.fdopen(os.dup(master), "r+b", 0)
             os.close(master)
@@ -46,10 +50,15 @@ class Process(Tube):
 
         logger.info(f"Created a new process (PID: {self.proc.pid})")
 
-    def _socket(self):
+    def _socket(self) -> subprocess.Popen | None:
         return self.proc
 
-    def _poll(self):
+    def pid(self) -> int:
+        return getattr(self.proc, "pid", -1)
+
+    def _poll(self) -> int | None:
+        if self.proc is None:
+            return None
         self.proc.poll()
         if self.proc.returncode and self.returncode is None:
             self.returncode = -self.proc.returncode
@@ -57,10 +66,16 @@ class Process(Tube):
 
         return self.returncode
 
-    def _is_alive(self):
+    def is_alive(self):
         return self._poll() is None
 
+    def is_dead(self):
+        return not self.is_alive()
+
     def recv(self, n: int = 4096, debug: bool = True) -> bytes:
+        if self.is_dead():
+            return b""
+
         if self.proc.stdout is None:
             return b""
         try:
@@ -79,8 +94,9 @@ class Process(Tube):
         return buf or b""
 
     def send(self, message: bytes | str | int, term: bytes | str = b"", debug: bool = True):
-        if self.proc.stdin is None:
-            return
+        if self.id_dead():
+            return b""
+
         self._poll()
         payload = b""
         if isinstance(message, str):
@@ -99,15 +115,16 @@ class Process(Tube):
             self.proc.stdin.flush()
             if debug:
                 logger.debug(f"<] {payload!r}")
-        except IOError:
+        except OSError:
             logger.warning("Broken pipe")
         except Exception as e:
             logger.error(e)
 
     def gdb(self, script: list[str] | None = None):
-        self.gdb = subprocess.run(
-            ["tmux", "split-window", "-h", "-c", "", "--", "gdb", "-p", str(self.pid)],
-        )
+        self._gdb = subprocess.Popen(["gdb", "-p", str(self.pid())], shell=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding="utf-8")
+        master, slave = pty.openpty()
+        tty.setraw(master)
+        tty.setraw(slave)
 
     def close(self):
         if self.proc is None:
