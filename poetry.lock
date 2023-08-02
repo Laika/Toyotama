@@ -151,14 +151,14 @@ files = [
 
 [[package]]
 name = "click"
-version = "8.1.5"
+version = "8.1.6"
 description = "Composable command line interface toolkit"
 category = "dev"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "click-8.1.5-py3-none-any.whl", hash = "sha256:e576aa487d679441d7d30abb87e1b43d24fc53bffb8758443b1a9e1cee504548"},
-    {file = "click-8.1.5.tar.gz", hash = "sha256:4be4b1af8d665c6d942909916d31a213a106800c47d0eeba73d34da3cbc11367"},
+    {file = "click-8.1.6-py3-none-any.whl", hash = "sha256:fa244bb30b3b5ee2cae3da8f55c9e5e0c0e86093306301fb418eb9dc40fbded5"},
+    {file = "click-8.1.6.tar.gz", hash = "sha256:48ee849951919527a045bfe3bf7baa8a959c423134e1a5b98c05c20ba75a1cbd"},
 ]
 
 [package.dependencies]
@@ -266,6 +266,39 @@ colors = ["colorama (>=0.4.3)"]
 pipfile-deprecated-finder = ["pip-shims (>=0.5.2)", "pipreqs", "requirementslib"]
 plugins = ["setuptools"]
 requirements-deprecated-finder = ["pip-api", "pipreqs"]
+
+[[package]]
+name = "lief"
+version = "0.13.2"
+description = "Library to instrument executable formats"
+category = "main"
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "lief-0.13.2-cp310-cp310-macosx_10_14_x86_64.whl", hash = "sha256:0390cfaaf0e9aed46bebf26f00f34852768f76bc7f90abf7ceb384566200e5f5"},
+    {file = "lief-0.13.2-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:5581bf0072c1e7a9ea2fb2e2252b8582016e8b298804b5461e552b402c9cd4e9"},
+    {file = "lief-0.13.2-cp310-cp310-manylinux2014_aarch64.whl", hash = "sha256:dbbf2fb3d7807e815f345c77e287da162e081100f059ec03005995befc295d7f"},
+    {file = "lief-0.13.2-cp310-cp310-manylinux_2_24_x86_64.whl", hash = "sha256:d344d37334c2b488dc02f04cb13c22cd61aa065eeb9bca7424588e0c8c23bdfb"},
+    {file = "lief-0.13.2-cp310-cp310-win32.whl", hash = "sha256:bc041b28b94139843a33c014e355822a9276b35f3c5ae10d82da56bf572f8222"},
+    {file = "lief-0.13.2-cp310-cp310-win_amd64.whl", hash = "sha256:01d4075bbc3541e9dd3ef008045fa1eb128294a0c5b0c1f69ce60d8948d248c7"},
+    {file = "lief-0.13.2-cp311-cp311-macosx_10_14_x86_64.whl", hash = "sha256:6570dacebe107ad60c2ba0968d1a865d316009d43cc85af3719d3eeb0911abf3"},
+    {file = "lief-0.13.2-cp311-cp311-macosx_11_0_arm64.whl", hash = "sha256:7ce2e3f7c791efba327c2bb3499dbef81e682027109045a9bae696c62e2aeeb0"},
+    {file = "lief-0.13.2-cp311-cp311-manylinux2014_aarch64.whl", hash = "sha256:11ab900e0644b6735ecdef2bbd04439b4866a527650fc054470c195d6cfe2917"},
+    {file = "lief-0.13.2-cp311-cp311-manylinux_2_24_x86_64.whl", hash = "sha256:042ad2105a136b11a7494b9af8178468e8cb32b8fa2a0a55cb659a5605aeb069"},
+    {file = "lief-0.13.2-cp311-cp311-win32.whl", hash = "sha256:1ce289b6ab3cf4be654270007e8a2c0d2e42116180418c29d3ce83762955de63"},
+    {file = "lief-0.13.2-cp311-cp311-win_amd64.whl", hash = "sha256:eccb248ffb598e410fd2ef7c1f171a3cde57a40c9bb8c4fa15d8e7b90eb4eb2d"},
+    {file = "lief-0.13.2-cp38-cp38-macosx_10_14_x86_64.whl", hash = "sha256:95731cadedd6ffc5fb48c147fcefe004624e436b75e8ee9fb2dbf2ae5f084342"},
+    {file = "lief-0.13.2-cp38-cp38-manylinux2014_aarch64.whl", hash = "sha256:8da75df0ea472557fcc37a27ba583bad5a8f3a256c186600d00a6dd0a57f718a"},
+    {file = "lief-0.13.2-cp38-cp38-manylinux_2_24_x86_64.whl", hash = "sha256:b99092f02c13f580c2d00b504af224b7e60e7c98a791e72ae8519f530b7687bb"},
+    {file = "lief-0.13.2-cp38-cp38-win32.whl", hash = "sha256:03db0138e4dbbdfa8bba74de312b0cebb30f504e44f38a9c8918b84022da340b"},
+    {file = "lief-0.13.2-cp38-cp38-win_amd64.whl", hash = "sha256:36c5bea3f8460dee3ebb75d35949f445638ec85d2871f31e293c47fb4a0a5af7"},
+    {file = "lief-0.13.2-cp39-cp39-macosx_10_14_x86_64.whl", hash = "sha256:eca8ecbcae1ad851ed7cf1e22ec8accd74f2267fa7375194559fb917523d8a92"},
+    {file = "lief-0.13.2-cp39-cp39-macosx_11_0_arm64.whl", hash = "sha256:a8703cb5308b4828563badc6885ff07a3926ec3403d1caa3aa75f24fe9cbcf84"},
+    {file = "lief-0.13.2-cp39-cp39-manylinux2014_aarch64.whl", hash = "sha256:c60f2f79e7d0d1f18dec7dcdb4d4f35e6b126ac29e2f2f056d28ec50599d868a"},
+    {file = "lief-0.13.2-cp39-cp39-manylinux_2_24_x86_64.whl", hash = "sha256:e0f84a7443b7f1b02666fd16a9aa57f5d9027e60ba2885e0d76db8426d689707"},
+    {file = "lief-0.13.2-cp39-cp39-win32.whl", hash = "sha256:3f8f251de874929d9c9e94a35891621ab8c059149f8a1c24e543fd9cf0c2a31c"},
+    {file = "lief-0.13.2-cp39-cp39-win_amd64.whl", hash = "sha256:2bbe294385e629aa7206b2f39f0ca34e3948605a8db50b22091603053889a759"},
+]
 
 [[package]]
 name = "mypy-extensions"
@@ -390,14 +423,14 @@ files = [
 
 [[package]]
 name = "urllib3"
-version = "2.0.3"
+version = "2.0.4"
 description = "HTTP library with thread-safe connection pooling, file post, and more."
 category = "main"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "urllib3-2.0.3-py3-none-any.whl", hash = "sha256:48e7fafa40319d358848e1bc6809b208340fafe2096f1725d05d67443d0483d1"},
-    {file = "urllib3-2.0.3.tar.gz", hash = "sha256:bee28b5e56addb8226c96f7f13ac28cb4c301dd5ea8a6ca179c0b9835e032825"},
+    {file = "urllib3-2.0.4-py3-none-any.whl", hash = "sha256:de7df1803967d2c2a98e4b11bb7d6bd9210474c46e8a0401514e3a42a75ebde4"},
+    {file = "urllib3-2.0.4.tar.gz", hash = "sha256:8d22f86aae8ef5e410d4f539fde9ce6b2113a001bb4d189e0aed70642d602b11"},
 ]
 
 [package.extras]
@@ -409,4 +442,4 @@ zstd = ["zstandard (>=0.18.0)"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8"
-content-hash = "6b7e6c4bca4b6ca9db06a70a65c3a025d7983847115cf8e78a4092db0c27307b"
+content-hash = "1c39304ca616233b9caf53b8c3bdd0b5219edf57f09f1236885833d0667a8687"

@@ -1,45 +1,48 @@
 from pathlib import Path
 
-from toyotama.util.log import get_logger
 from toyotama.elf.const import *
-from toyotama.elf.elfstruct import *
+from toyotama.elf.elfstruct import Elf64_Ehdr
+from toyotama.util.log import get_logger
 
 logger = get_logger()
 
 
-class MyELF(object):
-    def __init__(self, path: str):
-        self.path = Path(path)
-        self.Ehdr = {}
-        self.parser = ELFParser(Path(path))
-
-    def is_elf(self) -> bool:
-        return self.parser.is_elf()
-
-
-class ELFParser(object):
+class ELFParser:
     def __init__(self, path: Path):
         self.path = path
 
-        with open(self.path, "rb") as f:
-            self.map = f.read()
+        self.fd = open(self.path, "rb")
 
-        if not self.is_elf():
-            raise ValueError(f'"{self.path.name}" is not a vadid ELF file.')
-
-    def is_elf(self) -> bool:
-        return self.map[EI_MAG0] == ELFMAG0 and self.map[EI_MAG1] == ELFMAG1 and self.map[EI_MAG2] == ELFMAG2 and self.map[EI_MAG3] == ELFMAG3
+        self.parse_ehdr()
 
     def parse_ehdr(self):
-        # e_ident
-        self.bits = 64 if self.map[EI_CLASS] == ELFCLASS64 else 32
+        self.ehdr = Elf64_Ehdr()
+        self.fd.readinto(self.ehdr)
 
-        if self.bits == 64:
-            ehdr = Elf64_Ehdr()
+        if not self.is_elf():
+            raise ValueError(f'"{self.path.name}" is not a valid ELF file.')
 
-        e_ident = self.map[0:EI_NIDENT]
+        self.bits = ELFClass.from_int(self.ehdr.e_ident[EI_CLASS]).bits()
+        self.endian = ELFData.from_int(self.ehdr.e_ident[EI_DATA]).endian()
+
+        print("bits", self.bits)
+        print("endianness", self.endian)
+
+        return self.ehdr
+
+    def is_elf(self) -> bool:
+        return (
+            self.ehdr.e_ident[EI_MAG0] == ELFMAG0
+            and self.ehdr.e_ident[EI_MAG1] == ELFMAG1
+            and self.ehdr.e_ident[EI_MAG2] == ELFMAG2
+            and self.ehdr.e_ident[EI_MAG3] == ELFMAG3
+        )
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        if self.fd:
+            self.fd.close()
 
 
 if __name__ == "__main__":
-    elf = MyELF("../../example/vaccine")
-    elf = MyELF(__file__)
+    parser = ELFParser(Path("./chall"))
+    print(parser)

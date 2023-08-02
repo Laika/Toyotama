@@ -1,25 +1,31 @@
-from toyotama.util.integer import UChar, UInt16, UInt32, UInt64, Int32, Int64
+from ctypes import c_char, c_int32, c_int64, c_uint16, c_uint32, c_uint64
+from enum import IntEnum
 
 # Basic types
-Elf32_Addr = UInt32
-Elf64_Addr = UInt64
-Elf32_Off = UInt32
-Elf64_Off = UInt64
-Elf32_Section = UInt16
-Elf64_Section = UInt16
-Elf32_Versym = UInt16
-Elf64_Versym = UInt16
-Elf_Byte = UChar
-Elf32_Half = UInt16
-Elf64_Half = UInt16
-Elf32_Sword = Int32
-Elf64_Sword = Int32
-Elf32_Word = UInt32
-Elf64_Word = UInt32
-Elf32_Sxword = Int64
-Elf64_Sxword = Int64
-Elf32_Xword = UInt64
-Elf64_Xword = UInt64
+Elf32_Addr = c_uint32
+Elf32_Off = c_uint32
+Elf32_Section = c_uint16
+Elf32_Versym = c_uint16
+Elf_Byte = c_char
+Elf32_Half = c_uint16
+Elf32_Sword = c_int32
+Elf32_Word = c_uint32
+Elf32_Sxword = c_int64
+Elf32_Xword = c_uint64
+
+
+Elf64_Addr = c_uint64
+Elf64_Off = c_uint64
+Elf64_Section = c_uint16
+Elf64_Versym = c_uint16
+Elf64_Half = c_uint16
+Elf64_Sword = c_int32
+Elf64_Word = c_uint32
+Elf64_Sxword = c_int64
+Elf64_Xword = c_uint64
+
+
+Elf64_Addr = c_uint64
 
 # ELF header (Ehdr)
 EI_NIDENT = 16
@@ -42,14 +48,62 @@ ELFMAG3 = 0x46
 ELFMAG = b"\177ELF"
 SELFMAG = 4
 
-ELFCLASSNONE = 0
-ELFCLASS32 = 1
-ELFCLASS64 = 2
-ELFCLASSNUM = 3
 
-ELFDATANONE = 0
-ELFDATA2LSB = 1
-ELFDATA2MSB = 2
+class ELFClass(IntEnum):
+    NONE = 0
+    BIT32 = 1
+    BIT64 = 2
+    NUM = 3
+
+    @classmethod
+    def from_int(cls, x: int):
+        match x:
+            case 1:
+                return cls.BIT32
+            case 2:
+                return cls.BIT64
+            case 3:
+                return cls.NUM
+            case _:
+                return cls.NONE
+
+    def bits(self):
+        match self.value:
+            case self.BIT32:
+                return 32
+            case self.BIT64:
+                return 64
+            case _:
+                raise ValueError("Invalid ELF class")
+
+
+class ELFData(IntEnum):
+    NONE = 0
+    LSB = 1
+    MSB = 2
+    NUM = 3
+
+    @classmethod
+    def from_int(cls, x: int):
+        match x:
+            case 1:
+                return cls.LSB
+            case 2:
+                return cls.MSB
+            case 3:
+                return cls.NUM
+            case _:
+                return cls.NONE
+
+    def endian(self):
+        match self.value:
+            case self.LSB:
+                return "little"
+            case self.MSB:
+                return "big"
+            case _:
+                raise ValueError("Invalid ELF data")
+
 
 ## e_type
 ET_NONE = 0
@@ -153,18 +207,45 @@ STT_FILE = 4
 STT_COMMON = 5
 STT_TLS = 6
 
-ELF_ST_BIND = lambda x: x >> 4
-ELF_ST_TYPE = lambda x: x & 0xF
-ELF32_ST_BIND = lambda x: ELF_ST_BIND(x)
-ELF32_ST_TYPE = lambda x: ELF_ST_TYPE(x)
-ELF64_ST_BIND = lambda x: ELF_ST_BIND(x)
-ELF64_ST_TYPE = lambda x: ELF_ST_TYPE(x)
 
-ELF32_R_SYM = lambda x: x >> 8
-ELF32_R_TYPE = lambda x: x & 0xFF
+def ELF_ST_BIND(x: int) -> int:
+    return x >> 4
 
-ELF64_R_SYM = lambda x: x >> 32
-ELF64_R_TYPE = lambda x: x & 0xFFFFFFFF
+
+def ELF_ST_TYPE(x: int) -> int:
+    return x & 0xF
+
+
+def ELF32_ST_BIND(x: int) -> int:
+    return ELF_ST_BIND(x)
+
+
+def ELF32_ST_TYPE(x: int) -> int:
+    return ELF_ST_TYPE(x)
+
+
+def ELF64_ST_BIND(x: int) -> int:
+    return ELF_ST_BIND(x)
+
+
+def ELF64_ST_TYPE(x: int) -> int:
+    return ELF_ST_TYPE(x)
+
+
+def ELF32_R_SYM(x: int) -> int:
+    return x >> 8
+
+
+def ELF32_R_TYPE(x: int) -> int:
+    return x & 0xFF
+
+
+def ELF64_R_SYM(x: int) -> int:
+    return x >> 32
+
+
+def ELF64_R_TYPE(x: int) -> int:
+    return x & 0xFFFFFFFF
 
 
 # This is the info that is needed to parse the dynamic section of the file

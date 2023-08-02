@@ -1,42 +1,44 @@
-from toyotama.util.integer import UChar, UInt16, UInt32, Int32, Int64
-from dataclasses import dataclass
-from toyotama.elf.const import *
+from ctypes import Array, Structure, c_char, c_int32, c_int64, c_uint16, c_uint32, c_uint64
+
+from .const import EI_NIDENT, Elf32_Addr, Elf32_Off, Elf32_Word, Elf32_Xword, Elf64_Addr, Elf64_Off, Elf64_Word, Elf64_Xword
 
 
-@dataclass
-class Elf32_Ehdr(object):
-    e_ident: list[UChar]  # ELF "magic number"
-    e_type: UInt16
-    e_machine: UInt16
-    e_version: UInt32
-    e_entry: Elf32_Addr  # Entry point virtual address
-    e_phoff: Elf32_Off  # Program header table file offset
-    e_shoff: Elf32_Off  # Section header table file offset
-    e_flags: UInt32
-    e_ehsize: UInt16
-    e_phentsize: UInt16
-    e_phnum: UInt16
-    e_shentsize: UInt16
-    e_shnum: UInt16
-    e_shstrndx: UInt16
+class Elf32_Ehdr(Structure):
+    _fields_ = (
+        ("e_ident", c_char * EI_NIDENT),
+        ("e_type", c_uint16),
+        ("e_machine", c_uint16),
+        ("e_version", c_uint32),
+        ("e_entry", Elf32_Addr),
+        ("e_phoff", Elf32_Off),
+        ("e_shoff", Elf32_Off),
+        ("e_flags", c_uint32),
+        ("e_ehsize", c_uint16),
+        ("e_phentsize", c_uint16),
+        ("e_phnum", c_uint16),
+        ("e_shentsize", c_uint16),
+        ("e_shnum", c_uint16),
+        ("e_shstrndx", c_uint16),
+    )
 
 
-@dataclass
-class Elf64_Ehdr(object):
-    e_ident: list[UChar]  # ELF "magic number"
-    e_type: UInt16
-    e_machine: UInt16
-    e_version: UInt32
-    e_entry: Elf64_Addr  # Entry point virtual address
-    e_phoff: Elf64_Off  # Program header table file offset
-    e_shoff: Elf64_Off  # Section header table file offset
-    e_flags: UInt32
-    e_ehsize: UInt16
-    e_phentsize: UInt16
-    e_phnum: UInt16
-    e_shentsize: UInt16
-    e_shnum: UInt16
-    e_shstrndx: UInt16
+class Elf64_Ehdr(Structure):
+    _fields_ = (
+        ("e_ident", c_char * EI_NIDENT),
+        ("e_type", c_uint16),
+        ("e_machine", c_uint16),
+        ("e_version", c_uint32),
+        ("e_entry", Elf64_Addr),
+        ("e_phoff", Elf64_Off),
+        ("e_shoff", Elf64_Off),
+        ("e_flags", c_uint32),
+        ("e_ehsize", c_uint16),
+        ("e_phentsize", c_uint16),
+        ("e_phnum", c_uint16),
+        ("e_shentsize", c_uint16),
+        ("e_shnum", c_uint16),
+        ("e_shstrndx", c_uint16),
+    )
 
 
 # Program Header
@@ -92,118 +94,132 @@ SHF_RO_AFTER_INIT = 0x00200000
 SHF_MASKPROC = 0xF0000000
 
 
-@dataclass
-class Elf32_Phdr(object):
-    p_type: UInt32
-    p_offset: Elf32_Off
-    p_vaddr: Elf32_Addr
-    p_paddr: Elf32_Addr
-    p_filesz: UInt32
-    p_memsz: UInt32
-    p_flags: UInt32
-    p_align: UInt32
+class Elf32_Phdr(Structure):
+    _fields_ = (
+        ("p_type", c_uint32),
+        ("p_offset", Elf32_Off),
+        ("p_vaddr", Elf32_Addr),
+        ("p_paddr", Elf32_Addr),
+        ("p_filesz", c_uint32),
+        ("p_memsz", c_uint32),
+        ("p_flags", c_uint32),
+        ("p_align", c_uint32),
+    )
 
 
-@dataclass
-class Elf64_Phdr(object):
-    p_type: UInt32
-    p_flags: UInt32
-    p_offset: Elf64_Off
-    p_vaddr: Elf64_Addr
-    p_paddr: Elf64_Addr
-    p_filesz: UInt64
-    p_memsz: UInt64
-    p_align: UInt64
+class Elf64_Phdr(Structure):
+    _fields_ = (
+        ("p_type", c_uint32),
+        ("p_flags", c_uint32),
+        ("p_offset", Elf64_Off),
+        ("p_vaddr", Elf64_Addr),
+        ("p_paddr", Elf64_Addr),
+        ("p_filesz", c_uint64),
+        ("p_memsz", c_uint64),
+        ("p_align", c_uint64),
+    )
 
 
 # Section header (Shdr)
-@dataclass
-class Elf32_Shdr(object):
-    sh_name: UInt32
-    sh_type: UInt32
-    sh_flags: UInt32
-    sh_addr: Elf32_Addr
-    sh_offset: Elf32_Off
-    sh_size: UInt32
-    sh_link: UInt32
-    sh_info: UInt32
-    sh_addralign: UInt32
-    sh_entsize: UInt32
+class Elf32_Shdr(Structure):
+    _fields_ = (
+        ("sh_name", c_uint32),
+        ("sh_type", c_uint32),
+        ("sh_flags", c_uint32),
+        ("sh_addr", Elf32_Addr),
+        ("sh_offset", Elf32_Off),
+        ("sh_size", c_uint32),
+        ("sh_link", c_uint32),
+        ("sh_info", c_uint32),
+        ("sh_addralign", c_uint32),
+        ("sh_entsize", c_uint32),
+    )
 
 
-@dataclass
-class Elf64_Shdr(object):
-    sh_name: UInt32
-    sh_type: UInt32
-    sh_flags: UInt64
-    sh_addr: Elf64_Addr
-    sh_offset: Elf64_Off
-    sh_size: UInt64
-    sh_link: UInt32
-    sh_info: UInt32
-    sh_addralign: UInt64
-    sh_entsize: UInt64
+class Elf64_Shdr(Structure):
+    _fields_ = (
+        ("sh_name", c_uint32),
+        ("sh_type", c_uint32),
+        ("sh_flags", c_uint64),
+        ("sh_addr", Elf64_Addr),
+        ("sh_offset", Elf64_Off),
+        ("sh_size", c_uint64),
+        ("sh_link", c_uint32),
+        ("sh_info", c_uint32),
+        ("sh_addralign", c_uint64),
+        ("sh_entsize", c_uint64),
+    )
 
 
 # String and symbol tables
-@dataclass
-class Elf32_Sym(object):
-    st_name: UInt32
-    st_value: Elf32_Addr
-    st_size: UInt32
-    st_info: UChar
-    st_other: UChar
-    st_shndx: UInt16
+class Elf32_Sym(Structure):
+    _fields_ = (
+        ("st_name", c_uint32),
+        ("st_value", Elf32_Addr),
+        ("st_size", c_uint32),
+        ("st_info", c_char),
+        ("st_other", c_char),
+        ("st_shndx", c_uint16),
+    )
 
 
-@dataclass
-class Elf64_Sym(object):
-    st_name: UInt32
-    st_info: UChar
-    st_other: UChar
-    st_shndx: UInt16
-    st_value: Elf64_Addr
-    st_size: UInt64
+class Elf64_Sym(Structure):
+    _fields_ = (
+        ("st_name", c_uint32),
+        ("st_info", c_char),
+        ("st_other", c_char),
+        ("st_shndx", c_uint16),
+        ("st_value", Elf64_Addr),
+        ("st_size", c_uint64),
+    )
 
 
 # Relocation entries (Rel & Rela)
-@dataclass
-class Elf32_Rel(object):
-    r_offset: Elf32_Addr
-    r_info: UInt32
+class Elf32_Rel(Structure):
+    _fields_ = (
+        ("r_offset", Elf32_Addr),
+        ("r_info", c_uint32),
+    )
 
 
-@dataclass
-class Elf64_Rel(object):
-    r_offset: Elf64_Addr
-    r_info: UInt64
+class Elf64_Rel(Structure):
+    _fields_ = (
+        ("r_offset", Elf64_Addr),
+        ("r_info", c_uint64),
+    )
 
 
-@dataclass
-class Elf32_Rela(object):
-    r_offset: Elf32_Addr
-    r_info: UInt32
-    r_addend: Int32
+class Elf32_Rela(Structure):
+    _fields_ = (
+        ("r_offset", Elf32_Addr),
+        ("r_info", c_uint32),
+        ("r_addend", c_int32),
+    )
 
 
-@dataclass
-class Elf64_Rela(object):
-    r_offset: Elf64_Addr
-    r_info: UInt64
-    r_addend: Int64
+class Elf64_Rela(Structure):
+    _fields_ = (
+        ("r_offset", Elf64_Addr),
+        ("r_info", c_uint64),
+        ("r_addend", c_int64),
+    )
 
 
 # Dynamic tags (Dyn)
-class Elf32_Dyn(object):
-    d_tag: Elf32_Word
-    d_val: Elf32_Word  # Union d_un
-    d_ptr: Elf32_Addr  # Union d_un
+class Elf32_Dyn(Structure):
+    _fields_ = (
+        ("d_tag", Elf32_Word),
+        ("d_val", Elf32_Word),  # Union d_un
+        ("d_ptr", Elf32_Addr),  # Union d_un
+    )
 
 
-class Elf64_Dyn(object):
-    d_tag: Elf32_Word
-    d_val: Elf64_Xword  # Union d_un
-    d_ptr: Elf64_Addr  # Union d_un
+class Elf64_Dyn(Structure):
+    _fields_ = (
+        ("d_tag", Elf32_Word),
+        ("d_val", Elf64_Xword),  # Union d_un
+        ("d_ptr", Elf64_Addr),  # Union d_un
+    )
 
 
 _DYNAMIC32: list[Elf32_Dyn]
@@ -211,15 +227,22 @@ _DYNAMIC64: list[Elf64_Dyn]
 
 
 # Notes (Nhdr)
-@dataclass
-class Elf32_Nhdr(object):
-    n_namesz: Elf32_Word
-    n_descsz: Elf32_Word
-    n_type: Elf32_Word
+class Elf32_Nhdr(Structure):
+    _fields_ = (
+        ("n_namesz", Elf32_Word),
+        ("n_descsz", Elf32_Word),
+        ("n_type", Elf32_Word),
+    )
 
 
-@dataclass
-class Elf64_Nhdr(object):
-    n_namesz: Elf64_Word
-    n_descsz: Elf64_Word
-    n_type: Elf64_Word
+class Elf64_Nhdr(Structure):
+    _fields_ = (
+        ("n_namesz", Elf64_Word),
+        ("n_descsz", Elf64_Word),
+        ("n_type", Elf64_Word),
+    )
+
+
+if __name__ == "__main__":
+    ehdr = Elf64_Ehdr()
+    print(ehdr)
