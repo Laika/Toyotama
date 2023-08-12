@@ -8,7 +8,7 @@ from ..util.convert import to_block
 from ..util.log import get_logger
 from .util import xor
 
-logger = get_logger()
+logger = get_logger(__name__)
 
 
 def ecb_chosen_plaintext_attack(

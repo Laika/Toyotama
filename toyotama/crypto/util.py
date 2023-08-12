@@ -3,10 +3,14 @@
 from functools import reduce
 from math import ceil, gcd, isqrt, lcm
 from operator import mul
+from typing import assert_never, Literal
 
 import gmpy2
 
 from ..util.log import get_logger
+
+Endian = Literal["big", "little"]
+
 
 logger = get_logger()
 
@@ -24,7 +28,7 @@ def xor(*array: bytes, strict: bool = False) -> bytes:
     """
 
     if len(array) == 0:
-        return None
+        return bytes()
 
     ret = bytes(len(array[0]))
 
@@ -34,7 +38,7 @@ def xor(*array: bytes, strict: bool = False) -> bytes:
     return ret
 
 
-def rotl(data, shift: int, block_size: int = 16):
+def rotl(data: list, shift: int, block_size: int = 16) -> list:
     """Rotate left
     Calculate ROTL
     """
@@ -42,7 +46,7 @@ def rotl(data, shift: int, block_size: int = 16):
     return data[shift:] + data[:shift]
 
 
-def rotr(data, shift: int, block_size: int = 16):
+def rotr(data: list, shift: int, block_size: int = 16) -> list:
     """Rotate right
     Calculate ROTR
     """
@@ -50,7 +54,7 @@ def rotr(data, shift: int, block_size: int = 16):
     return data[-shift:] + data[:-shift]
 
 
-def i2b(x: int, byteorder="big") -> bytes:
+def i2b(x: int, byteorder: Endian = "big") -> bytes:
     """Convert int to bytes.
 
     Args:
@@ -63,7 +67,7 @@ def i2b(x: int, byteorder="big") -> bytes:
     return x.to_bytes(x.bit_length() + 7 >> 3, byteorder=byteorder)
 
 
-def b2i(x: bytes, byteorder="big") -> int:
+def b2i(x: bytes, byteorder: Endian = "big") -> int:
     """Convert bytes to int.
 
     Args:
@@ -190,7 +194,7 @@ def chinese_remainder(a: list[int], m: list[int]) -> tuple[int, int]:
     return a1, m1
 
 
-def bsgs(g, y, p, q=None):
+def bsgs(g: int, y: int, p: int, q: int = 0):
     if not q:
         q = p
     m = ceil(isqrt(q))
@@ -213,15 +217,15 @@ def bsgs(g, y, p, q=None):
     return -1
 
 
-def pohlig_hellman(g, y, factor):
+def pohlig_hellman(g: int, y: int, factor: list[int]) -> tuple[int, int]:
     p = reduce(mul, factor) + 1
     x = [bsgs(pow(g, (p - 1) // q, p), pow(y, (p - 1) // q, p), p, q) for q in factor]
 
-    x = chinese_remainder(x, factor)
-    return x
+    res = chinese_remainder(x, factor)
+    return res
 
 
-def factorize_from_kphi(n, kphi):
+def factorize_from_kphi(n: int, kphi: int) -> tuple[int, int]:
     """
     factorize by Miller-Rabin primality test
     n: p*q
@@ -240,10 +244,10 @@ def factorize_from_kphi(n, kphi):
                 assert p * n // p == n
                 return p, n // p
             x = x * x % n
-    return None
+    raise ValueError("factorization failed")
 
 
-def factorize_from_ed(n, d, e=0x10001):
+def factorize_from_ed(n: int, d: int, e: int = 0x10001) -> tuple[int, int]:
     return factorize_from_kphi(n, e * d - 1)
 
 
@@ -259,8 +263,8 @@ def inverse(a: int, n: int) -> int:
     """
     x, _, g = extended_gcd(a, n)
     if g != 1:
-        logger.warning("No inverse for the given modulus.")
-        return None
+        logger.error("No inverse for the given modulus.")
+        return 0
 
     return x % n
 

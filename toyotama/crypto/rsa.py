@@ -99,7 +99,7 @@ def lsb_decryption_oracle_attack(n: int, e: int, c: int, oracle: Callable, debug
 
     from fractions import Fraction
 
-    lb, ub = 0, n
+    lb, ub = Fraction(), Fraction(n)
     c_ = c
     i = 0
     nl = n.bit_length()
