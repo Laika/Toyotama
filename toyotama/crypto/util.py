@@ -1,9 +1,10 @@
 """Crypto Utility
 """
 from functools import reduce
-from math import ceil, gcd, isqrt, lcm
+from math import gcd, isqrt, lcm
 from operator import mul
-from typing import assert_never, Literal
+from random import randint
+from typing import Literal
 
 import gmpy2
 
@@ -102,6 +103,33 @@ def extended_gcd(a: int, b: int) -> tuple[int, int, int]:
     return x, y, g
 
 
+def miller_rabin_Test(n: int, k: int = 100) -> bool:
+    """Miller-Rabin primality test.
+
+    Args:
+        n (int): A value.
+        k (int, optional): The number of iteration. Defaults to 100.
+
+    Returns:
+        bool: Whether n is prime or not.
+    """
+    if n == 2:
+        return True
+    if n < 2 or n % 2 == 0:
+        return False
+
+    s, t = 0, n - 1
+    while t % 2 == 0:
+        s, t = s + 1, t >> 1
+    a = randint(1, n - 1)
+    if pow(a, t, n) == 1:
+        return True
+    for i in range(s):
+        if pow(a, (1 << i) * t, n) == n - 1:
+            return True
+    return False
+
+
 def legendre(a: int, p: int) -> int:
     res = pow(a, (p - 1) // 2, p)
     return -1 if res == p - 1 else res
@@ -194,11 +222,13 @@ def chinese_remainder(a: list[int], m: list[int]) -> tuple[int, int]:
     return a1, m1
 
 
-def bsgs(g: int, y: int, p: int, q: int = 0):
+def babystep_giantstep(g: int, y: int, p: int, q: int = 0) -> int:
     if not q:
         q = p
-    m = ceil(isqrt(q))
+
+    m = isqrt(q)
     table = {}
+
     b = 1
     for i in range(m):
         table[b] = i
@@ -281,5 +311,8 @@ def solve_quadratic_equation(a: int, b: int, c: int) -> tuple[int, int]:
     return x, xx
 
 
+# Aliases
 int_to_bytes = i2b
 bytes_to_int = b2i
+is_prime = miller_rabin_Test
+bsgs = babystep_giantstep

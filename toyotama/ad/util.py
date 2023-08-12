@@ -1,8 +1,6 @@
 """Attack-and-Defense utility module
 """
 
-from functools import singledispatch
-
 import requests
 
 from ..util.log import get_logger
@@ -10,36 +8,7 @@ from ..util.log import get_logger
 logger = get_logger()
 
 
-@singledispatch
-def submit_flag(flags, url: str, token: str):
-    """Submit flags
-
-    Args:
-        flags (list or str): Flags you've got.
-          url         (str): A URL.
-        token         (str): A token needed to submit.
-
-    Returns:
-        None
-    """
-    raise TypeError("flag must be str or list.")
-
-
-@submit_flag.register(list)
-def submit_flag_list(flags: list[str], url: str, token: str):
-    header = {
-        "x-api-key": token,
-    }
-    for flag in flags:
-        data = {
-            "flag": flag,
-        }
-        response = requests.post(url, data=data, headers=header)
-        logger.info(response.text)
-
-
-@submit_flag.register(str)
-def submit_flag_str(flag: str, url: str, token: str):
+def submit_flag(flag: str, url: str, token: str):
     header = {
         "x-api-key": token,
     }
@@ -48,3 +17,8 @@ def submit_flag_str(flag: str, url: str, token: str):
     }
     response = requests.post(url, data=data, headers=header)
     logger.info(response.text)
+
+
+def submit_flags(flags: list[str], url: str, token: str):
+    for flag in flags:
+        submit_flag(flag, url, token)

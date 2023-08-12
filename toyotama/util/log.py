@@ -5,7 +5,6 @@ from ..terminal.style import Style
 
 class CustomFormatter(logging.Formatter):
     def __init__(self, colored=True):
-        self.fmt = "[ %(levelname)-8s | %(asctime)s ] %(message)s"
         self.date_format = "%Y-%m-%dT%T"
         self.FORMATS = {}
         if colored:
