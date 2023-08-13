@@ -17,9 +17,11 @@ class ELF:
         self.path = Path(path)
 
         self._base = 0x000000
-        logger.info(f'[{self.__class__.__name__}] Open "{self.path!s}"')
+
+        logger.info('[%s] Open "%s"', self.__class__.__name__, self.path)
         self._r = r2pipe.open(path)
-        logger.info(f"[{self.__class__.__name__}] {'a'*level}")
+
+        logger.info("[%s] %s", self.__class__.__name__, "a" * level)
         self._r.cmd("a" * level)
 
         self._funcs = self._get_funcs()

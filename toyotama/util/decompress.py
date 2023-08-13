@@ -1,15 +1,21 @@
 import argparse
 import bz2
+import os
 import tarfile
 from pathlib import Path
 from zipfile import ZipFile
 
 import py7zr
 
+from toyotama.util.log import get_logger
+
+logger = get_logger(__name__, "DEBUG")
+
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Decompress a file")
     parser.add_argument("input", type=str, help="Compressed file")
+    parser.add_argument("-k", "--keep", action="store_true", help="Keep the compressed file")
     return parser.parse_args()
 
 
@@ -59,17 +65,27 @@ def decompress(args):
     input_path = Path(args.input)
     match get_file_format(input_path):
         case "Zip":
+            logger.info("Zip file detected")
             decompress_zip(input_path, input_path.parent)
         case "Bzip2":
+            logger.info("Bzip2 file detected")
             decompress_bz2(input_path, input_path.parent)
         case "7z":
+            logger.info("7z file detected")
             decompress_7z(input_path, input_path.parent)
         case "Gzip":
+            logger.info("Gzip file detected")
             decompress_tar(input_path, input_path.parent)
         case "XZ":
+            logger.info("XZ file detected")
             decompress_tar(input_path, input_path.parent)
         case _:
-            print("Unknown file format")
+            logger.error("Unknown file format")
+            raise ValueError("Unknown file format")
+
+    if not args.keep:
+        logger.debug("Removing %s", args.input)
+        os.remove(input_path)
 
 
 def main():

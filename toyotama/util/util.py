@@ -75,31 +75,6 @@ class MarkdownTable:
             print(line)
 
 
-def interact(symboltable):
-    """Switch to interactive mode
-
-    Parameters
-    ----------
-        symboltable: dict
-            The symboltable when this function is called.
-
-    Returns
-    -------
-    None
-
-    Examples
-    --------
-    a = 5 + 100
-    interact(globals())
-
-    (InteractiveConsole)
-    >>> a
-    105
-    """
-
-    code.interact(local=symboltable)
-
-
 def printvall(symboltable, *args):
     """Show the value and its type
 

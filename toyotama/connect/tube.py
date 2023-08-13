@@ -56,7 +56,7 @@ class Tube(metaclass=ABCMeta):
         return self.recvline()
 
     def recvvalue(self, parser: Callable = ast.literal_eval) -> Any:
-        pattern_raw = r"(?P<name>.*) *[=:] *(?P<value>.*)"
+        pattern_raw = r"(?P<name>.*?) *[=:] *(?P<value>.*)"
         pattern = re.compile(pattern_raw)
         line = pattern.match(self.recvline().decode())
         if not line:
@@ -64,7 +64,7 @@ class Tube(metaclass=ABCMeta):
         name = line.group("name").strip()
         value = parser(line.group("value"))
 
-        logger.debug(f"{name}: {value}")
+        logger.debug("%s: %s", name, value)
 
         return value
 

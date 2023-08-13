@@ -1,6 +1,6 @@
-from ctypes import Array, Structure, c_char, c_int32, c_int64, c_uint16, c_uint32, c_uint64
+from ctypes import c_char, c_int32, c_int64, c_uint16, c_uint32, c_uint64, Structure
 
-from .const import EI_NIDENT, Elf32_Addr, Elf32_Off, Elf32_Word, Elf32_Xword, Elf64_Addr, Elf64_Off, Elf64_Word, Elf64_Xword
+from .const import EI_NIDENT, Elf32_Addr, Elf32_Off, Elf32_Word, Elf64_Addr, Elf64_Off, Elf64_Word, Elf64_Xword
 
 
 class Elf32_Ehdr(Structure):
@@ -42,8 +42,7 @@ class Elf64_Ehdr(Structure):
 
 
 # Program Header
-
-## p_type
+# p_type
 PT_NULL = 0
 PT_LOAD = 1
 PT_DYNAMIC = 2
@@ -61,12 +60,12 @@ PT_GNU_STACK = PT_LOOS + 0x474E551
 PT_GNU_RELRO = PT_LOOS + 0x474E552
 PT_GNU_PROPERTY = PT_LOOS + 0x474E553
 
-## p_flgas
+# p_flgas
 PF_X = 0x1
 PF_W = 0x2
 PF_R = 0x4
 
-## sh_type
+# sh_type
 SHT_NULL = 0
 SHT_PROGBITS = 1
 SHT_SYMTAB = 2
@@ -85,7 +84,7 @@ SHT_HIPROC = 0x7FFFFFFF
 SHT_LOUSER = 0x80000000
 SHT_HIUSER = 0xFFFFFFFF
 
-## sh_flags
+# sh_flags
 SHF_WRITE = 0x1
 SHF_ALLOC = 0x2
 SHF_EXECINSTR = 0x4

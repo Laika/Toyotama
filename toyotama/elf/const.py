@@ -25,12 +25,10 @@ Elf64_Sxword = c_int64
 Elf64_Xword = c_uint64
 
 
-Elf64_Addr = c_uint64
-
 # ELF header (Ehdr)
 EI_NIDENT = 16
 
-## e_ident
+# e_ident
 EI_MAG0 = 0
 EI_MAG1 = 1
 EI_MAG2 = 2
@@ -56,7 +54,7 @@ class ELFClass(IntEnum):
     NUM = 3
 
     @classmethod
-    def from_int(cls, x: int):
+    def from_int(cls, x: int) -> "ELFClass":
         match x:
             case 1:
                 return cls.BIT32
@@ -67,7 +65,7 @@ class ELFClass(IntEnum):
             case _:
                 return cls.NONE
 
-    def bits(self):
+    def bits(self) -> int:
         match self.value:
             case self.BIT32:
                 return 32
@@ -105,14 +103,14 @@ class ELFData(IntEnum):
                 raise ValueError("Invalid ELF data")
 
 
-## e_type
+# e_type
 ET_NONE = 0
 ET_REL = 1
 ET_EXEC = 2
 ET_DYN = 3
 ET_CORE = 4
 
-## e_machine
+# e_machine
 EM_NONE = 0
 EM_M32 = 1
 EM_SPARC = 2
@@ -164,7 +162,7 @@ EM_LOONGARCH = 258  # LoongArch
 EM_FRV = 0x5441  # Fujitsu FR-V
 
 
-EM_ALPHA = 0x9026  #  This is an interim value that we will use until the committee comes up with a final number.
+EM_ALPHA = 0x9026  # This is an interim value that we will use until the committee comes up with a final number.
 
 
 EM_CYGNUS_M32R = 0x9041  # Bogus old m32r magic number, used by old tools.
@@ -176,11 +174,11 @@ EM_S390_OLD = 0xA390  # This is the old interim value for S/390 architecture
 EM_CYGNUS_MN10300 = 0xBEEF  # Also Panasonic/MEI MN10300, AM33
 
 
-## e_version
+# e_version
 EV_NONE = 0
 EV_CURRENT = 1
 
-## e_phnum
+# e_phnum
 PN_XNUM = 0xFFFF
 
 # special section indexes

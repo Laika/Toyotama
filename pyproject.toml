@@ -139,6 +139,9 @@ gmpy2 = "^2.1.2"
 r2pipe = "^1.6.5"
 requests = "^2.27.1"
 lief = "^0.13.2"
+pillow = "^10.0.0"
+flask = "^2.3.2"
+py7zr = "^0.20.6"
 
 [tool.poetry.dev-dependencies]
 black = "^22.1.0"
@@ -146,7 +149,7 @@ autopep8 = "^1.6.0"
 isort = "^5.10.1"
 
 [tool.poetry.scripts]
-dcp = "toyotama.util.decompress:main"
+unar = "toyotama.util.decompress:main"
 
 
 [tool.poetry.group.dev.dependencies]
