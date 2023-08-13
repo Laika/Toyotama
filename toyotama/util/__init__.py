@@ -1,3 +1,4 @@
+from .convert import *
 from .integer import *
 from .log import *
 from .shell import *

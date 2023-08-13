@@ -1,19 +1,17 @@
 """RSA utility
 """
+from collections.abc import Callable
 from functools import reduce
 from math import ceil, isqrt
 from operator import mul
-from typing import Callable
-
-import gmpy2
 
 from ..util.log import get_logger
-from .util import extended_gcd, i2b, inverse
+from .util import extended_gcd, i2b, inverse, is_square
 
 logger = get_logger()
 
 
-def common_modulus_attack(e1: int, e2: int, c1: int, c2: int, N: int) -> int:
+def common_modulus_attack(e1: int, e2: int, c1: int, c2: int, n: int) -> int:
     """Common Modulus Attack
 
     Common Modulus Attack
@@ -27,17 +25,17 @@ def common_modulus_attack(e1: int, e2: int, c1: int, c2: int, N: int) -> int:
         int: The plaintext
     """
     s1, s2, _ = extended_gcd(e1, e2)
-    return pow(c1, s1, N) * pow(c2, s2, N) % N
+    return pow(c1, s1, n) * pow(c2, s2, n) % n
 
 
-def wieners_attack(e: int, N: int) -> int | None:
+def wieners_attack(e: int, n: int) -> int | None:
     """Wiener's attack
 
     Wiener's attack
 
     Args:
         e (int): The public exponent.
-        N (int): The modulus.
+        n (int): The modulus.
     Returns:
         int or None: The private key. None if failed.
     """
@@ -52,11 +50,11 @@ def wieners_attack(e: int, N: int) -> int | None:
         n0, d0 = 0, 1
         n1, d1 = 1, 0
         for q in cfrac:
-            n = q * n1 + n0
-            d = q * d1 + d0
-            yield n, d
+            n_ = q * n1 + n0
+            d_ = q * d1 + d0
+            yield n_, d_
             n0, d0 = n1, d1
-            n1, d1 = n, d
+            n1, d1 = n_, d_
 
     def conv_from_cfrac(cfrac):
         n_, d_ = 1, 0
@@ -64,22 +62,22 @@ def wieners_attack(e: int, N: int) -> int | None:
             yield n + (i + 1) % 2 * n_, d + (i + 1) % 2 * d_
             n_, d_ = n, d
 
-    for k, dg in conv_from_cfrac(rat_to_cfrac(e, N)):
+    for k, dg in conv_from_cfrac(rat_to_cfrac(e, n)):
         edg = e * dg
         phi = edg // k
 
-        x = N - phi + 1
-        if x % 2 == 0 and gmpy2.is_square((x // 2) ** 2 - N):
+        x = n - phi + 1
+        if x % 2 == 0 and is_square((x // 2) ** 2 - n):
             g = edg - phi * k
             return dg // g
     return None
 
 
-def lsb_decryption_oracle_attack(N: int, e: int, c: int, oracle: Callable, debug: bool = True) -> int:
+def lsb_decryption_oracle_attack(n: int, e: int, c: int, oracle: Callable, debug: bool = True) -> int:
     """Perform LSB Decryption oracle attack.
 
     Args:
-        N (int): A modulus.
+        n (int): A modulus.
         e (int): A public exponent.
         c (int): A ciphertext.
         oracle (Callable): A decryption oracle. (2**e)*c = (2*m)**e (mod n) => oracle => m&1
@@ -101,17 +99,17 @@ def lsb_decryption_oracle_attack(N: int, e: int, c: int, oracle: Callable, debug
 
     from fractions import Fraction
 
-    lb, ub = 0, N
-    C = c
+    lb, ub = Fraction(), Fraction(n)
+    c_ = c
     i = 0
-    nl = N.bit_length()
+    nl = n.bit_length()
     while ub - lb > 1:
         if debug:
             logger.info(f"{(100*i//nl):>3}% [{i:>4}/{nl}]")
 
         mid = Fraction(lb + ub, 2)
-        C = C * pow(2, e, N) % N
-        if oracle(C):
+        c_ = c_ * pow(2, e, n) % n
+        if oracle(c_):
             lb = mid
         else:
             ub = mid
