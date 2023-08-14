@@ -1,18 +1,8 @@
 [project]
 name = "toyotama"
 version = "0.9.9"
-dependencies = [
-  "gmpy2~=2.1.5",
-  "rzpipe~=0.5.1",
-  "requests~=2.31.0",
-  "pillow~=9.5.0",
-]
-dev-dependencies = [
-  "black~=23.3.0",
-  "autopep8~=2.0.2",
-  "flake8~=6.0.0",
-  "isort~=5.12.0",
-]
+dependencies = ["gmpy2~=2.1.5", "rzpipe~=0.5.1", "requests~=2.31.0", "pillow~=9.5.0"]
+dev-dependencies = ["black~=23.3.0", "autopep8~=2.0.2", "flake8~=6.0.0", "isort~=5.12.0"]
 description = "Python library for CTF."
 authors = [{ name = "Laika", email = "laika@albina.cc" }]
 maintainers = [{ name = "Laika", email = "laika@albina.cc" }]
@@ -22,89 +12,89 @@ repository = "https://github.com/Laika/Toyotama"
 homepage = "https://github.com/Laika/Toyotama"
 keywords = ["CTF"]
 classifiers = [
-  "License :: OSI Approved :: MIT License",
-  "Topic :: Software Development :: Libraries :: Python Modules",
-  "Programming Language :: Python :: 3",
-  "Programming Language :: Python :: 3.10",
-  "Programming Language :: Python :: 3.11",
-  "Operating System :: POSIX :: Linux",
+    "License :: OSI Approved :: MIT License",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Operating System :: POSIX :: Linux",
 ]
 
 [tool.ruff]
-line-length = 150
+line-length    = 150
 target-version = "py311"
 
 select = ["E", "F", "C90", "I", "N", "UP", "PERF", "PL"]
 ignore = []
 
 fixable = [
-  "A",
-  "B",
-  "C",
-  "D",
-  "E",
-  "F",
-  "G",
-  "I",
-  "N",
-  "Q",
-  "S",
-  "T",
-  "W",
-  "ANN",
-  "ARG",
-  "BLE",
-  "COM",
-  "DJ",
-  "DTZ",
-  "EM",
-  "ERA",
-  "EXE",
-  "FBT",
-  "ICN",
-  "INP",
-  "ISC",
-  "NPY",
-  "PD",
-  "PGH",
-  "PIE",
-  "PL",
-  "PT",
-  "PTH",
-  "PYI",
-  "RET",
-  "RSE",
-  "RUF",
-  "SIM",
-  "SLF",
-  "TCH",
-  "TID",
-  "TRY",
-  "UP",
-  "YTT",
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G",
+    "I",
+    "N",
+    "Q",
+    "S",
+    "T",
+    "W",
+    "ANN",
+    "ARG",
+    "BLE",
+    "COM",
+    "DJ",
+    "DTZ",
+    "EM",
+    "ERA",
+    "EXE",
+    "FBT",
+    "ICN",
+    "INP",
+    "ISC",
+    "NPY",
+    "PD",
+    "PGH",
+    "PIE",
+    "PL",
+    "PT",
+    "PTH",
+    "PYI",
+    "RET",
+    "RSE",
+    "RUF",
+    "SIM",
+    "SLF",
+    "TCH",
+    "TID",
+    "TRY",
+    "UP",
+    "YTT",
 ]
 exclude = [
-  ".bzr",
-  ".direnv",
-  ".eggs",
-  ".git",
-  ".git-rewrite",
-  ".hg",
-  ".mypy_cache",
-  ".nox",
-  ".pants.d",
-  ".pytype",
-  ".ruff_cache",
-  ".svn",
-  ".tox",
-  ".venv",
-  "__pypackages__",
-  "_build",
-  "buck-out",
-  "build",
-  "dist",
-  "node_modules",
-  "venv",
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".git-rewrite",
+    ".hg",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "venv",
 ]
 unfixable = []
 
@@ -124,32 +114,32 @@ repository = "https://github.com/Laika/Toyotama"
 homepage = "https://github.com/Laika/Toyotama"
 keywords = ["CTF"]
 classifiers = [
-  "License :: OSI Approved :: MIT License",
-  "Topic :: Software Development :: Libraries :: Python Modules",
-  "Programming Language :: Python :: 3",
-  "Programming Language :: Python :: 3.10",
-  "Programming Language :: Python :: 3.11",
-  "Operating System :: POSIX :: Linux",
+    "License :: OSI Approved :: MIT License",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Operating System :: POSIX :: Linux",
 ]
 packages = [{ include = "toyotama" }]
 
 [tool.poetry.dependencies]
-python = ">=3.8"
-gmpy2 = "^2.1.2"
-r2pipe = "^1.6.5"
+python   = ">=3.8"
+gmpy2    = "^2.1.2"
+r2pipe   = "^1.6.5"
 requests = "^2.27.1"
-lief = "^0.13.2"
-pillow = "^10.0.0"
-flask = "^2.3.2"
-py7zr = "^0.20.6"
+lief     = "^0.13.2"
+pillow   = "^10.0.0"
+flask    = "^2.3.2"
+py7zr    = "^0.20.6"
 
 [tool.poetry.dev-dependencies]
-black = "^22.1.0"
+black    = "^22.1.0"
 autopep8 = "^1.6.0"
-isort = "^5.10.1"
+isort    = "^5.10.1"
 
 [tool.poetry.scripts]
-unar = "toyotama.util.decompress:main"
+dcmp = "toyotama.util.decompress:main"
 
 
 [tool.poetry.group.dev.dependencies]
@@ -158,5 +148,5 @@ mypy = "^1.5.0"
 [build-system]
 # requires = ["poetry-core>=1.0.0"]
 # build-backend = "poetry.core.masonry.api"
-requires = ["hatchling"]
+requires      = ["hatchling"]
 build-backend = "hatchling.build"
