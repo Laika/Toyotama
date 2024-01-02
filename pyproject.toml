@@ -1,8 +1,13 @@
 [project]
 name = "toyotama"
-version = "0.9.9"
-dependencies = ["gmpy2~=2.1.5", "rzpipe~=0.5.1", "requests~=2.31.0", "pillow~=9.5.0"]
-dev-dependencies = ["black~=23.3.0", "autopep8~=2.0.2", "flake8~=6.0.0", "isort~=5.12.0"]
+version = "0.9.10"
+dependencies = ["rzpipe~=0.5.1", "requests~=2.31.0", "pillow~=9.5.0"]
+dev-dependencies = [
+    "black~=23.3.0",
+    "autopep8~=2.0.2",
+    "flake8~=6.0.0",
+    "isort~=5.12.0",
+]
 description = "Python library for CTF."
 authors = [{ name = "Laika", email = "laika@albina.cc" }]
 maintainers = [{ name = "Laika", email = "laika@albina.cc" }]
@@ -21,7 +26,7 @@ classifiers = [
 ]
 
 [tool.ruff]
-line-length    = 150
+line-length = 150
 target-version = "py311"
 
 select = ["E", "F", "C90", "I", "N", "UP", "PERF", "PL"]
@@ -104,7 +109,7 @@ convention = "google"
 
 [tool.poetry]
 name = "toyotama"
-version = "0.9.9"
+version = "0.9.10"
 description = "Python library for CTF."
 authors = ["Laika <laika@albina.cc>"]
 maintainers = ["Laika <laika@albina.cc>"]
@@ -119,24 +124,23 @@ classifiers = [
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
     "Operating System :: POSIX :: Linux",
 ]
 packages = [{ include = "toyotama" }]
 
 [tool.poetry.dependencies]
-python   = ">=3.8"
-gmpy2    = "^2.1.2"
-r2pipe   = "^1.6.5"
+python = ">=3.8"
 requests = "^2.27.1"
-lief     = "^0.13.2"
-pillow   = "^10.0.0"
-flask    = "^2.3.2"
-py7zr    = "^0.20.6"
+lief = "^0.13.2"
+pillow = "^10.0.0"
+flask = "^2.3.2"
+py7zr = "^0.20.6"
 
 [tool.poetry.dev-dependencies]
-black    = "^22.1.0"
+black = "^22.1.0"
 autopep8 = "^1.6.0"
-isort    = "^5.10.1"
+isort = "^5.10.1"
 
 [tool.poetry.scripts]
 dcmp = "toyotama.util.decompress:main"
@@ -148,5 +152,5 @@ mypy = "^1.5.0"
 [build-system]
 # requires = ["poetry-core>=1.0.0"]
 # build-backend = "poetry.core.masonry.api"
-requires      = ["hatchling"]
+requires = ["hatchling"]
 build-backend = "hatchling.build"

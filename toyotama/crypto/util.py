@@ -6,7 +6,7 @@ from operator import mul
 from random import randint
 from typing import Literal
 
-import gmpy2
+from Crypto.Util.number import isPrime
 
 from ..util.log import get_logger
 
@@ -14,6 +14,17 @@ Endian = Literal["big", "little"]
 
 
 logger = get_logger()
+
+
+def next_prime(x: int) -> int:
+    if x <= 1:
+        return 2
+
+    x += 1 + x % 2
+    while not isPrime(x):
+        x += 2
+
+    return x
 
 
 def xor(*array: bytes, strict: bool = False) -> bytes:
@@ -266,7 +277,7 @@ def factorize_from_kphi(n: int, kphi: int) -> tuple[int, int]:
     r = (kphi & -kphi).bit_length() - 1
     s = kphi >> r
     g = 1
-    while g := int(gmpy2.next_prime(g)):
+    while g := int(next_prime(g)):
         x = pow(g, s, n)
         for _ in range(r):
             p = gcd(x - 1, n)

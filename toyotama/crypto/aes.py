@@ -166,7 +166,7 @@ def test_padding():
     _r = Socket("nc localhost 50000")
 
     def oracle(ciphertext: bytes, iv: bytes) -> bool:
-        _r.sendlineafter(b"> ", (iv + ciphertext).hex().encode())
+        _r.sendlineafter("> ", (iv + ciphertext).hex())
         result = _r.recvline().decode().strip()
         return result == "ok"
 

@@ -1,6 +1,6 @@
 import logging
 
-from ..terminal.style import Style
+from .terminal.style import Style
 
 
 class CustomFormatter(logging.Formatter):

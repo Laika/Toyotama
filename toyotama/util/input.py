@@ -46,6 +46,3 @@ if __name__ == "__main__":
 
     test3 = io.StringIO("test3 : VEVTVFNUUklOR1Nob2dlaG9nZWhvZ2VmdWdh")
     assert readbase64(test3) == b"TESTSTRINGShogehogehogefuga"
-
-
-test2

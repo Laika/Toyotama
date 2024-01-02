@@ -7,40 +7,28 @@ from .log import get_logger
 logger = get_logger()
 
 
-def urlencode(s, encoding="shift-jis", safe=":/&?="):
-    from urllib.parse import quote_plus
-
-    return quote_plus(s, encoding=encoding, safe=safe)
-
-
-def urldecode(s, encoding="shift-jis"):
-    from urllib.parse import unquote_plus
-
-    return unquote_plus(s, encoding=encoding)
-
-
-def to_block(x, block_size: int = 16):
+def to_block(x: bytes, block_size: int = 16) -> list[bytes]:
     return [x[i : i + block_size] for i in range(0, len(x), block_size)]
 
 
-@singledispatch
-def b64_padding(s):
-    raise TypeError("s must be str or bytes.")
+def b64_padding(s: str | bytes) -> str | bytes:
+    if isinstance(s, str):
+        s += "=" * (-len(s) % 4)
+        return s
+    elif isinstance(s, bytes):
+        s += b"=" * (-len(s) % 4)
+        return s
+    else:
+        raise TypeError("s must be str or bytes")
 
 
-@b64_padding.register(str)
-def b64_padding_str(s):
-    s += "=" * (-len(s) % 4)
-    return s
-
-
-@b64_padding.register(bytes)
-def b64_padding_bytes(s):
-    s += b"=" * (-len(s) % 4)
-    return s
-
-
-def binary_to_image(data, padding=5, size=5, rev=False, image_size=(1000, 1000)):
+def binary_to_image(
+    data,
+    padding: int = 5,
+    size: int = 5,
+    inverted: bool = False,
+    image_size: tuple[int, int] = (1000, 1000),
+):
     bk, wh = (0, 0, 0), (255, 255, 255)
     image = Image.new("RGB", image_size, wh)
     rect = Image.new("RGB", (size, size))
@@ -56,7 +44,7 @@ def binary_to_image(data, padding=5, size=5, rev=False, image_size=(1000, 1000))
             w = max(w, x)
             x = 0
         else:
-            if (pixel == "1") ^ rev:
+            if (pixel == "1") ^ inverted:
                 image.paste(rect, (padding + x * size, padding + y * size))
             x += 1
 

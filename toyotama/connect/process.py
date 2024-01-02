@@ -94,7 +94,7 @@ class Process(Tube):
         return buf or b""
 
     def send(self, message: bytes | str | int, term: bytes | str = b"", debug: bool = True):
-        if self.id_dead():
+        if self.is_dead():
             return b""
 
         self._poll()

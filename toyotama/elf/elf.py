@@ -4,6 +4,7 @@ from pathlib import Path
 import lief
 import r2pipe
 
+from ..pwn.address import Address
 from ..util import MarkdownTable
 from ..util.log import get_logger
 
@@ -58,7 +59,7 @@ class ELF:
 
         for reloc in self._relocs:
             if "name" in reloc.keys() and re.search(target, reloc["name"]):
-                return self._base + reloc["vaddr"]
+                return Address(self._base + reloc["vaddr"])
 
         return None
 
@@ -68,7 +69,7 @@ class ELF:
 
         for func in self._funcs:
             if re.search(target, func["name"]):
-                return self._base + func["offset"]
+                return Address(self._base + func["offset"])
 
         return None
 
@@ -78,7 +79,7 @@ class ELF:
 
         for str_ in self._strs:
             if re.search(target, str_["string"]):
-                return self._base + str_["vaddr"]
+                return Address(self._base + str_["vaddr"])
 
         return None
 
@@ -88,7 +89,7 @@ class ELF:
 
         for sym in self._syms:
             if re.search(target, sym["name"]):
-                return self._base + sym["vaddr"]
+                return Address(self._base + sym["vaddr"])
 
         return None
 
