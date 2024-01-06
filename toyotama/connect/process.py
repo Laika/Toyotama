@@ -4,12 +4,12 @@ import pty
 import signal
 import subprocess
 import tty
+from logging import getLogger
 from pathlib import Path
 
 from toyotama.connect.tube import Tube
-from toyotama.util.log import get_logger
 
-logger = get_logger()
+logger = getLogger(__name__)
 
 
 class Process(Tube):
@@ -145,6 +145,3 @@ class Process(Tube):
 
     def __del__(self):
         self.close()
-
-
-__all__ = ["Process"]

@@ -1,3 +1,2 @@
-from toyotama.terminal.style import Style
-
-__all__ = ["Style"]
+from toyotama.terminal.style import *
+from toyotama.terminal.util import *

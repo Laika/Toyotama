@@ -1,11 +1,9 @@
-import code
 import string
 from functools import singledispatch
 from itertools import zip_longest
+from logging import getLogger
 
-from toyotama.util.log import get_logger
-
-logger = get_logger()
+logger = getLogger(__name__)
 
 
 class MarkdownTable:

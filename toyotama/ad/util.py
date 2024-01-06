@@ -1,11 +1,12 @@
 """Attack-and-Defense utility module
 """
 
+
+from logging import getLogger
+
 import requests
 
-from toyotama.util.log import get_logger
-
-logger = get_logger()
+logger = getLogger(__name__)
 
 
 def submit_flag(flag: str, url: str, token: str):

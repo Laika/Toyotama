@@ -1,3 +1,4 @@
+import logging
 from collections import namedtuple
 
 RED = "#DC3545"
@@ -72,3 +73,33 @@ styles = {
 }
 
 Style = namedtuple("Style", list(styles.keys()))(**styles)
+
+
+class CustomFormatter(logging.Formatter):
+    def __init__(self, colored: bool = True):
+        self.date_format = "%Y-%m-%dT%T"
+        self.FORMATS = {}
+        if colored:
+            self.FORMATS = {
+                logging.DEBUG: self._colored_format(Style.FG_GRAY),
+                logging.INFO: self._colored_format(Style.FG_BLUE),
+                logging.WARNING: self._colored_format(Style.FG_YELLOW),
+                logging.ERROR: self._colored_format(Style.FG_RED),
+                logging.CRITICAL: self._colored_format(Style.FG_MAGENTA),
+            }
+        else:
+            self.FORMATS = {
+                logging.DEBUG: self._colored_format(),
+                logging.INFO: self._colored_format(),
+                logging.WARNING: self._colored_format(),
+                logging.ERROR: self._colored_format(),
+                logging.CRITICAL: self._colored_format(),
+            }
+
+    def _colored_format(self, color: str = "") -> str:
+        return f"{Style.FG_GRAY}{{asctime}} {Style.BOLD}{color}{{levelname: <8}}{Style.RESET} {{message}}"
+
+    def format(self, record: logging.LogRecord):
+        log_format = self.FORMATS.get(record.levelno)
+        formatter = logging.Formatter(log_format, self.date_format, style="{")
+        return formatter.format(record)

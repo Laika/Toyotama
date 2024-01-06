@@ -1,17 +1,17 @@
 import ast
 import base64
-import os
 import re
 import sys
 import threading
 import time
 from abc import ABCMeta, abstractmethod
-from typing import Any, Callable
+from collections.abc import Callable
+from logging import getLogger
+from typing import Any
 
 from toyotama.terminal.style import Style
-from toyotama.util.log import get_logger
 
-logger = get_logger(__name__, os.environ.get("TOYOTAMA_LOG_LEVEL", "INFO"))
+logger = getLogger(__name__)
 
 
 class Tube(metaclass=ABCMeta):
@@ -20,6 +20,7 @@ class Tube(metaclass=ABCMeta):
     def __init__(self):
         self.recv_bytes = 0
         self.send_bytes = 0
+        self._handlers: list[Callable] = []
 
     @abstractmethod
     def recv(self, n: int = 4096) -> bytes:
@@ -143,7 +144,7 @@ class Tube(metaclass=ABCMeta):
         payload = base64.b64encode(payload).decode()
 
         self.cmd("cd /tmp")
-        logger.info(f"Sending payload.")
+        logger.info("Sending payload.")
         for i in range(0, len(payload), block_size):
             logger.info(f"Uploading... {i}/{len(payload)}[{i / len(payload):.2%}]")
             self.cmd(f'echo "{payload[i : i + block_size]}" >>exploit-b64')
@@ -156,6 +157,9 @@ class Tube(metaclass=ABCMeta):
 
         self.interactive()
 
+    def add_handler(self, handler: Callable):
+        self._handlers.append(handler)
+
     def __enter__(self):
         return self
 
@@ -165,6 +169,3 @@ class Tube(metaclass=ABCMeta):
     @abstractmethod
     def close(self):
         ...
-
-
-__all__ = ["Tube"]

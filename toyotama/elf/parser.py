@@ -1,10 +1,10 @@
+from logging import getLogger
 from pathlib import Path
 
 from toyotama.elf.const import *
 from toyotama.elf.elfstruct import Elf64_Ehdr
-from toyotama.util.log import get_logger
 
-logger = get_logger()
+logger = getLogger(__name__)
 
 
 class ParseError(Exception):
@@ -74,8 +74,6 @@ class ELFParser:
         if self.fd:
             self.fd.close()
 
-
-__all__ = ["ELFParser"]
 
 if __name__ == "__main__":
     parser = ELFParser(Path("./chall"))

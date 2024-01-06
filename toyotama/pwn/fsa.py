@@ -1,7 +1,8 @@
-from toyotama.pwn.util import p32, p64
-from toyotama.util.log import get_logger
+from logging import getLogger
 
-logger = get_logger()
+from toyotama.pwn.util import p32, p64
+
+logger = getLogger(__name__)
 
 
 def fsa_write_32(value: int, nth_stack: int, target_addr: int | None = None, offset: int = 0, each: int = 4) -> bytes:
@@ -52,9 +53,7 @@ def fsa_write_32(value: int, nth_stack: int, target_addr: int | None = None, off
     return payload
 
 
-def fsa_write_64(
-    write_dict: dict[int, int], nth_stack: int, written_bytes_num: int = 0, offset: int = 0, each: int = 4
-) -> bytes:
+def fsa_write_64(write_dict: dict[int, int], nth_stack: int, written_bytes_num: int = 0, offset: int = 0, each: int = 4) -> bytes:
     """Arbitrary write using format string bug (64bit)
 
     Args:
@@ -104,6 +103,3 @@ def fsa_write_64(
         logger.warning("The payload includes some null bytes.")
 
     return payload
-
-
-__all__ = ["fsa_write_32", "fsa_write_64"]

@@ -1,19 +1,16 @@
 """Crypto Utility
 """
-import os
 from functools import reduce
+from logging import getLogger
 from math import gcd, isqrt, lcm
 from operator import mul
 from random import randint
 from typing import Literal
 
 from toyotama.crypto.const import PRIMES
-from toyotama.util.log import get_logger
 
+logger = getLogger(__name__)
 Endian = Literal["big", "little"]
-
-
-logger = get_logger(__name__, os.environ.get("TOYOTAMA_LOG_LEVEL", "INFO"))
 
 
 def int_to_bytes(x: int, byteorder: Endian = "big") -> bytes:
@@ -131,7 +128,7 @@ def xor(*array: bytes, strict: bool = False) -> bytes:
     """
 
     if len(array) == 0:
-        return bytes()
+        return b""
 
     ret = bytes(len(array[0]))
 

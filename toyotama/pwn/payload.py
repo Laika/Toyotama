@@ -49,6 +49,3 @@ class Payload:
     def save(self, path: str):
         with open(path, "wb") as f:
             f.write(self.payload)
-
-
-__all__ = ["Payload"]

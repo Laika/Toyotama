@@ -2,14 +2,13 @@ import argparse
 import bz2
 import os
 import tarfile
+from logging import getLogger
 from pathlib import Path
 from zipfile import ZipFile
 
 import py7zr
 
-from toyotama.util.log import get_logger
-
-logger = get_logger(__name__, "DEBUG")
+logger = getLogger(__name__)
 
 
 def parse_args():

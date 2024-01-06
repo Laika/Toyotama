@@ -1,13 +1,13 @@
 import sys
 from collections.abc import Callable
 from itertools import pairwise
+from logging import getLogger
 from random import sample
 
 from toyotama.crypto.util import xor
 from toyotama.util.convert import to_block
-from toyotama.util.log import get_logger
 
-logger = get_logger(__name__)
+logger = getLogger(__name__)
 
 
 def ecb_chosen_plaintext_attack(
@@ -159,6 +159,3 @@ class PKCS7PaddingOracleAttack:
         iv = tampered_ciphertext_block.pop(0)
         tampered_ciphertext = b"".join(tampered_ciphertext_block)
         return tampered_ciphertext, iv
-
-
-__all__ = ["PKCS7PaddingOracleAttack", "ecb_chosen_plaintext_attack"]

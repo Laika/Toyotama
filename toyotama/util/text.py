@@ -1,14 +1,12 @@
 import ast
 import io
-import os
 import re
 from base64 import b64decode
 from collections.abc import Callable
+from logging import getLogger
 from typing import Any
 
-from toyotama.util.log import get_logger
-
-logger = get_logger(__name__, os.environ.get("TOYOTAMA_LOG_LEVEL", "INFO"))
+logger = getLogger(__name__)
 
 
 class Text(io.StringIO):
@@ -102,6 +100,3 @@ class Text(io.StringIO):
 
         self.PATTERN_RAW = pattern
         self.pattern = re.compile(self.PATTERN_RAW)
-
-
-__all__ = ["Text"]

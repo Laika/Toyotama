@@ -1,11 +1,10 @@
-import os
 import socket
 import subprocess
+from logging import getLogger
 
 from toyotama.connect.tube import Tube
-from toyotama.util.log import get_logger
 
-logger = get_logger(__name__, os.environ.get("TOYOTAMA_LOG_LEVEL", "INFO"))
+logger = getLogger(__name__)
 
 
 class Socket(Tube):
@@ -68,7 +67,7 @@ class Socket(Tube):
         if commands[0] != "hashcash":
             raise ValueError("Invalid hashcash command.")
 
-        result = subprocess.run(commands, capture_output=True).stdout.decode().strip()
+        result = subprocess.run(commands, capture_output=True, check=False).stdout.decode().strip()
         self.sendline(result)
 
         return result
@@ -78,6 +77,3 @@ class Socket(Tube):
             self.sock.close()
             self.sock = None
             logger.info(f"Connection to {self.host}:{self.port} closed.")
-
-
-__all__ = ["Socket"]
