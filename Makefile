@@ -26,3 +26,6 @@ set-credentials-pypi:
 publish:
 	poetry publish
 
+.PHONY: install
+install:
+	python -m pip install -U .
