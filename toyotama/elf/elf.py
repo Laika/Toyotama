@@ -2,11 +2,11 @@ import re
 from pathlib import Path
 
 import lief
-import r2pipe
+import rzpipe
 
-from ..pwn.address import Address
-from ..util import MarkdownTable
-from ..util.log import get_logger
+from toyotama.pwn.address import Address
+from toyotama.util.log import get_logger
+from toyotama.util.util import MarkdownTable
 
 logger = get_logger()
 
@@ -17,10 +17,10 @@ class ELF:
 
         self.path = Path(path)
 
-        self._base = 0x000000
+        self._base = 0x0
 
         logger.info('[%s] Open "%s"', self.__class__.__name__, self.path)
-        self._r = r2pipe.open(path)
+        self._r = rzpipe.open(path)
 
         logger.info("[%s] %s", self.__class__.__name__, "a" * level)
         self._r.cmd("a" * level)
@@ -83,15 +83,15 @@ class ELF:
 
         return None
 
-    def sym(self, target: str = "") -> dict[str, int] | int | None:
-        if not target:
-            return {sym["name"]: self._base + sym["vaddr"] for sym in self._syms}
-
+    def sym(self, target: str = "") -> int:
         for sym in self._syms:
             if re.search(target, sym["name"]):
                 return Address(self._base + sym["vaddr"])
 
-        return None
+        return 0
+
+    def syms(self) -> dict[str, int]:
+        return {sym["name"]: self._base + sym["vaddr"] for sym in self._syms}
 
     def _get_rop_gadget(self, pattern: str):
         results = self._r.cmdj(f"/Rj {pattern}")
@@ -154,3 +154,6 @@ class ELF:
     relocs = got
     funcs = plt
     __repr__ = __str__
+
+
+__all__ = ["ELF"]

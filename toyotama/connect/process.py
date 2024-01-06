@@ -6,8 +6,8 @@ import subprocess
 import tty
 from pathlib import Path
 
-from ..util.log import get_logger
-from .tube import Tube
+from toyotama.connect.tube import Tube
+from toyotama.util.log import get_logger
 
 logger = get_logger()
 
@@ -121,7 +121,13 @@ class Process(Tube):
             logger.error(e)
 
     def gdb(self, script: list[str] | None = None):
-        self._gdb = subprocess.Popen(["gdb", "-p", str(self.pid())], shell=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding="utf-8")
+        self._gdb = subprocess.Popen(
+            ["gdb", "-p", str(self.pid())],
+            shell=False,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            encoding="utf-8",
+        )
         master, slave = pty.openpty()
         tty.setraw(master)
         tty.setraw(slave)
@@ -139,3 +145,6 @@ class Process(Tube):
 
     def __del__(self):
         self.close()
+
+
+__all__ = ["Process"]

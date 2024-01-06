@@ -1,6 +1,4 @@
-from .const import *
-from .elf import ELF
-from .elfstruct import *
-from .parser import *
-
-__all__ = ["ELF"]
+from toyotama.elf.const import *
+from toyotama.elf.elf import *
+from toyotama.elf.elfstruct import *
+from toyotama.elf.parser import *

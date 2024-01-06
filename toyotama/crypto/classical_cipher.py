@@ -22,3 +22,6 @@ def rot(plaintext: str | bytes, rotate: int = 13) -> bytes:
             r.append(c)
 
     return bytes(r)
+
+
+__all__ = ["rot"]

@@ -1,7 +1,7 @@
 [project]
 name = "toyotama"
 version = "0.9.11-alpha"
-dependencies = ["rzpipe~=0.6.0", "requests~=2.31.0", "pillow~=10.2.0"]
+dependencies = ["rzpipe~=0.6.0", "requests~=2.31.0", "pillow~=9.3.0"]
 dev-dependencies = [
     "black~=23.3.0",
     "autopep8~=2.0.2",

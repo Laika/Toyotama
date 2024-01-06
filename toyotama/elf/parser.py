@@ -19,7 +19,6 @@ class ELFParser:
 
         self.parse_ehdr()
 
-
     def __repr__(self) -> str:
         return f'ELFParser(path="{self.path.resolve()}")'
 
@@ -75,6 +74,8 @@ class ELFParser:
         if self.fd:
             self.fd.close()
 
+
+__all__ = ["ELFParser"]
 
 if __name__ == "__main__":
     parser = ELFParser(Path("./chall"))

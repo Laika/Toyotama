@@ -1,4 +1,2 @@
-from .process import Process
-from .socket import Socket
-
-__all__ = ["Socket", "Process"]
+from toyotama.connect.process import *
+from toyotama.connect.socket import *

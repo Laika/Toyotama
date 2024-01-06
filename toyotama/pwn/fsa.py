@@ -1,5 +1,5 @@
-from ..util.log import get_logger
-from .util import p32, p64
+from toyotama.pwn.util import p32, p64
+from toyotama.util.log import get_logger
 
 logger = get_logger()
 
@@ -27,21 +27,21 @@ def fsa_write_32(value: int, nth_stack: int, target_addr: int | None = None, off
         4: "n",
     }
 
-    bit_len = 32
-    byte_len = bit_len // 8
+    BIT_WIDTH = 32
+    BYTE_WIDTH = BIT_WIDTH // 8
 
     # Adjust stack alignment
-    payload = b"A" * (-offset % byte_len)
+    payload = b"A" * (-offset % BYTE_WIDTH)
     if offset != 0:
         nth_stack += 1
 
     if target_addr:
-        for i in range(0, byte_len, each):
+        for i in range(0, BYTE_WIDTH, each):
             payload += p32(target_addr + i)
 
     previous_value = 0
     current_value = len(payload)
-    for i in range(0, byte_len, each):
+    for i in range(0, BYTE_WIDTH, each):
         previous_value = current_value
         current_value = value % (1 << 8 * each)
         offset = (current_value - previous_value) % (1 << 8 * each)
@@ -52,7 +52,9 @@ def fsa_write_32(value: int, nth_stack: int, target_addr: int | None = None, off
     return payload
 
 
-def fsa_write_64(write_dict: dict[int, int], nth_stack: int, written_bytes_num: int = 0, offset: int = 0, each: int = 4) -> bytes:
+def fsa_write_64(
+    write_dict: dict[int, int], nth_stack: int, written_bytes_num: int = 0, offset: int = 0, each: int = 4
+) -> bytes:
     """Arbitrary write using format string bug (64bit)
 
     Args:
@@ -77,7 +79,7 @@ def fsa_write_64(write_dict: dict[int, int], nth_stack: int, written_bytes_num: 
     }
 
     BIT_WIDTH = 64
-    BYTE_WIDTH = BIT_LEN // 8
+    BYTE_WIDTH = BIT_WIDTH // 8
 
     payload = b""
 
@@ -102,3 +104,6 @@ def fsa_write_64(write_dict: dict[int, int], nth_stack: int, written_bytes_num: 
         logger.warning("The payload includes some null bytes.")
 
     return payload
+
+
+__all__ = ["fsa_write_32", "fsa_write_64"]

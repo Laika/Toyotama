@@ -7,9 +7,8 @@ from operator import mul
 from random import randint
 from typing import Literal
 
+from toyotama.crypto.const import PRIMES
 from toyotama.util.log import get_logger
-
-from .const import primes
 
 Endian = Literal["big", "little"]
 
@@ -53,7 +52,7 @@ def is_prime(n: int, rounds: int = 10) -> bool:
     """
     if n < 3 or n % 2 == 0:
         return n == 2
-    for p in primes:
+    for p in PRIMES:
         if n == p:
             return True
         if n % p == 0:

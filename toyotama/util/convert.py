@@ -1,10 +1,10 @@
-from functools import singledispatch
+import os
 
 from PIL import Image, ImageDraw
 
-from .log import get_logger
+from toyotama.util.log import get_logger
 
-logger = get_logger()
+logger = get_logger(__name__, os.environ.get("TOYOTAMA_LOG_LEVEL", "INFO"))
 
 
 def to_block(x: bytes, block_size: int = 16) -> list[bytes]:

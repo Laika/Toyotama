@@ -3,7 +3,7 @@
 
 import requests
 
-from ..util.log import get_logger
+from toyotama.util.log import get_logger
 
 logger = get_logger()
 

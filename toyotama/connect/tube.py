@@ -165,3 +165,6 @@ class Tube(metaclass=ABCMeta):
     @abstractmethod
     def close(self):
         ...
+
+
+__all__ = ["Tube"]

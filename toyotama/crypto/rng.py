@@ -26,3 +26,6 @@ def lcg_crack(x, a=None, b=None, m=None):
             b = (x[1] - a * x[0]) % m
 
     return a, b, m
+
+
+__all__ = ["lcg_crack"]

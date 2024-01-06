@@ -1,8 +1,8 @@
 from collections.abc import Callable
 from typing import Literal, Self
 
-from .address import Address
-from .util import p32, p64
+from toyotama.pwn.address import Address
+from toyotama.pwn.util import p32, p64
 
 
 class Payload:
@@ -49,3 +49,6 @@ class Payload:
     def save(self, path: str):
         with open(path, "wb") as f:
             f.write(self.payload)
+
+
+__all__ = ["Payload"]

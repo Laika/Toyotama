@@ -2,9 +2,8 @@ import os
 import socket
 import subprocess
 
+from toyotama.connect.tube import Tube
 from toyotama.util.log import get_logger
-
-from .tube import Tube
 
 logger = get_logger(__name__, os.environ.get("TOYOTAMA_LOG_LEVEL", "INFO"))
 
@@ -79,3 +78,6 @@ class Socket(Tube):
             self.sock.close()
             self.sock = None
             logger.info(f"Connection to {self.host}:{self.port} closed.")
+
+
+__all__ = ["Socket"]

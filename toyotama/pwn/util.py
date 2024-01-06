@@ -58,3 +58,16 @@ def fill(length: int, character: bytes | str = b"A") -> bytes | str:
         str or bytes: The string by repeating `character` for `length` times
     """
     return character * length
+
+
+__all__ = [
+    "p8",
+    "p16",
+    "p32",
+    "p64",
+    "u8",
+    "u16",
+    "u32",
+    "u64",
+    "fill",
+]
