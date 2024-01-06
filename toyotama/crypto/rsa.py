@@ -6,7 +6,7 @@ from math import ceil, isqrt
 from operator import mul
 
 from ..util.log import get_logger
-from .util import extended_gcd, i2b, inverse, is_square
+from .util import extended_gcd, int_to_bytes, inverse, is_square
 
 logger = get_logger()
 
@@ -140,7 +140,7 @@ class RSASolver:
             self.d = inverse(self.e, self.phi)
             self.m = pow(self.c, self.d, self.n)
             if plaintext:
-                return i2b(self.m)
+                return int_to_bytes(self.m)
             return self.m
 
         logger.warning("No solution found.")
@@ -151,7 +151,7 @@ class RSASolver:
         m = wieners_attack(self.e, self.n)
         if m:
             logger.info("Wiener's attack succeeded.")
-            m = i2b(m)
+            m = int_to_bytes(m)
             return m
 
     def _check_modulus(self):

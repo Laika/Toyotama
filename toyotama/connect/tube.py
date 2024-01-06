@@ -1,5 +1,6 @@
 import ast
 import base64
+import os
 import re
 import sys
 import threading
@@ -7,10 +8,10 @@ import time
 from abc import ABCMeta, abstractmethod
 from typing import Any, Callable
 
-from ..terminal.style import Style
-from ..util.log import get_logger
+from toyotama.terminal.style import Style
+from toyotama.util.log import get_logger
 
-logger = get_logger()
+logger = get_logger(__name__, os.environ.get("TOYOTAMA_LOG_LEVEL", "INFO"))
 
 
 class Tube(metaclass=ABCMeta):
@@ -21,7 +22,7 @@ class Tube(metaclass=ABCMeta):
         self.send_bytes = 0
 
     @abstractmethod
-    def recv(self, n: int = 4096, debug: bool = False) -> bytes:
+    def recv(self, n: int = 4096) -> bytes:
         ...
 
     def _to_bytes(self, value: bytes | str | int, encode: str = "utf-8") -> bytes:
@@ -39,7 +40,7 @@ class Tube(metaclass=ABCMeta):
         term = self._to_bytes(term)
 
         while not buf.endswith(term):
-            buf += self.recv(1, debug=False) or b""
+            buf += self.recv(1) or b""
 
         logger.debug(f"[> {buf!r}")
 
@@ -56,7 +57,7 @@ class Tube(metaclass=ABCMeta):
         return self.recvline()
 
     def recvvalue(self, parser: Callable = ast.literal_eval) -> Any:
-        pattern_raw = r"(?P<name>.*?) *[=:] *(?P<value>.*)"
+        pattern_raw = r" *(?P<name>.*?) *[=:] *(?P<value>.*)"
         pattern = re.compile(pattern_raw)
         line = pattern.match(self.recvline().decode())
         if not line:
@@ -80,10 +81,12 @@ class Tube(metaclass=ABCMeta):
 
     def sendline(self, message: bytes | str | int):
         self.send(message, term=b"\n")
+        logger.debug(f"<] {message!r}")
 
     def sendafter(self, term: bytes | str, message: bytes | str | int) -> bytes:
         data = self.recvuntil(term)
         self.send(message)
+        logger.debug(f"<] {message!r}")
         return data
 
     def sendlineafter(self, term: bytes | str, message: bytes | str | int):
@@ -99,7 +102,7 @@ class Tube(metaclass=ABCMeta):
         def recv_thread():
             while not go.is_set():
                 try:
-                    buf = self.recv(debug=False)
+                    buf = self.recv()
                     if buf:
                         sys.stdout.buffer.write(buf)
                         sys.stdout.flush()
@@ -113,7 +116,7 @@ class Tube(metaclass=ABCMeta):
 
         try:
             while not go.is_set():
-                sys.stdout.write(f"{Style.FG_VIOLET}>{Style.RESET} ")
+                sys.stdout.write(f"{Style.FG_VIOLET}${Style.RESET} ")
                 sys.stdout.flush()
                 data = sys.stdin.readline()
                 if data:
