@@ -1,11 +1,9 @@
-import sys
 from collections.abc import Callable
 from itertools import pairwise
 from logging import getLogger
 from random import sample
 
-from toyotama.crypto.util import xor
-from toyotama.util.convert import to_block
+from toyotama.util.bytes import Bytes
 
 logger = getLogger(__name__)
 
@@ -15,7 +13,6 @@ def ecb_chosen_plaintext_attack(
     plaintext_space: bytes = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789{}_",
     known_plaintext: bytes = b"",
     block_size: int = 16,
-    verbose: bool = False,
 ):
     """AES ECB mode chosen plaintext attack
 
@@ -26,7 +23,6 @@ def ecb_chosen_plaintext_attack(
         plaintext_space (bytes, optional): Defaults to uppercase + lowercase + numbers + "{}_".
         known_plaintext (bytes, optional): Defaults to b"".
         block_size (int, optional): Defaults to 16.
-        verbose (bool, optional): Defaults to False.
     Returns:
         bytes: The plaintext.
     """
@@ -34,29 +30,25 @@ def ecb_chosen_plaintext_attack(
     block_end = block_size * (len(known_plaintext) // (block_size - 2) + 1)
     for _ in range(1, 100):
         # shuffle plaintext_space to reduce complexity
-        plaintext_space = bytes(sample(bytearray(plaintext_space), len(plaintext_space)))
+        plaintext_space = Bytes(sample(bytearray(plaintext_space), len(plaintext_space)))
 
         # get the encrypted block which includes the beginning of FLAG
-        if verbose:
-            logger.info("Getting the encrypted block which includes the beginning of FLAG")
+        logger.info("Getting the encrypted block which includes the beginning of FLAG")
 
         if len(known_plaintext) % block_size == block_size - 1:
             block_end += block_size
 
-        chosen_plaintext = bytes(block_end - len(known_plaintext) - 1)
+        chosen_plaintext = Bytes(block_end - len(known_plaintext) - 1)
         encrypted_block = encrypt_oracle(chosen_plaintext)
         encrypted_block = encrypted_block[block_end - block_size : block_end]
 
         # bruteforcing all of the characters in plaintext_space
-        if verbose:
-            logger.info("Bruteforcing all of the characters in plaintext_space")
+        logger.info("Bruteforcing all of the characters in plaintext_space")
         for c in plaintext_space:
             payload = b"\x00" * (block_end - len(known_plaintext) - 1) + known_plaintext + bytearray([c])
             enc_block = encrypt_oracle(payload)[block_end - block_size : block_end]
             if encrypted_block == enc_block:
                 known_plaintext += bytearray([c])
-                if verbose:
-                    sys.stderr.write("\n")
                 break
 
 
@@ -74,7 +66,7 @@ class PKCS7PaddingOracleAttack:
     @staticmethod
     def _xor(a: bytearray, b: bytearray) -> bytearray:
         assert len(a) == len(b)
-        return bytearray([x ^ y for x, y in zip(a, b)])
+        return bytearray(x ^ y for x, y in zip(a, b))
 
     def _make_padding_block(self, n: int) -> bytearray:
         assert 0 <= n <= self.block_size
@@ -83,7 +75,7 @@ class PKCS7PaddingOracleAttack:
     def set_padding_oracle(self, padding_oracle: Callable[[bytes, bytes], bool]):
         self.padding_oracle = padding_oracle
 
-    def solve_decrypted_block(self, ct_target: bytes, iv: bytes = b"") -> bytes:
+    def solve_decrypted_block(self, ct_target: bytes, iv: bytes = b"") -> Bytes:
         """
         [_____ct_____]   [_ct_target__]
               |                |
@@ -117,7 +109,7 @@ class PKCS7PaddingOracleAttack:
                     break
             else:
                 raise ValueError("Padding Oracle Attack failed.")
-        return d
+        return Bytes(d)
 
     def decryption_attack(self, ciphertext: bytes, iv: bytes) -> bytes:
         """Padding oracle decryption attack.
@@ -129,11 +121,12 @@ class PKCS7PaddingOracleAttack:
         Returns:
             bytes: decrypt(ciphertext)
         """
-        ciphertext_block: list[bytes] = [iv] + to_block(ciphertext)
-        plaintext_block = b""
+        ciphertext = Bytes(ciphertext)
+        ciphertext_block: list[Bytes] = [Bytes(iv)] + ciphertext.to_block()
+        plaintext_block = Bytes()
 
         for ct1, ct2 in pairwise(ciphertext_block):
-            plaintext_block += xor(ct1, self.solve_decrypted_block(ct2, iv))
+            plaintext_block += ct1 ^ self.solve_decrypted_block(ct2, iv)
 
         return plaintext_block
 
@@ -149,12 +142,12 @@ class PKCS7PaddingOracleAttack:
             tuple[bytes, bytes]: iv and ciphertext.
         """
 
-        plaintext_block: list[bytes] = to_block(plaintext)
-        ciphertext_block: list[bytes] = to_block(ciphertext)
+        plaintext_block: list[Bytes] = Bytes(plaintext).to_block()
+        ciphertext_block: list[Bytes] = Bytes(ciphertext).to_block()
         tampered_ciphertext_block: list[bytes] = [ciphertext_block.pop()]
         while plaintext_block:
             pt, ct = plaintext_block.pop(), tampered_ciphertext_block[0]
-            tampered_ciphertext_block = [xor(pt, self.solve_decrypted_block(ct, iv))] + tampered_ciphertext_block
+            tampered_ciphertext_block = [pt ^ self.solve_decrypted_block(ct, iv)] + tampered_ciphertext_block
 
         iv = tampered_ciphertext_block.pop(0)
         tampered_ciphertext = b"".join(tampered_ciphertext_block)

@@ -70,10 +70,11 @@ def wieners_attack(e: int, n: int) -> int | None:
         if x % 2 == 0 and is_square((x // 2) ** 2 - n):
             g = edg - phi * k
             return dg // g
+    logger.warn("Wiener's attack failed.")
     return None
 
 
-def lsb_decryption_oracle_attack(n: int, e: int, c: int, oracle: Callable, debug: bool = True) -> int:
+def lsb_decryption_oracle_attack(n: int, e: int, c: int, oracle: Callable) -> int:
     """Perform LSB Decryption oracle attack.
 
     Args:
@@ -104,8 +105,7 @@ def lsb_decryption_oracle_attack(n: int, e: int, c: int, oracle: Callable, debug
     i = 0
     nl = n.bit_length()
     while ub - lb > 1:
-        if debug:
-            logger.info(f"{(100*i//nl):>3}% [{i:>4}/{nl}]")
+        logger.debug(f"{(100*i//nl):>3}% [{i:>4}/{nl}]")
 
         mid = Fraction(lb + ub, 2)
         c_ = c_ * pow(2, e, n) % n
