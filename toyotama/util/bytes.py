@@ -1,15 +1,26 @@
 import base64
 from typing import Self
+from logging import getLogger
+
+logger = getLogger(__name__)
 
 
 class Bytes(bytes):
+
     def __xor__(self, other: Self) -> Self:
         if len(self) != len(other):
-            raise ValueError("Bytes objects must be of same length")
+            logger.warning("XOR: length of bytes is not equal")
         return Bytes(x ^ y for x, y in zip(self, other))
+
+    def __getitem__(self, key: int | slice) -> Self:
+        return Bytes(super().__getitem__(key))
 
     def to_int(self):
         return int.from_bytes(self, "big")
+
+    @staticmethod
+    def from_int(n: int):
+        return Bytes(n.to_bytes((n.bit_length() + 7) // 8, "big"))
 
     def to_block(self, block_size: int = 16) -> list[Self]:
         return [self[i : i + block_size] for i in range(0, len(self), block_size)]
@@ -28,6 +39,3 @@ class Bytes(bytes):
         else:
             raise TypeError("Expected str, bytes or Bytes")
 
-    @staticmethod
-    def from_int(n: int):
-        return Bytes(n.to_bytes((n.bit_length() + 7) // 8, "big"))

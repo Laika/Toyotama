@@ -1,0 +1,31 @@
+{
+  "lockfile_version": "1",
+  "packages": {
+    "dprint@latest": {
+      "last_modified": "2024-01-07T11:22:52Z",
+      "resolved": "github:NixOS/nixpkgs/24fe8bb4f552ad3926274d29e083b79d84707da6#dprint",
+      "source": "devbox-search",
+      "version": "0.45.0"
+    },
+    "poetry@latest": {
+      "last_modified": "2023-12-13T22:54:10Z",
+      "plugin_version": "0.0.4",
+      "resolved": "github:NixOS/nixpkgs/fd04bea4cbf76f86f244b9e2549fca066db8ddff#poetry",
+      "source": "devbox-search",
+      "version": "1.7.1"
+    },
+    "python@3.12": {
+      "last_modified": "2023-12-13T22:54:10Z",
+      "plugin_version": "0.0.3",
+      "resolved": "github:NixOS/nixpkgs/fd04bea4cbf76f86f244b9e2549fca066db8ddff#python312",
+      "source": "devbox-search",
+      "version": "3.12.1"
+    },
+    "ruff@latest": {
+      "last_modified": "2024-01-07T11:22:52Z",
+      "resolved": "github:NixOS/nixpkgs/24fe8bb4f552ad3926274d29e083b79d84707da6#ruff",
+      "source": "devbox-search",
+      "version": "0.1.11"
+    }
+  }
+}

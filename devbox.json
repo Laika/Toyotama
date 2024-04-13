@@ -1,0 +1,40 @@
+{
+  "packages": [
+    "poetry@latest",
+    "dprint@latest",
+    "ruff@latest",
+    "python@3.12"
+  ],
+  "shell": {
+    "init_hook": [
+    ],
+    "scripts": {
+      "build": [
+        "poetry build"
+      ],
+      "set-credentials-pypi": [
+        "poetry config repositories.pypi https://upload.pypi.org/legacy/",
+        "poetry config http-basic.pypi ${PYPI_USERNAME} ${PYPI_PASSWORD}"
+      ],
+      "set-credentials-testpypi": [
+        "poetry config repositories.pypi https://test.pypi.org/legacy/",
+        "poetry config http-basic.pypi ${TESTPYPI_USERNAME} ${TESTPYPI_PASSWORD}"
+      ],
+      "publish": [
+        "poetry publish"
+      ],
+      "publish-testpypi": [
+        "poetry publish -r testpypi"
+      ],
+      "install": [
+        "python -m pip install --upgrade pip"
+      ],
+      "format": [
+        "dprint fmt"
+      ],
+      "prerequisites": [
+        "poetry self add \"poetry-dynamic-versioning[plugin\""
+      ]
+    }
+  }
+}

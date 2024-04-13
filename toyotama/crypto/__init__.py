@@ -1,4 +1,5 @@
 from logging import getLogger
+import os
 
 from toyotama.crypto.aes import *
 from toyotama.crypto.classical_cipher import *
@@ -16,4 +17,5 @@ try:
     from toyotama.crypto.polynomial import *
 except ImportError:
     logger = getLogger(__name__)
-    logger.warning("SageMath is not installed. Some functions may not work.")
+    if not os.environ.get("TOYOTAMA_IGNORE_SAGEMATH", False):
+        logger.warning("SageMath is not installed. Some functions may not work.")

@@ -1,14 +1,13 @@
 from collections.abc import Callable
 from struct import unpack
 from typing import Self
-
 from toyotama.pwn.util import p8, p16, p32, p64
 
 
 class Address(int):
-    def __init__(self, address: int, packer: Callable[[Self], bytes] = p64):
+    def __init__(self, address: int, packer: Callable[[int], bytes] = p64):
         super().__init__()
-        self.address = address
+        self.address: int  = address
         self.packer = packer
 
     def __str__(self) -> str:

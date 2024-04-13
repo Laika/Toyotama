@@ -366,3 +366,4 @@ def solve_quadratic_equation(a: int, b: int, c: int) -> tuple[int, int]:
     xx = -b - isqrt(D) // (2 * a)
 
     return x, xx
+

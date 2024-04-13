@@ -76,4 +76,4 @@ class Socket(Tube):
         if self.sock:
             self.sock.close()
             self.sock = None
-            logger.info(f"Connection to {self.host}:{self.port} closed.")
+            logger.info("Connection to {host}:{port} closed.".format(host=self.host, port=self.port))

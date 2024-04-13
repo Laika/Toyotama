@@ -4,7 +4,7 @@ import re
 from base64 import b64decode
 from collections.abc import Callable
 from logging import getLogger
-from typing import Any
+from typing import Any, Self
 
 logger = getLogger(__name__)
 
@@ -14,6 +14,12 @@ class Text(io.StringIO):
 
     PATTERN_RAW = r" *(?P<name>.*?) *[=:] *(?P<value>.*)"
     pattern = re.compile(PATTERN_RAW)
+
+    @classmethod
+    def from_file(cls, path: str) -> Self:
+        with open(path) as f:
+            str = f.read()
+        return cls(str)
 
     def readvalue(self, parser: Callable = ast.literal_eval) -> Any:
         """Read a value from the next line.
