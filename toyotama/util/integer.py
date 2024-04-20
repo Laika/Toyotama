@@ -92,10 +92,13 @@ class Int:
         return self.__lt__(other) or self.__eq__(other)
 
     def __gt__(self, other):
-        return not __self.__le__(other)
+        return not self.__le__(other)
 
     def __ge__(self, other):
-        return not __lt__(other)
+        return not self.__lt__(other)
+
+    def to_bytes(self, byteorder="big"):
+        return self.x.to_bytes(self.bits // 8, byteorder)
 
 
 class UInt8(Int):

@@ -21,6 +21,7 @@ def common_modulus_attack(e1: int, e2: int, c1: int, c2: int, n: int) -> int:
         e2 (int): The second public exponent.
         c1 (int): The first ciphertext.
         c1 (int): The second ciphertext.
+        n (int): The modulus.
     Returns:
         int: The plaintext
     """
@@ -105,7 +106,7 @@ def lsb_decryption_oracle_attack(n: int, e: int, c: int, oracle: Callable) -> in
     i = 0
     nl = n.bit_length()
     while ub - lb > 1:
-        logger.debug(f"{(100*i//nl):>3}% [{i:>4}/{nl}]")
+        logger.debug("%3d%% [%4d/%d]", (100 * i // nl), i, nl)
 
         mid = Fraction(lb + ub, 2)
         c_ = c_ * pow(2, e, n) % n

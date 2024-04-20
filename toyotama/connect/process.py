@@ -5,11 +5,12 @@ import pty
 import select
 import signal
 import subprocess
+import tempfile
 import tty
 from logging import getLogger
 from pathlib import Path
 
-from libtmux import Pane, Server
+from libtmux import Pane, Server  # pyright: ignore
 
 from toyotama.connect.tube import Tube
 
@@ -46,20 +47,24 @@ class Process(Tube):
                 stderr=subprocess.STDOUT,
             )
         except FileNotFoundError:
-            logger.error(f'File not found: "{path}"')
+            logger.error('File not found: "%s"', path)
             return
         except Exception as e:
-            logger.error(f"Process.__init__(): {e}")
+            logger.error("Process.__init__(): %s", e)
             return
 
         if master:
             self.proc.stdout = os.fdopen(os.dup(master), "r+b", 0)
             os.close(master)
 
-        fd = self.proc.stdout.fileno()
+        if not hasattr(self.proc, "stdout"):
+            logger.error("Process.__init__(): Failed to open a pipe")
+            return
+
+        fd = self.proc.stdout.fileno()  # pyright: ignore
         fcntl.fcntl(fd, fcntl.F_SETFL, fcntl.fcntl(fd, fcntl.F_GETFL) | os.O_NONBLOCK)
 
-        logger.info(f"Created a new process (PID: {self.proc.pid})")
+        logger.info("Created a new process (PID: %d)", self.proc.pid)
 
     def _socket(self) -> subprocess.Popen | None:
         return self.proc
@@ -75,7 +80,7 @@ class Process(Tube):
         if returncode is not None and self.returncode is None:
             self.returncode = returncode
 
-            logger.error(f'"{self.path!s}" terminated: {signal.strsignal(-self.returncode)} (PID={self.proc.pid})')
+            logger.error('"%s" terminated: %s (PID=%d)', str(self.path), signal.strsignal(-self.returncode), self.proc.pid)
 
         return returncode
 
@@ -110,15 +115,15 @@ class Process(Tube):
             logger.warning("Process.recv(): process is dead")
             return b""
 
-        if self.proc.stdout is None:
+        if self.proc.stdout is None:  # pyright: ignore
             logger.warning("Process.recv(): stdout is None")
             return b""
 
         buf = b""
         try:
-            buf += self.proc.stdout.read(n) or b""
+            buf += self.proc.stdout.read(n) or b""  # pyright: ignore
         except Exception as e:
-            logger.error(e)
+            logger.error("%s", e)
             input()
 
         self.recv_bytes += len(buf)
@@ -141,21 +146,22 @@ class Process(Tube):
         self.send_bytes += len(payload)
 
         try:
-            self.proc.stdin.write(payload)
-            self.proc.stdin.flush()
+            self.proc.stdin.write(payload)  # pyright: ignore
+            self.proc.stdin.flush()  # pyright: ignore
         except OSError:
             logger.warning("Broken pipe")
         except Exception as e:
-            logger.error(f"Process.send(): {e}")
+            logger.error("Process.send(): %s", e)
 
-    def gdb(self, script: list[str] | None = None, host: str = "localhost", port: int = 51280):
+    def gdb(self, script: str = "", host: str = "localhost", port: int = 51280):
         self._gdbserver = subprocess.Popen(
-            ["gdbserver", f"{host}:{port}", "--attach", str(self.pid)],
+            ["gdbserver", f"{host}:{port}", "--attach", str(self.pid())],
             shell=False,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             encoding="utf-8",
         )
+        logger.info("gdbserver started (PID: %d)", self._gdbserver.pid)
 
         master, slave = pty.openpty()
         tty.setraw(master)
@@ -166,23 +172,35 @@ class Process(Tube):
         session = srv.sessions[0]
 
         window = session.new_window(attach=False, window_name="gdb")
+        try:
+            pane = Pane.from_pane_id(pane_id=window.pane_id, server=window.server)
 
-        pane = Pane.from_pane_id(pane_id=window.pane_id, server=window.server)
+            with tempfile.NamedTemporaryFile(delete=True) as t:
+                f = open(t.name, "w")
+                f.write(script)
+                f.flush()
 
-        pane.send_keys(f"gdb -p {self.pid}")
+                pane.send_keys(f"gdb -q -p {self.proc.pid}")  # pyright: ignore
+                pane.send_keys(f"file {self.path!s}")
+                pane.send_keys(f"source {t.name}")
 
-        window.kill()
+                input()
+
+            window.kill()
+        except Exception as e:
+            logger.error("Process.gdb(): %s", e)
+            window.kill()
 
     def close(self):
         if self.proc is None:
             return
 
         if self.is_alive():
-            self.proc.stdin.close()
-            self.proc.stdout.close()
+            self.proc.stdin.close()  # pyright: ignore
+            self.proc.stdout.close()  # pyright: ignore
             self.proc.kill()
             self.proc.wait()
-            logger.info(f'"{self.path!s}" killed (PID={self.proc.pid})')
+            logger.info('"%s" killed (PID=%d)', str(self.path), self.proc.pid)
 
         self.proc = None
 

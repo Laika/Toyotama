@@ -43,7 +43,7 @@ class Tube(metaclass=ABCMeta):
         while not buf.endswith(term):
             buf += self.recv(1) or b""
 
-        logger.debug("[> {buf!r}".format(buf=buf))
+        logger.debug("[> %r", buf)
 
         return buf
 
@@ -66,7 +66,7 @@ class Tube(metaclass=ABCMeta):
         name = line.group("name").strip()
         value = parser(line.group("value"))
 
-        logger.debug("{name}: {value}".format(name=name, value=value))
+        logger.debug("%s: %s", name, value)
 
         return value
 
@@ -82,12 +82,12 @@ class Tube(metaclass=ABCMeta):
 
     def sendline(self, message: bytes | str | int):
         self.send(message, term=b"\n")
-        logger.debug("<] {message!r}".format(message=message))
+        logger.debug("<] %r", message)
 
     def sendafter(self, term: bytes | str, message: bytes | str | int) -> bytes:
         data = self.recvuntil(term)
         self.send(message)
-        logger.debug("<] {message!r}".format(message=message))
+        logger.debug("<] %r", message)
         return data
 
     def sendlineafter(self, term: bytes | str, message: bytes | str | int):
@@ -146,7 +146,7 @@ class Tube(metaclass=ABCMeta):
         self.cmd("cd /tmp")
         logger.info("Sending payload.")
         for i in range(0, len(payload), block_size):
-            logger.info("Uploading... {i}/{length}[{ratio:.2%}]".format(i=i, length=len(payload), ratio=i/len(payload)))
+            logger.info("Uploading... %d/%d[%d]", i, len(payload), int(i / len(payload) * 100))
             self.cmd(f'echo "{payload[i : i + block_size]}" >>exploit-b64')
 
         self.cmd(":")

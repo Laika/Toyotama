@@ -36,7 +36,7 @@ class Socket(Tube):
         try:
             buf += self.sock.recv(n)
         except Exception as e:
-            logger.error(e)
+            logger.error("%s", e)
 
         self.recv_bytes += len(buf)
 
@@ -60,7 +60,7 @@ class Socket(Tube):
             self.sock.sendall(payload)
         except Exception as e:
             self.is_alive = False
-            logger.error(e)
+            logger.error("%s", e)
 
     def solve_hashcash(self, command: str) -> str:
         commands = command.strip().split()
@@ -76,4 +76,4 @@ class Socket(Tube):
         if self.sock:
             self.sock.close()
             self.sock = None
-            logger.info("Connection to {host}:{port} closed.".format(host=self.host, port=self.port))
+            logger.info("Connection to %s:%d closed.", self.host, self.port)

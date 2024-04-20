@@ -3,7 +3,7 @@ from itertools import pairwise
 from logging import getLogger
 from random import sample
 
-from toyotama.util.bytes import Bytes
+from toyotama.util.bytes_ import Bytes
 
 logger = getLogger(__name__)
 
