@@ -1,12 +1,11 @@
 import base64
-from typing import Self
 from logging import getLogger
+from typing import Self
 
 logger = getLogger(__name__)
 
 
 class Bytes(bytes):
-
     def __xor__(self, other: Self) -> Self:
         if len(self) != len(other):
             logger.warning("XOR: length of bytes is not equal")
@@ -38,4 +37,3 @@ class Bytes(bytes):
             return Bytes(base64.b64decode(s.encode()))
         else:
             raise TypeError("Expected str, bytes or Bytes")
-
