@@ -17,7 +17,7 @@ class BitStream:
 
         if isinstance(value, str):
             if any(c not in ("0", "1") for c in value):
-                print(f"The value contains non-binary characters {value}")
+                logger.warning("The value contains non-binary characters '%s'", value)
                 return
             self.bitstream = [int(c) ^ self.flip_mask for c in value]
             print(self.bitstream)

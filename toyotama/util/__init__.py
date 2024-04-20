@@ -1,5 +1,5 @@
 from toyotama.util.bitstream import *
-from toyotama.util.bytes import *
+from toyotama.util.bytes_ import *
 from toyotama.util.convert import *
 from toyotama.util.decompress import *
 from toyotama.util.integer import *
