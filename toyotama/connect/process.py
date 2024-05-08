@@ -5,12 +5,11 @@ import pty
 import select
 import signal
 import subprocess
-import tempfile
 import tty
 from logging import getLogger
 from pathlib import Path
 
-from libtmux import Pane, Server  # pyright: ignore
+from libtmux import Server  # pyright: ignore
 
 from toyotama.connect.tube import Tube
 
@@ -163,33 +162,20 @@ class Process(Tube):
         )
         logger.info("gdbserver started (PID: %d)", self._gdbserver.pid)
 
-        master, slave = pty.openpty()
-        tty.setraw(master)
-        tty.setraw(slave)
-
         # tmux
         srv = Server()
         session = srv.sessions[0]
 
-        window = session.new_window(attach=False, window_name="gdb")
         try:
-            pane = Pane.from_pane_id(pane_id=window.pane_id, server=window.server)
+            pane = session.active_window.active_pane.split(shell="gdb")
 
-            with tempfile.NamedTemporaryFile(delete=True) as t:
-                f = open(t.name, "w")
-                f.write(script)
-                f.flush()
+            pane.send_keys(f"target remote :{port}")
+            pane.send_keys(f"file {self.path!s}")
+            for line in script.split(os.linesep):
+                pane.send_keys(line)
 
-                pane.send_keys(f"gdb -q -p {self.proc.pid}")  # pyright: ignore
-                pane.send_keys(f"file {self.path!s}")
-                pane.send_keys(f"source {t.name}")
-
-                input()
-
-            window.kill()
         except Exception as e:
             logger.error("Process.gdb(): %s", e)
-            window.kill()
 
     def close(self):
         if self.proc is None:

@@ -21,10 +21,10 @@ class Tube(metaclass=ABCMeta):
         self.recv_bytes = 0
         self.send_bytes = 0
         self._handlers: list[Callable] = []
+        self.pattern: re.Pattern = re.compile(r"( *(?P<name>.*?) *[=:])? *(?P<value>.*)")
 
     @abstractmethod
-    def recv(self, n: int = 4096) -> bytes:
-        ...
+    def recv(self, n: int = 4096) -> bytes: ...
 
     def _to_bytes(self, value: bytes | str | int, encode: str = "utf-8") -> bytes:
         if isinstance(value, bytes):
@@ -58,9 +58,7 @@ class Tube(metaclass=ABCMeta):
         return self.recvline()
 
     def recvvalue(self, parser: Callable = ast.literal_eval) -> Any:
-        pattern_raw = r" *(?P<name>.*?) *[=:] *(?P<value>.*)"
-        pattern = re.compile(pattern_raw)
-        line = pattern.match(self.recvline().decode())
+        line = self.pattern.match(self.recvline().decode())
         if not line:
             return None
         name = line.group("name").strip()
@@ -77,8 +75,7 @@ class Tube(metaclass=ABCMeta):
         return self.recvvalue(parser=lambda x: bytes.fromhex(x))
 
     @abstractmethod
-    def send(self, message: bytes | str | int, term: bytes | str = b""):
-        ...
+    def send(self, message: bytes | str | int, term: bytes | str = b""): ...
 
     def sendline(self, message: bytes | str | int):
         self.send(message, term=b"\n")
@@ -90,7 +87,7 @@ class Tube(metaclass=ABCMeta):
         logger.debug("<] %r", message)
         return data
 
-    def sendlineafter(self, term: bytes | str, message: bytes | str | int):
+    def sendlineafter(self, term: bytes | str, message: bytes | str | int) -> bytes:
         data = self.recvuntil(term)
         self.sendline(message)
         return data
@@ -136,22 +133,22 @@ class Tube(metaclass=ABCMeta):
         while t.is_alive():
             t.join(timeout=0.1)
 
-    def cmd(self, command: bytes | str, term: bytes | str = b"$ "):
+    def send_command(self, command: bytes | str, term: bytes | str = b"$ "):
         self.sendlineafter(term, command)
 
     def send_payload(self, payload: bytes | str, block_size: int = 512):
         payload = self._to_bytes(payload)
         payload = base64.b64encode(payload).decode()
 
-        self.cmd("cd /tmp")
+        self.send_command("cd /tmp")
         logger.info("Sending payload.")
         for i in range(0, len(payload), block_size):
             logger.info("Uploading... %d/%d[%d]", i, len(payload), int(i / len(payload) * 100))
-            self.cmd(f'echo "{payload[i : i + block_size]}" >>exploit-b64')
+            self.send_command(f'echo "{payload[i : i + block_size]}" >>exploit-b64')
 
-        self.cmd(":")
-        self.cmd("base64 -d exploit-b64 > exploit")
-        self.cmd("chmod +x exploit")
+        self.send_command(":")
+        self.send_command("base64 -d exploit-b64 > exploit")
+        self.send_command("chmod +x exploit")
 
         logger.info("Uploaded to /tmp/exploit")
 
@@ -167,5 +164,4 @@ class Tube(metaclass=ABCMeta):
         self.close()
 
     @abstractmethod
-    def close(self):
-        ...
+    def close(self): ...
