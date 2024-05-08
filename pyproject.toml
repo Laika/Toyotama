@@ -1,6 +1,6 @@
 [project]
 name = "toyotama"
-version = "0.9.10"
+version = "0.9.11"
 description = "Python library for CTF."
 authors = [{ name = "Laika", email = "laika@albina.cc" }]
 maintainers = [{ name = "Laika", email = "laika@albina.cc" }]
@@ -22,12 +22,12 @@ packages = [{ include = "toyotama" }]
 requires-python = ">= 3.8"
 
 dependencies = [
-    "libtmux>=0.37.0",
-    "lief>=0.14.1",
-    "rzpipe>=0.6.0",
-    "pillow>=10.3.0",
-    "py7zr>=0.21.0",
-    "flask>=3.0.3",
+  "libtmux>=0.37.0",
+  "lief>=0.14.1",
+  "rzpipe>=0.6.0",
+  "pillow>=10.3.0",
+  "py7zr>=0.21.0",
+  "flask>=3.0.3",
 ]
 
 [build-system]
@@ -39,15 +39,13 @@ dcmp = "toyotama.util.decompress:main"
 
 [tool.rye]
 managed = true
-dev-dependencies = [
-    "ruff>=0.4.2",
-]
+dev-dependencies = ["ruff>=0.4.2"]
 
 [tool.hatch.metadata]
 allow-direct-references = true
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/toyotama"]
+packages = ["toyotama"]
 
 
 [tool.ruff]
