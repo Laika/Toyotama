@@ -1,6 +1,11 @@
+from typing import Literal
+
+Bits = Literal[8, 16, 32, 64]
+
+
 class Int:
-    def __init__(self, value, bits=32, signed=True):
-        self.bits = bits
+    def __init__(self, value: int, bits: Bits = 32, signed: bool = True):
+        self.bits: Bits = bits
         self.mask = (1 << self.bits) - 1
         self.signed = signed
         self.__x = value & self.mask

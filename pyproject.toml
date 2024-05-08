@@ -1,9 +1,9 @@
-[tool.poetry]
+[project]
 name = "toyotama"
 version = "0.9.10"
 description = "Python library for CTF."
-authors = ["Laika <laika@albina.cc>"]
-maintainers = ["Laika <laika@albina.cc>"]
+authors = [{ name = "Laika", email = "laika@albina.cc" }]
+maintainers = [{ name = "Laika", email = "laika@albina.cc" }]
 license = "MIT"
 readme = "README.md"
 repository = "https://github.com/Laika/Toyotama"
@@ -19,24 +19,36 @@ classifiers = [
   "Operating System :: POSIX :: Linux",
 ]
 packages = [{ include = "toyotama" }]
+requires-python = ">= 3.8"
 
-[tool.poetry.dependencies]
-python = ">=3.10"
-requests = "^2.31.0"
-pillow = "^10.2.0"
-flask = "^3.0.0"
-py7zr = "^0.20.8"
-rzpipe = "^0.6.0"
+dependencies = [
+    "libtmux>=0.37.0",
+    "lief>=0.14.1",
+    "rzpipe>=0.6.0",
+    "pillow>=10.3.0",
+    "py7zr>=0.21.0",
+    "flask>=3.0.3",
+]
 
-[tool.poetry.scripts]
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.scripts]
 dcmp = "toyotama.util.decompress:main"
 
-[tool.poetry.group.dev.dependencies]
-ruff = "^0.1.11"
-hatch = "^1.9.1"
+[tool.rye]
+managed = true
+dev-dependencies = [
+    "ruff>=0.4.2",
+]
 
-[tool.poetry-dynamic-versioning]
-enable = true
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/toyotama"]
+
 
 [tool.ruff]
 line-length = 150
@@ -118,7 +130,3 @@ unfixable = []
 
 [tool.ruff.pydocstyle]
 convention = "google"
-
-[build-system]
-requires = ["poetry-core>=1.0.0", "poetry-dynamic-versioning>=1.0.0,<2.0.0"]
-build-backend = "poetry_dynamic_versioning.backend"

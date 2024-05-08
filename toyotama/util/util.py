@@ -203,8 +203,7 @@ def random_string(length: int, alphabet: bytes = b"") -> bytes:
     b'aghlqvucdf'
     """
 
-    if not alphabet:
-        alphabet: bytes = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+    alphabet: bytes = alphabet or b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
 
     rnd = choices(alphabet, k=length)
     rnd = b"".join(rnd)

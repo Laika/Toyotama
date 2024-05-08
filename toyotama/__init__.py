@@ -1,7 +1,6 @@
 from logging import StreamHandler, getLogger
 from os import getenv
 
-from .ad import *
 from .connect import *
 from .elf import *
 from .pwn import *

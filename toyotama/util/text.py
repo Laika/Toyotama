@@ -12,14 +12,14 @@ logger = getLogger(__name__)
 class Text(io.StringIO):
     """A class to parse text."""
 
-    PATTERN_RAW = r" *(?P<name>.*?) *[=:] *(?P<value>.*)"
+    PATTERN_RAW = r"( *(?P<name>.*?) *[=:])? *(?P<value>.*)"
     pattern = re.compile(PATTERN_RAW)
 
     @classmethod
     def from_file(cls, path: str) -> Self:
         with open(path) as f:
-            str = f.read()
-        return cls(str)
+            s = f.read()
+        return cls(s)
 
     def readvalue(self, parser: Callable = ast.literal_eval) -> Any:
         """Read a value from the next line.
@@ -39,10 +39,11 @@ class Text(io.StringIO):
         line = self.pattern.match(self.readline())
         if not line:
             return None
-        name = line.group("name").strip()
+        if name := line.group("name"):
+            name = name.strip()
         value = parser(line.group("value"))
 
-        logger.debug(f"{name}: {value}")
+        logger.debug("[toyotama.util.text.Text] %s: %s", name, value)
 
         return value
 
