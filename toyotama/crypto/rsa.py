@@ -1,5 +1,5 @@
-"""RSA utility
-"""
+"""RSA utility"""
+
 from collections.abc import Callable
 from functools import reduce
 from logging import getLogger
@@ -68,7 +68,7 @@ def wieners_attack(e: int, n: int) -> int | None:
         phi = edg // k
 
         x = n - phi + 1
-        if x % 2 == 0 and is_square((x // 2) ** 2 - n):
+        if x % 2 == 0 and is_square(n - (x // 2) ** 2):
             g = edg - phi * k
             return dg // g
     logger.warn("Wiener's attack failed.")

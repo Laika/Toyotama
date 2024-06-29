@@ -10,6 +10,7 @@ from logging import getLogger
 from pathlib import Path
 
 from libtmux import Server  # pyright: ignore
+from libtmux.constants import PaneDirection
 
 from toyotama.connect.tube import Tube
 
@@ -22,7 +23,7 @@ class Process(Tube):
         path: str,
         args: list[str] | None = None,
         env: dict[str, str] | None = None,
-        timeout: float = 20.0,
+        timeout: float | None = None,
     ):
         super().__init__()
         self.path: Path = Path(path)
@@ -30,7 +31,7 @@ class Process(Tube):
         self.env: dict[str, str] = env or {}
         self.proc: subprocess.Popen | None
         self.returncode: int | None = None
-        self.timeout: float = timeout
+        self.timeout: float | None = timeout
 
         master, slave = pty.openpty()
         tty.setraw(master)
@@ -167,7 +168,7 @@ class Process(Tube):
         session = srv.sessions[0]
 
         try:
-            pane = session.active_window.active_pane.split(shell="gdb")
+            pane = session.active_window.active_pane.split(direction=PaneDirection.Right, shell="gdb")
 
             pane.send_keys(f"target remote :{port}")
             pane.send_keys(f"file {self.path!s}")
@@ -182,11 +183,11 @@ class Process(Tube):
             return
 
         if self.is_alive():
+            logger.info('"%s" killed (PID=%d)', self.path, self.proc.pid)
             self.proc.stdin.close()  # pyright: ignore
             self.proc.stdout.close()  # pyright: ignore
             self.proc.kill()
             self.proc.wait()
-            logger.info('"%s" killed (PID=%d)', str(self.path), self.proc.pid)
 
         self.proc = None
 

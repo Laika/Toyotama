@@ -1,18 +1,21 @@
 from collections.abc import Callable
 from struct import unpack
-from typing import Self
+
 from toyotama.pwn.util import p8, p16, p32, p64
 
 
 class Address(int):
     def __init__(self, address: int, packer: Callable[[int], bytes] = p64):
         super().__init__()
-        self.address: int  = address
+        self.address: int = address
         self.packer = packer
 
     def __str__(self) -> str:
         res = hex(self.address)
         return res
+
+    def __repr__(self) -> str:
+        return f"Address(address:{hex(self.address)})"
 
     def hex(self) -> str:
         return hex(self.address)

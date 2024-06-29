@@ -9,6 +9,7 @@ from collections.abc import Callable
 from logging import getLogger
 from typing import Any
 
+from toyotama.pwn.address import Address
 from toyotama.terminal.style import Style
 
 logger = getLogger(__name__)
@@ -61,15 +62,20 @@ class Tube(metaclass=ABCMeta):
         line = self.pattern.match(self.recvline().decode())
         if not line:
             return None
-        name = line.group("name").strip()
+
+        if name := line.group("name"):
+            name = name.strip()
         value = parser(line.group("value"))
 
-        logger.debug("%s: %s", name, value)
+        logger.debug("[toyotama.tube.recvvalue] %s: %s", name or "(empty)", value)
 
         return value
 
     def recvint(self) -> int:
         return self.recvvalue(parser=lambda x: int(x, 0))
+
+    def recvaddr(self) -> Address:
+        return self.recvvalue(parser=lambda x: Address(int(x, 0)))
 
     def recvhex(self) -> bytes:
         return self.recvvalue(parser=lambda x: bytes.fromhex(x))

@@ -1,5 +1,7 @@
-from logging import StreamHandler, getLogger
+import logging
 from os import getenv
+
+from rich.logging import RichHandler
 
 from .connect import *
 from .elf import *
@@ -8,11 +10,13 @@ from .terminal import *
 from .util import *
 from .web import *
 
-logger = getLogger("toyotama")
+logger = logging.getLogger("toyotama")
 logger.setLevel(getenv("TOYOTAMA_LOG_LEVEL", "INFO").upper())
-handler = StreamHandler()
-formatter = CustomFormatter(colored=bool(getenv("TOYOTAMA_LOG_COLORED", True)))
-handler.setFormatter(formatter)
+# handler = StreamHandler()
+# formatter = CustomFormatter(colored=bool(getenv("TOYOTAMA_LOG_COLORED", True)))
+# handler.setFormatter(formatter)
+handler = RichHandler(rich_tracebacks=True)
+handler.setFormatter(logging.Formatter("%(message)s"))
 logger.addHandler(handler)
 
 from .crypto import *

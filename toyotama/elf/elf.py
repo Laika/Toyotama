@@ -1,7 +1,6 @@
 import re
 from logging import getLogger
 from pathlib import Path
-from typing import Any
 
 import lief
 import rzpipe
@@ -13,14 +12,14 @@ logger = getLogger(__name__)
 
 
 class ELF:
-    def __init__(self, path: str, level: int = 4):
+    def __init__(self, path: str | Path, level: int = 4):
         self.elf = lief.parse(path)
 
         self.path = Path(path)
 
         self._base = Address(0x0)
 
-        self._rz = rzpipe.open(path)
+        self._rz = rzpipe.open(str(path))
 
         logger.info("[%s] %s", self.__class__.__name__, "a" * level)
         self._rz.cmd("a" * level)
@@ -59,7 +58,7 @@ class ELF:
     def got(self, target: str) -> Address | None:
         for reloc in self._relocs:
             if "name" in reloc.keys() and re.search(target, reloc["name"]):
-                logger.debug("[got] %s: 0x%x", reloc["name"], reloc["vaddr"])
+                logger.debug("[got] %s: 0x%x", reloc["name"], self._base + reloc["vaddr"])
                 return Address(self._base + reloc["vaddr"])
 
         return None
@@ -85,55 +84,54 @@ class ELF:
         logger.warning("Not found %s", target)
         return None
 
-    def strs(self) -> dict[str, Address]:
+    def strs(self) -> dict:
         return {str_["string"]: Address(self._base + str_["vaddr"]) for str_ in self._strs if "vaddr" in str_.keys()}
 
     def sym(self, target: str) -> Address | None:
         for sym in self._syms:
             if re.search(target, sym["name"]):
-                logger.debug("[sym] %s: 0x%x", sym["name"], sym["vaddr"])
+                logger.debug("[sym] %s: 0x%x", sym["name"], self._base + sym["vaddr"])
                 return Address(self._base + sym["vaddr"])
 
         logger.warning("Not found %s", target)
         return None
 
-    def syms(self) -> dict[str, Address]:
+    def syms(self) -> dict:
         return {sym["name"]: Address(self._base + sym["vaddr"]) for sym in self._syms if "vaddr" in sym.keys()}
 
-    def _get_rop_gadget(self, pattern: str) -> dict[str, int]:
+    def _get_rop_gadget(self, pattern: str) -> dict:
         results = self._rz.cmdj(f"/Rj {pattern}")
         return results or {}
 
-    def _get_funcs(self) -> dict[str, int]:
+    def _get_funcs(self) -> dict:
         results = self._rz.cmdj("aflj")
         return results or {}
 
-    def _get_relocs(self) -> dict[str, int]:
+    def _get_relocs(self) -> dict:
         results = self._rz.cmdj("irj")
         return results or {}
 
-    def _get_strs(self) -> dict[str, int]:
+    def _get_strs(self) -> dict:
         results = self._rz.cmdj("izj")
         return results or {}
 
-    def _get_info(self) -> dict[str, Any]:
+    def _get_info(self) -> dict:
         results = self._rz.cmdj("iIj")
         return results or {}
 
-    def _get_syms(self) -> dict[str, int]:
+    def _get_syms(self) -> dict:
         results = self._rz.cmdj("isj")
         return results or {}
 
     def __str__(self):
-        enabled = lambda x: "Enabled" if x else "Disabled"
         result = f"{self.path.resolve()!s}\n"
         mt = MarkdownTable(
             rows=[
                 ["Arch", self._info["arch"]],
                 ["RELRO", self._info["relro"].title()],
-                ["Canary", enabled(self._info["canary"])],
-                ["NX", enabled(self._info["nx"])],
-                ["PIE", enabled(self._info["pic"])],
+                ["Canary", "Enabled" if self._info["canary"] else "Disabled"],
+                ["NX", "Enabled" if self._info["nx"] else "Disabled"],
+                ["PIE", "Enabled" if self._info["pic"] else "Disabled"],
                 ["Lang", self._info["lang"]],
             ]
         )
@@ -149,13 +147,12 @@ class ELF:
         results |= {"got": self.got(target)}
         return results
 
-    def close(self):
-        ...
+    def close(self): ...
 
     # alias
     __repr__ = __str__
 
 
-class LIBC(ELF):
+class Libc(ELF):
     def __init__(self, path: str, level: int = 2):
         super().__init__(path, level)

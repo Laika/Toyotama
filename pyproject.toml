@@ -22,12 +22,14 @@ packages = [{ include = "toyotama" }]
 requires-python = ">= 3.8"
 
 dependencies = [
-  "libtmux>=0.37.0",
-  "lief>=0.14.1",
-  "rzpipe>=0.6.0",
-  "pillow>=10.3.0",
-  "py7zr>=0.21.0",
-  "flask>=3.0.3",
+    "libtmux>=0.37.0",
+    "lief>=0.14.1",
+    "rzpipe>=0.6.0",
+    "pillow>=10.3.0",
+    "py7zr>=0.21.0",
+    "flask>=3.0.3",
+    "rich>=13.7.1",
+    "setuptools>=70.1.1",
 ]
 
 [build-system]
@@ -39,7 +41,7 @@ dcmp = "toyotama.util.decompress:main"
 
 [tool.rye]
 managed = true
-dev-dependencies = ["ruff>=0.4.2"]
+dev-dependencies = ["ruff>=0.4.9"]
 
 [tool.hatch.metadata]
 allow-direct-references = true
