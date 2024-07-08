@@ -12,9 +12,6 @@ from .web import *
 
 logger = logging.getLogger("toyotama")
 logger.setLevel(getenv("TOYOTAMA_LOG_LEVEL", "INFO").upper())
-# handler = StreamHandler()
-# formatter = CustomFormatter(colored=bool(getenv("TOYOTAMA_LOG_COLORED", True)))
-# handler.setFormatter(formatter)
 handler = RichHandler(rich_tracebacks=True)
 handler.setFormatter(logging.Formatter("%(message)s"))
 logger.addHandler(handler)

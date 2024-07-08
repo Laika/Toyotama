@@ -8,7 +8,16 @@ logger = getLogger(__name__)
 
 
 class Socket(Tube):
-    def __init__(self, target: str, timeout: float = 30.0):
+    def __init__(
+        self, 
+        target: str, 
+        timeout: float = 30.0, 
+        ssl: bool = False, 
+        ssl_context = None, 
+        ssl_args = None,
+        *args,
+        **kwargs,
+    ):
         """Create a socket connection to a remote host.
 
         Args:
@@ -16,7 +25,7 @@ class Socket(Tube):
         timeout (float, optional): Timeout in seconds. Defaults to 30.0.
         """
 
-        super().__init__()
+        super().__init__(*args, **kwargs)
         _, host, port = target.split()
         self.host: str = host
         self.port: int = int(port)
@@ -25,6 +34,11 @@ class Socket(Tube):
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.sock.settimeout(timeout)
         self.sock.connect((self.host, self.port))
+        if ssl:
+            import ssl as ssl_
+            ssl_args = ssl_args or {}
+            ssl_context = ssl_context or ssl_.SSLContext(ssl_.PROTOCOL_TLSv1_2)
+            self.sock = ssl_context.wrap_socket(self.sock, **ssl_args)
 
     def _socket(self):
         return self.sock

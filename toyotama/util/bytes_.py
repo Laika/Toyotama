@@ -11,19 +11,24 @@ class Bytes(bytes):
             logger.warning("XOR: length of bytes is not equal")
         return Bytes(x ^ y for x, y in zip(self, other))
 
+    def __rxor__(self, other: bytes) -> Self:
+        if isinstance(other, bytes):
+            return Bytes(self.__xor__(other))
+        raise NotImplemented
+
     def __or__(self, other: Self) -> Self:
         if isinstance(other, Bytes):
             return Bytes(super().__add__(other))
         elif isinstance(other, bytes):
             return Bytes(super().__add__(other))
-        return NotImplemented
+        raise NotImplemented
 
     def __ror__(self, other: Self) -> Self:
         if isinstance(other, Bytes):
             return Bytes(other.__add__(self))
         elif isinstance(other, bytes):
             return Bytes(other.__add__(self))
-        return NotImplemented
+        raise NotImplemented
 
     def __getitem__(self, key: int | slice) -> Self:
         return Bytes(super().__getitem__(key))

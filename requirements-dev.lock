@@ -6,6 +6,7 @@
 #   features: []
 #   all-features: false
 #   with-sources: false
+#   generate-hashes: false
 
 -e file:.
 blinker==1.8.2
@@ -35,11 +36,11 @@ mdurl==0.1.2
     # via markdown-it-py
 multivolumefile==0.2.3
     # via py7zr
-pillow==10.3.0
+pillow==10.4.0
     # via toyotama
 psutil==5.9.8
     # via py7zr
-py7zr==0.21.0
+py7zr==0.21.1
     # via toyotama
 pybcj==1.0.2
     # via py7zr
@@ -56,7 +57,7 @@ rich==13.7.1
 ruff==0.4.9
 rzpipe==0.6.0
     # via toyotama
-setuptools==70.1.1
+setuptools==70.2.0
     # via toyotama
 texttable==1.7.0
     # via py7zr
