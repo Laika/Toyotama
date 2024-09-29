@@ -170,8 +170,8 @@ class Process(Tube):
         try:
             pane = session.active_window.active_pane.split(direction=PaneDirection.Right, shell="gdb")
 
-            pane.send_keys(f"target remote :{port}")
             pane.send_keys(f"file {self.path!s}")
+            pane.send_keys(f"target extend-remote {host}:{port}")
             for line in script.split(os.linesep):
                 pane.send_keys(line)
 
