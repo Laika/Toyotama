@@ -3,6 +3,7 @@ import itertools
 from functools import reduce
 from logging import getLogger
 from math import gcd
+from pathlib import Path
 
 logger = getLogger(__name__)
 
@@ -33,8 +34,8 @@ def lcg_crack(x, a=None, b=None, m=None):
 
 
 class LibcRandom:
-    def __init__(self, libc_path: str = "libc.so.6"):
-        self.libc = ctypes.cdll.LoadLibrary(libc_path)
+    def __init__(self, libc_path: Path = Path("libc.so.6")):
+        self.libc = ctypes.cdll.LoadLibrary(str(libc_path))
         self.libc.srand.argtypes = [ctypes.c_uint]
         self.libc.srand.restype = None
         self.libc.rand.argtypes = []
