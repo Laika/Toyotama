@@ -99,7 +99,7 @@ class Tube(metaclass=ABCMeta):
         return data
 
     def interactive(self):
-        logger.info("🔄 Switching to interactive mode.")
+        logger.info("<> Switching to interactive mode.")
 
         go = threading.Event()
 
@@ -111,11 +111,10 @@ class Tube(metaclass=ABCMeta):
                         sys.stdout.buffer.write(buf)
                         sys.stdout.flush()
                 except EOFError:
-                    logger.error("❌ Got EOF while reading in interactive")
+                    logger.error(">< Got EOF while reading in interactive")
                     break
 
-        t = threading.Thread(target=recv_thread)
-        t.daemon = True
+        t = threading.Thread(target=recv_thread, daemon=True)
         t.start()
 
         try:
@@ -128,12 +127,12 @@ class Tube(metaclass=ABCMeta):
                         self.send(data)
                     except EOFError:
                         go.set()
-                        logger.error("❌ Got EOF while reading in interactive.")
+                        logger.error(">< Got EOF while reading in interactive.")
                 else:
                     go.set()
                 time.sleep(self.INPUT_READ_DELAY)
         except KeyboardInterrupt:
-            logger.warning("⏸️ Interrupted")
+            logger.warning("|| Interrupted")
             go.set()
 
         while t.is_alive():

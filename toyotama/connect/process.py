@@ -1,4 +1,3 @@
-import errno
 import fcntl
 import os
 import pty
@@ -20,93 +19,117 @@ logger = getLogger(__name__)
 class Process(Tube):
     def __init__(
         self,
-        path: str,
-        args: list[str] | None = None,
+        args: list[str],
         env: dict[str, str] | None = None,
         timeout: float | None = None,
+        raw_mode: bool = True,
+        cwd: Path | None = None,
+        stdin: int | None = None,
+        stdout: int | None = None,
+        stderr: int | None = None,
     ):
         super().__init__()
-        self.path: Path = Path(path)
-        self.args: list[str] = args or []
-        self.env: dict[str, str] = env or {}
-        self.proc: subprocess.Popen | None
-        self.returncode: int | None = None
-        self.timeout: float | None = timeout
+        self._args: list[str] = args or []
+        self._env: dict[str, str] = env or {}
+        self._proc: subprocess.Popen | None
+        self._returncode: int | None = None
+        self._timeout: float | None = timeout
 
-        master, slave = pty.openpty()
-        tty.setraw(master)
-        tty.setraw(slave)
+        master, slave = None, None
+        if raw_mode:
+            master, slave = pty.openpty()
+            tty.setraw(master)
+            tty.setraw(slave)
+            stdout = slave
+
+        stdin = stdin or subprocess.PIPE
+        stdout = stdout or subprocess.PIPE
+        stderr = stderr or subprocess.STDOUT
 
         try:
-            self.proc = subprocess.Popen(
-                [path] + self.args,
-                env=self.env,
+            self._proc = subprocess.Popen(
+                self._args,
+                env=self._env,
+                cwd=cwd,
                 shell=False,
-                stdin=subprocess.PIPE,
-                stdout=slave,
-                stderr=subprocess.STDOUT,
+                stdin=stdin,
+                stdout=stdout,
+                stderr=stderr,
             )
         except FileNotFoundError:
-            logger.error('File not found: "%s"', path)
+            logger.error('File not found: "%s"', self._args[0])
             return
         except Exception as e:
             logger.error("Process.__init__(): %s", e)
             return
 
-        if master:
-            self.proc.stdout = os.fdopen(os.dup(master), "r+b", 0)
-            os.close(master)
+        self._path = Path(self._args[0])
 
-        if not hasattr(self.proc, "stdout"):
+        if not hasattr(self._proc, "stdout"):
             logger.error("Process.__init__(): Failed to open a pipe")
             return
 
-        fd = self.proc.stdout.fileno()  # pyright: ignore
+        if master is not None:
+            self._proc.stdout = os.fdopen(os.dup(master), "r+b", 0)
+            os.close(master)
+
+        fd = self._proc.stdout.fileno()  # pyright: ignore
         fcntl.fcntl(fd, fcntl.F_SETFL, fcntl.fcntl(fd, fcntl.F_GETFL) | os.O_NONBLOCK)
 
-        logger.info("Created a new process (PID: %d)", self.proc.pid)
+        logger.info("Created a new process (PID: %d)", self._proc.pid)
 
-    def _socket(self) -> subprocess.Popen | None:
-        return self.proc
+    @property
+    def proc(self) -> subprocess.Popen | None:
+        return self._proc
 
+    @property
     def pid(self) -> int:
-        return getattr(self.proc, "pid", -1)
+        return getattr(self._proc, "pid", -1)
 
-    def _poll(self) -> int | None:
-        if self.proc is None:
+    @property
+    def path(self) -> Path:
+        return self._path
+
+    def poll(self) -> int | None:
+        if self._proc is None:
             return None
-        self.proc.poll()
-        returncode = self.proc.returncode
-        if returncode is not None and self.returncode is None:
-            self.returncode = returncode
+        if self._proc.poll() is None:  # alive
+            return None
 
-            logger.error('"%s" terminated: %s (PID=%d)', str(self.path), signal.strsignal(-self.returncode), self.proc.pid)
+        # dead
+        if self._returncode is None:
+            self._returncode = self._proc.returncode
+            if -self._proc.returncode != 0:
+                logger.error('"%s" terminated: %s (PID=%d)', str(self._path), signal.strsignal(-self._proc.returncode), self.pid)
+            else:
+                logger.info('"%s" terminated (PID=%d)', str(self._path), self.pid)
+            input()
 
-        return returncode
+        return self._returncode
 
     def is_alive(self):
-        return self._poll() is None
+        return self.poll() is None
 
     def is_dead(self):
         return not self.is_alive()
 
     def is_ready(self) -> bool:
-        if self.proc is None:
+        if self._proc is None:
             return False
 
-        try:
-            ready = select.select([self.proc.stdout], [], [], self.timeout)
+        if self._timeout is None:
+            while self.is_alive():
+                ready, [], [] = select.select([self._proc.stdout], [], [], 0.1)
+                if ready:
+                    return True
+        else:
+            ready = select.select([self._proc.stdout], [], [], self._timeout)
             if ready == ([], [], []):
-                raise TimeoutError(f"Process.is_ready(): timeout {self.timeout}s")
-        except TimeoutError as e:
-            raise e from None
-        except OSError as e:
-            if e.errno == errno.EINTR:
-                return True
+                raise TimeoutError(f"Process.is_ready(): timeout {self._timeout}s")
 
         return True
 
-    def recv(self, n: int = 4096) -> bytes:
+    def recv(self, n: int = 0x1000) -> bytes:
         if not self.is_ready():
             logger.warning("Process.recv(): not ready")
             return b""
@@ -128,12 +151,12 @@ class Process(Tube):
 
         self.recv_bytes += len(buf)
 
-        self._poll()
+        self.poll()
 
         return buf
 
     def send(self, message: bytes | str | int, term: bytes | str = b""):
-        self._poll()
+        self.poll()
 
         payload = b""
 
@@ -146,50 +169,59 @@ class Process(Tube):
         self.send_bytes += len(payload)
 
         try:
-            self.proc.stdin.write(payload)  # pyright: ignore
-            self.proc.stdin.flush()  # pyright: ignore
+            self._proc.stdin.write(payload)  # pyright: ignore
+            self._proc.stdin.flush()  # pyright: ignore
         except OSError:
             logger.warning("Broken pipe")
         except Exception as e:
-            logger.error("Process.send(): %s", e)
+            logger.exception("Process.send(): %s", e)
 
-    def gdb(self, script: str = "", host: str = "localhost", port: int = 51280):
+    def gdb(self, script: str = "", remote_work_dir: Path = Path("."), host: str = "127.0.0.1", port: int = 51280):
+        gdbserver_args = ["sudo", "gdbserver", "--multi", f"{host}:{port}", "--attach", str(self.pid)]
         self._gdbserver = subprocess.Popen(
-            ["gdbserver", f"{host}:{port}", "--attach", str(self.pid())],
+            gdbserver_args,
             shell=False,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
+            stdin=subprocess.DEVNULL,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
             encoding="utf-8",
         )
-        logger.info("gdbserver started (PID: %d)", self._gdbserver.pid)
+        logger.info("gdbserver started (PID: %d): %s", self._gdbserver.pid, " ".join(gdbserver_args))
 
         # tmux
         srv = Server()
         session = srv.sessions[0]
 
         try:
-            pane = session.active_window.active_pane.split(direction=PaneDirection.Right, shell="gdb")
+            pane = session.active_window.active_pane
+            if not pane:
+                logger.error("Cannot get the active pane")
+                return
+            pane = pane.split(direction=PaneDirection.Right, shell="gdb")
 
-            pane.send_keys(f"file {self.path!s}")
-            pane.send_keys(f"target extend-remote {host}:{port}")
+            pane.send_keys(f"file {self._path!s}")
+            pane.send_keys(f"set remote exec-file {self._path!s}")
+            # pane.send_keys(f"remote put {self._path!s} {remote_work_dir/self.path.name}")
+            pane.send_keys(f"target extended-remote {host}:{port}")
             for line in script.split(os.linesep):
                 pane.send_keys(line)
+            pane.send_keys("start")
 
         except Exception as e:
-            logger.error("Process.gdb(): %s", e)
+            logger.exception("Process.gdb(): %s", e)
 
     def close(self):
-        if self.proc is None:
+        if self._proc is None:
             return
 
         if self.is_alive():
-            logger.info('"%s" killed (PID=%d)', self.path, self.proc.pid)
-            self.proc.stdin.close()  # pyright: ignore
-            self.proc.stdout.close()  # pyright: ignore
-            self.proc.kill()
-            self.proc.wait()
-
-        self.proc = None
+            logger.info('"%s" killed (PID=%d)', self._path, self._proc.pid)
+            self._proc.stdin.close()  # pyright: ignore
+            self._proc.stdout.close()  # pyright: ignore
+            self._proc.kill()
+            self._proc.wait()
+            self._proc = None
 
     def __del__(self):
-        self.close()
+        ...
+        # self.close()

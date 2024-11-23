@@ -1,6 +1,6 @@
 [project]
 name = "toyotama"
-version = "0.9.11"
+version = "0.10.1"
 description = "Python library for CTF."
 authors = [{ name = "Laika", email = "laika@albina.cc" }]
 maintainers = [{ name = "Laika", email = "laika@albina.cc" }]
@@ -19,7 +19,7 @@ classifiers = [
   "Operating System :: POSIX :: Linux",
 ]
 packages = [{ include = "toyotama" }]
-requires-python = ">= 3.8"
+requires-python = ">= 3.10"
 
 dependencies = [
   "libtmux>=0.37.0",
@@ -30,6 +30,7 @@ dependencies = [
   "flask>=3.0.3",
   "rich>=13.7.1",
   "setuptools>=70.2.0",
+  "colored>=2.2.4",
 ]
 
 [build-system]
