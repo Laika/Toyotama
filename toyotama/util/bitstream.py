@@ -20,7 +20,6 @@ class BitStream:
                 logger.warning("The value contains non-binary characters '%s'", value)
                 return
             self.bitstream = [int(c) ^ self.flip_mask for c in value]
-            print(self.bitstream)
 
     def __str__(self) -> str:
         s = "".join(str(b ^ self.flip_mask) for b in self.bitstream[: self.string_limit])
