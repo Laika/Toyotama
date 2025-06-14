@@ -71,7 +71,7 @@ def wieners_attack(e: int, n: int) -> int | None:
         if x % 2 == 0 and is_square(n - (x // 2) ** 2):
             g = edg - phi * k
             return dg // g
-    logger.warn("Wiener's attack failed.")
+    logger.warning("Wiener's attack failed.")
     return None
 
 

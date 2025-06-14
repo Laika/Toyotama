@@ -14,21 +14,21 @@ class Bytes(bytes):
     def __rxor__(self, other: bytes) -> Self:
         if isinstance(other, bytes):
             return Bytes(self.__xor__(other))
-        raise NotImplemented
+        raise NotImplementedError
 
     def __or__(self, other: Self) -> Self:
         if isinstance(other, Bytes):
             return Bytes(super().__add__(other))
         elif isinstance(other, bytes):
             return Bytes(super().__add__(other))
-        raise NotImplemented
+        raise NotImplementedError
 
     def __ror__(self, other: Self) -> Self:
         if isinstance(other, Bytes):
             return Bytes(other.__add__(self))
         elif isinstance(other, bytes):
             return Bytes(other.__add__(self))
-        raise NotImplemented
+        raise NotImplementedError
 
     def __getitem__(self, key: int | slice) -> Self:
         return Bytes(super().__getitem__(key))

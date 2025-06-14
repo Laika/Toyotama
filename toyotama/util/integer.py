@@ -13,8 +13,8 @@ class Int:
     @property
     def x(self):
         if self.signed:
-            sign = self.__x & 1 << self.bits - 1
-            value = self.__x & self.mask >> 1
+            sign = self.__x & (1 << (self.bits - 1))
+            value = self.__x & (self.mask >> 1)
             if sign:
                 return -((~self.__x + 1) & self.mask)
             return value & self.mask
@@ -108,7 +108,7 @@ class Int:
 
 class UInt8(Int):
     def __init__(self, value):
-        super().__init__(self, value, bits=8, signed=False)
+        super().__init__(value, bits=8, signed=False)
 
 
 class UChar(Int):
@@ -118,34 +118,34 @@ class UChar(Int):
 
 class UInt16(Int):
     def __init__(self, value):
-        super().__init__(self, value, bits=16, signed=False)
+        super().__init__(value, bits=16, signed=False)
 
 
 class UInt32(Int):
     def __init__(self, value):
-        super().__init__(self, value, bits=32, signed=False)
+        super().__init__(value, bits=32, signed=False)
 
 
 class UInt64(Int):
     def __init__(self, value):
-        super().__init__(self, value, bits=64, signed=False)
+        super().__init__(value, bits=64, signed=False)
 
 
 class Int8(Int):
     def __init__(self, value):
-        super().__init__(self, value, bits=8, signed=True)
+        super().__init__(value, bits=8, signed=True)
 
 
 class Int16(Int):
     def __init__(self, value):
-        super().__init__(self, value, bits=16, signed=True)
+        super().__init__(value, bits=16, signed=True)
 
 
 class Int32(Int):
     def __init__(self, value):
-        super().__init__(self, value, bits=32, signed=True)
+        super().__init__(value, bits=32, signed=True)
 
 
 class Int64(Int):
     def __init__(self, value):
-        super().__init__(self, value, bits=64, signed=True)
+        super().__init__(value, bits=64, signed=True)

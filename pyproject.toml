@@ -16,6 +16,7 @@ classifiers = [
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
   "Operating System :: POSIX :: Linux",
 ]
 packages = [{ include = "toyotama" }]
@@ -48,8 +49,9 @@ packages = ["toyotama"]
 
 [tool.ruff]
 line-length = 150
-target-version = "py312"
+target-version = "py313"
 
+[tool.ruff.lint]
 select = ["E", "F", "C90", "I", "N", "UP", "PERF", "PL"]
 ignore = []
 
@@ -124,10 +126,8 @@ exclude = [
 ]
 unfixable = []
 
-[tool.ruff.pydocstyle]
+[tool.ruff.lint.pydocstyle]
 convention = "google"
 
 [tool.uv]
-dev-dependencies = [
-  "ruff>=0.6.2",
-]
+dev-dependencies = ["ruff>=0.6.2"]

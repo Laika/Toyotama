@@ -54,10 +54,10 @@ def is_prime(n: int, rounds: int = 10) -> bool:
             return True
         if n % p == 0:
             return False
-    return miller_rabin_Test(n, rounds)
+    return miller_rabin_test(n, rounds)
 
 
-def miller_rabin_Test(n: int, rounds: int = 10) -> bool:
+def miller_rabin_test(n: int, rounds: int = 10) -> bool:
     """Miller-Rabin primality test.
 
     Args:

@@ -99,11 +99,13 @@ class Process(Tube):
         # dead
         if self._returncode is None:
             self._returncode = self._proc.returncode
-            if -self._proc.returncode != 0:
-                logger.error('"%s" terminated: %s (PID=%d)', str(self._path), signal.strsignal(-self._proc.returncode), self.pid)
+            if self._proc.returncode != 0:
+                if self._proc.returncode < 0:
+                    logger.error('"%s" terminated: %s (PID=%d)', str(self._path), signal.strsignal(-self._proc.returncode), self.pid)
+                else:
+                    logger.error('"%s" terminated with exit code %d (PID=%d)', str(self._path), self._proc.returncode, self.pid)
             else:
                 logger.info('"%s" terminated (PID=%d)', str(self._path), self.pid)
-            input()
 
         return self._returncode
 
@@ -146,8 +148,8 @@ class Process(Tube):
         try:
             buf += self.proc.stdout.read(n) or b""  # pyright: ignore
         except Exception as e:
-            logger.error("%s", e)
-            input()
+            logger.error("Error reading from process stdout: %s", e)
+            raise
 
         self.recv_bytes += len(buf)
 

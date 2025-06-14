@@ -1,3 +1,3 @@
-from toyotama.connect.process import *
-from toyotama.connect.socket import *
-from toyotama.connect.tube import *
+from toyotama.connect.process import Process
+from toyotama.connect.socket import Socket
+from toyotama.connect.tube import Tube

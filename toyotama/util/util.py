@@ -59,8 +59,7 @@ class MarkdownTable:
             lines.append(self.__get_printable_header())
             lines.append(self.__get_printable_border())
 
-        for row in self.rows:
-            lines.append(self.__get_printable_row(row))
+        lines.extend([self.__get_printable_row(row) for row in self.rows])
 
         return lines
 
