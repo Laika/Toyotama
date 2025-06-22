@@ -113,7 +113,7 @@ class UInt8(Int):
 
 class UChar(Int):
     def __init__(self, value):
-        super().__init__(self, value, bits=8, signed=False)
+        super().__init__(value, bits=8, signed=False)
 
 
 class UInt16(Int):
