@@ -59,7 +59,14 @@ class Tube(metaclass=ABCMeta):
         return self.recvline()
 
     def recvvalue(self, parser: Callable = ast.literal_eval) -> Any:
-        line = self.pattern.match(self.recvline().decode())
+        raw = self.recvline()
+        try:
+            decoded = raw.decode()
+        except UnicodeDecodeError:
+            logger.warning("recvvalue: failed to decode %r", raw)
+            return None
+
+        line = self.pattern.match(decoded)
         if not line:
             return None
 

@@ -362,8 +362,8 @@ def is_square(n: int):
 
 def solve_quadratic_equation(a: int, b: int, c: int) -> tuple[int, int]:
     D = b * b - 4 * a * c
-    x = -b + isqrt(D) // (2 * a)
-    xx = -b - isqrt(D) // (2 * a)
+    x = (-b + isqrt(D)) // (2 * a)
+    xx = (-b - isqrt(D)) // (2 * a)
 
     return x, xx
 

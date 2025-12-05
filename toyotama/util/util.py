@@ -202,12 +202,10 @@ def random_string(length: int, alphabet: bytes = b"") -> bytes:
     b'aghlqvucdf'
     """
 
-    alphabet: bytes = alphabet or b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+    alphabet = alphabet or b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
 
     rnd = choices(alphabet, k=length)
-    rnd = b"".join(rnd)
-
-    return rnd
+    return bytes(rnd)
 
 
 def de_bruijn(length: int, alphabet, *, n: int = 4) -> str:

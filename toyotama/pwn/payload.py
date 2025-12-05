@@ -52,8 +52,12 @@ class Payload:
     def fill(self, n: int, byte: bytes = b"A"):
         self.blocks.append(byte * n)
 
-    def zfill(self):
-        self.fill(-len(self.dump()) % self.bytes_)
+    def align(self, n: int):
+        """
+        Align the payload to the specified number of bytes.
+        If the payload is already aligned, nothing will be done.
+        """
+        self.fill(-len(self.dump()) % n)
 
     def dump(self) -> bytes:
         return b"".join(self.blocks)

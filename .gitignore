@@ -2,3 +2,4 @@ build/
 dist/
 toyotama.egg-info/
 __pycache__/
+toyotama/.gdb_history

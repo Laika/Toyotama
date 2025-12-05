@@ -30,6 +30,7 @@ class Socket(Tube):
         self.host: str = host
         self.port: int = int(port)
         self.timeout: float = timeout
+        self._is_alive: bool = True
 
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.sock.settimeout(timeout)
@@ -71,7 +72,7 @@ class Socket(Tube):
         try:
             self.sock.sendall(payload)
         except Exception as e:
-            self.is_alive = False
+            self._is_alive = False
             logger.error("%s", e)
 
     def solve_hashcash(self, command: str) -> str:
@@ -83,6 +84,9 @@ class Socket(Tube):
         self.sendline(result)
 
         return result
+
+    def is_alive(self) -> bool:
+        return self._is_alive and self.sock is not None
 
     def close(self):
         if self.sock:

@@ -70,9 +70,17 @@ class ELFParser:
             and self.ehdr.e_ident[EI_MAG3] == ELFMAG3
         )
 
+    def __enter__(self):
+        return self
+
     def __exit__(self, exc_type, exc_val, exc_tb):
         if self.fd:
             self.fd.close()
+
+    def close(self):
+        if self.fd:
+            self.fd.close()
+            self.fd = None
 
 
 if __name__ == "__main__":

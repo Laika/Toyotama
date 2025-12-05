@@ -38,7 +38,7 @@ def decompress_7z(input_file: Path, output_file: Path):
 
 def decompress_tar(input_file: Path, output_file: Path):
     with tarfile.open(input_file, "r") as archive:
-        archive.extractall(output_file)
+        archive.extractall(output_file, filter="data")
 
 
 def get_file_format(file_path: Path):

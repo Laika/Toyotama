@@ -31,9 +31,11 @@ class Process(Tube):
         super().__init__()
         self._args: list[str] = args or []
         self._env: dict[str, str] = env or {}
-        self._proc: subprocess.Popen | None
+        self._proc: subprocess.Popen | None = None
         self._returncode: int | None = None
         self._timeout: float | None = timeout
+        self._path: Path = Path(self._args[0]) if self._args else Path()
+        self._gdbserver: subprocess.Popen | None = None
 
         master, slave = None, None
         if raw_mode:
@@ -57,13 +59,11 @@ class Process(Tube):
                 stderr=stderr,
             )
         except FileNotFoundError:
-            logger.error('File not found: "%s"', self._args[0])
+            logger.error('File not found: "%s"', self._args[0] if self._args else "(empty)")
             return
         except Exception as e:
             logger.error("Process.__init__(): %s", e)
             return
-
-        self._path = Path(self._args[0])
 
         if not hasattr(self._proc, "stdout"):
             logger.error("Process.__init__(): Failed to open a pipe")
@@ -99,11 +99,10 @@ class Process(Tube):
         # dead
         if self._returncode is None:
             self._returncode = self._proc.returncode
-            if self._proc.returncode != 0:
-                if self._proc.returncode < 0:
-                    logger.error('"%s" terminated: %s (PID=%d)', str(self._path), signal.strsignal(-self._proc.returncode), self.pid)
-                else:
-                    logger.error('"%s" terminated with exit code %d (PID=%d)', str(self._path), self._proc.returncode, self.pid)
+            if self._proc.returncode < 0:
+                logger.error('"%s" terminated by signal: %s (PID=%d)', str(self._path), signal.strsignal(-self._proc.returncode), self.pid)
+            elif self._proc.returncode > 0:
+                logger.error('"%s" terminated with exit code %d (PID=%d)', str(self._path), self._proc.returncode, self.pid)
             else:
                 logger.info('"%s" terminated (PID=%d)', str(self._path), self.pid)
 
@@ -116,17 +115,17 @@ class Process(Tube):
         return not self.is_alive()
 
     def is_ready(self) -> bool:
-        if self._proc is None:
+        if self._proc is None or self._proc.stdout is None:
             return False
 
         if self._timeout is None:
             while self.is_alive():
-                ready, [], [] = select.select([self._proc.stdout], [], [], 0.1)
-                if ready:
+                readable, _, _ = select.select([self._proc.stdout], [], [], 0.1)
+                if readable:
                     return True
         else:
-            ready = select.select([self._proc.stdout], [], [], self._timeout)
-            if ready == ([], [], []):
+            readable, _, _ = select.select([self._proc.stdout], [], [], self._timeout)
+            if not readable:
                 raise TimeoutError(f"Process.is_ready(): timeout {self._timeout}s")
 
         return True
@@ -140,16 +139,15 @@ class Process(Tube):
             logger.warning("Process.recv(): process is dead")
             return b""
 
-        if self.proc.stdout is None:  # pyright: ignore
+        if self._proc is None or self._proc.stdout is None:
             logger.warning("Process.recv(): stdout is None")
             return b""
 
         buf = b""
         try:
-            buf += self.proc.stdout.read(n) or b""  # pyright: ignore
+            buf += self._proc.stdout.read(n) or b""
         except Exception as e:
-            logger.error("Error reading from process stdout: %s", e)
-            raise
+            logger.error("%s", e)
 
         self.recv_bytes += len(buf)
 
@@ -216,14 +214,31 @@ class Process(Tube):
         if self._proc is None:
             return
 
+        # Close file handles first
+        if self._proc.stdin:
+            try:
+                self._proc.stdin.close()
+            except Exception:
+                pass
+        if self._proc.stdout:
+            try:
+                self._proc.stdout.close()
+            except Exception:
+                pass
+
+        # Kill if still alive
         if self.is_alive():
             logger.info('"%s" killed (PID=%d)', self._path, self._proc.pid)
-            self._proc.stdin.close()  # pyright: ignore
-            self._proc.stdout.close()  # pyright: ignore
+            self._proc.kill()
+
+        # Wait for process to finish
+        try:
+            self._proc.wait(timeout=1.0)
+        except subprocess.TimeoutExpired:
             self._proc.kill()
             self._proc.wait()
-            self._proc = None
+
+        self._proc = None
 
     def __del__(self):
-        ...
-        # self.close()
+        self.close()

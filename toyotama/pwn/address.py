@@ -5,8 +5,11 @@ from toyotama.pwn.util import p8, p16, p32, p64
 
 
 class Address(int):
+    def __new__(cls, address: int, packer: Callable[[int], bytes] = p64) -> "Address":
+        instance = super().__new__(cls, address)
+        return instance
+
     def __init__(self, address: int, packer: Callable[[int], bytes] = p64):
-        super().__init__()
         self.address: int = address
         self.packer = packer
 
@@ -47,11 +50,11 @@ class Address(int):
 
         return self
 
-    def __lshift__(self, __value: int) -> int:
-        return Address(super().__lshift__(__value))
+    def __lshift__(self, value: int) -> "Address":
+        return Address(super().__lshift__(value))
 
-    def __rshift__(self, __value: int) -> int:
-        return Address(super().__rshift__(__value))
+    def __rshift__(self, value: int) -> "Address":
+        return Address(super().__rshift__(value))
 
     def __isub__(self, o):
         if not isinstance(o, int):
