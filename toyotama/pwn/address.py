@@ -1,17 +1,30 @@
+from collections.abc import Callable
+from struct import unpack
+
 from toyotama.pwn.util import p8, p16, p32, p64
 
 
 class Address(int):
-    def __init__(self, address: int):
-        super().__init__()
-        self.address = address
+    def __new__(cls, address: int, packer: Callable[[int], bytes] = p64) -> "Address":
+        instance = super().__new__(cls, address)
+        return instance
+
+    def __init__(self, address: int, packer: Callable[[int], bytes] = p64):
+        self.address: int = address
+        self.packer = packer
 
     def __str__(self) -> str:
         res = hex(self.address)
         return res
 
+    def __repr__(self) -> str:
+        return f"Address(address:{hex(self.address)})"
+
     def hex(self) -> str:
         return hex(self.address)
+
+    def pack(self) -> bytes:
+        return self.packer(self.address)
 
     def __add__(self, o):
         if not isinstance(o, int):
@@ -37,6 +50,12 @@ class Address(int):
 
         return self
 
+    def __lshift__(self, value: int) -> "Address":
+        return Address(super().__lshift__(value))
+
+    def __rshift__(self, value: int) -> "Address":
+        return Address(super().__rshift__(value))
+
     def __isub__(self, o):
         if not isinstance(o, int):
             raise TypeError("Invalid type")
@@ -56,6 +75,12 @@ class Address(int):
 
     def p64(self) -> bytes:
         return p64(self.address)
+
+    @classmethod
+    def u64(cls, x: bytes, signed: bool = False) -> int:
+        assert len(x) <= 8
+        x = x.ljust(8, b"\0")
+        return cls(unpack("<q" if signed else "<Q", x)[0])
 
 
 Addr = Address

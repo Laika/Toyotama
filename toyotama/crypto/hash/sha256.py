@@ -1,13 +1,12 @@
 import hashlib
 import random
 import struct
+from logging import getLogger
 
-from toyotama.util.log import get_logger
-
-logger = get_logger(__name__)
+logger = getLogger(__name__)
 
 
-class SHA256(object):
+class SHA256:
     BLOCK_SIZE: int = 64
     MOD: int = 1 << 32
     # fmt: off

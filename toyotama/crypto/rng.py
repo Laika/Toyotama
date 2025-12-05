@@ -1,6 +1,11 @@
+import ctypes
 import itertools
 from functools import reduce
+from logging import getLogger
 from math import gcd
+from pathlib import Path
+
+logger = getLogger(__name__)
 
 
 def lcg_crack(x, a=None, b=None, m=None):
@@ -26,3 +31,18 @@ def lcg_crack(x, a=None, b=None, m=None):
             b = (x[1] - a * x[0]) % m
 
     return a, b, m
+
+
+class LibcRandom:
+    def __init__(self, libc_path: Path = Path("libc.so.6")):
+        self.libc = ctypes.cdll.LoadLibrary(str(libc_path))
+        self.libc.srand.argtypes = [ctypes.c_uint]
+        self.libc.srand.restype = None
+        self.libc.rand.argtypes = []
+        self.libc.rand.restype = ctypes.c_int
+
+    def srand(self, seed: int):
+        self.libc.srand(seed)
+
+    def rand(self):
+        return self.libc.rand()

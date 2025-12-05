@@ -22,27 +22,27 @@ def p64(x: int) -> bytes:
 
 
 def u8(x: bytes, sign: bool = False) -> int:
-    """Unpack 8bit byteseger"""
+    """Unpack 8bit bytes"""
     assert len(x) <= 1
     return unpack("<b" if sign else "<B", x)[0]
 
 
 def u16(x: bytes, sign: bool = False) -> int:
-    """Unpack 16bit byteseger"""
+    """Unpack 16bit bytes"""
     assert len(x) <= 2
     x = x.ljust(2, b"\0")
     return unpack("<h" if sign else "<H", x)[0]
 
 
 def u32(x: bytes, sign: bool = False) -> int:
-    """Unpack 32bit byteseger"""
+    """Unpack 32bit bytes"""
     assert len(x) <= 4
     x = x.ljust(4, b"\0")
     return unpack("<i" if sign else "<I", x)[0]
 
 
 def u64(x: bytes, sign: bool = False) -> int:
-    """Unpack 64bit byteseger"""
+    """Unpack 64bit bytes"""
     assert len(x) <= 8
     x = x.ljust(8, b"\0")
     return unpack("<q" if sign else "<Q", x)[0]

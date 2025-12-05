@@ -1,35 +1,134 @@
 """Crypto Utility
 """
 from functools import reduce
+from logging import getLogger
 from math import gcd, isqrt, lcm
 from operator import mul
 from random import randint
 from typing import Literal
 
-import gmpy2
+from toyotama.crypto.const import PRIMES
 
-from ..util.log import get_logger
-
+logger = getLogger(__name__)
 Endian = Literal["big", "little"]
 
 
-logger = get_logger()
+def int_to_bytes(x: int, byteorder: Endian = "big") -> bytes:
+    """Convert integer to bytes.
+
+    Args:
+        x (int): A value.
+        byteorder (str, optional): The byte order. Defaults to "big".
+
+    Returns:
+        bytes: The result of conversion.
+    """
+    return x.to_bytes(x.bit_length() + 7 >> 3, byteorder=byteorder)
+
+
+def bytes_to_int(x: bytes, byteorder: Endian = "big") -> int:
+    """Convert bytes to integer.
+
+    Args:
+        x (bytes): A value.
+        byteorder (str, optional): The byte order. Defaults to "big".
+    Returns:
+        int: The result of conversion.
+    """
+    return int.from_bytes(x, byteorder=byteorder)
+
+
+def is_prime(n: int, rounds: int = 10) -> bool:
+    """Primality test.
+    Args:
+        n (int): A value.
+        rounds (int, optional): The number of iteration. Defaults to 10.
+
+    Returns:
+        bool: Whether n is prime or not.
+    """
+    if n < 3 or n % 2 == 0:
+        return n == 2
+    for p in PRIMES:
+        if n == p:
+            return True
+        if n % p == 0:
+            return False
+    return miller_rabin_test(n, rounds)
+
+
+def miller_rabin_test(n: int, rounds: int = 10) -> bool:
+    """Miller-Rabin primality test.
+
+    Args:
+        n (int): A value.
+        k (int, optional): The number of iteration. Defaults to 10.
+
+    Returns:
+        bool: Whether n is prime or not.
+    """
+    if n < 2 or n % 2 == 0:
+        return n == 2
+
+    s, t = 0, n - 1
+    while t % 2 == 0:
+        s, t = s + 1, t >> 1
+
+    done = set()
+    for _ in range(min(rounds, n - 2)):
+        a = randint(2, n - 1)
+        while a in done:
+            a = randint(2, n - 1)
+        done.add(a)
+        m = pow(a, t, n)
+        if m == 1 or m == n - 1:
+            continue
+
+        is_composite = True
+        for _ in range(s):
+            m = (m * m) % n
+            if m == 1:
+                return False
+            elif m == n - 1:
+                is_composite = False
+                break
+        if is_composite:
+            return False
+    return True
+
+
+def next_prime(x: int) -> int:
+    """Get next prime number.
+
+    Args:
+        x (int): A value.
+    Returns:
+        int: The next prime number.
+    """
+
+    if x <= 1:
+        return 2
+
+    x += 1 + x % 2
+    while not is_prime(x):
+        x += 2
+
+    return x
 
 
 def xor(*array: bytes, strict: bool = False) -> bytes:
-    """XOR strings
-
-    Calculate `A XOR B`.
+    """Calculate XOR of bytes.
 
     Args:
-        A (bytes): A first string.
-        B (bytes): A second string.
+        array (bytes): The list of bytes.
+        strict (bool, optional): Whether the length of each bytes is same or not. Defaults to False.
+
     Returns:
-        bytes: The result of `A XOR B`.
+        bytes: The result of XOR.
     """
 
     if len(array) == 0:
-        return bytes()
+        return b""
 
     ret = bytes(len(array[0]))
 
@@ -40,45 +139,31 @@ def xor(*array: bytes, strict: bool = False) -> bytes:
 
 
 def rotl(data: list, shift: int, block_size: int = 16) -> list:
-    """Rotate left
-    Calculate ROTL
+    """Calculate ROTL
+    Args:
+        data (list): The list of value.
+        shift (int): The shift value.
+        block_size (int, optional): The block size. Defaults to 16.
+    Returns:
+        list: The result of rotation.
     """
+
     shift %= block_size
     return data[shift:] + data[:shift]
 
 
 def rotr(data: list, shift: int, block_size: int = 16) -> list:
-    """Rotate right
-    Calculate ROTR
+    """Calculate ROTR
+
+    Args:
+        data (list): The list of value.
+        shift (int): The shift value.
+        block_size (int, optional): The block size. Defaults to 16.
+    Returns:
+        list: The result of rotation.
     """
     shift %= block_size
     return data[-shift:] + data[:-shift]
-
-
-def i2b(x: int, byteorder: Endian = "big") -> bytes:
-    """Convert int to bytes.
-
-    Args:
-        x (int): A value.
-        byteorder (str, optional): Byteorder. Defaults to "big".
-
-    Returns:
-        bytes: Result.
-    """
-    return x.to_bytes(x.bit_length() + 7 >> 3, byteorder=byteorder)
-
-
-def b2i(x: bytes, byteorder: Endian = "big") -> int:
-    """Convert bytes to int.
-
-    Args:
-        x (bytes): A value.
-        byteorder (str, optional): Byteorder. Defaults to "big".
-
-    Returns:
-        int: Result.
-    """
-    return int.from_bytes(x, byteorder=byteorder)
 
 
 def extended_gcd(a: int, b: int) -> tuple[int, int, int]:
@@ -100,34 +185,8 @@ def extended_gcd(a: int, b: int) -> tuple[int, int, int]:
         x, a_ = a_, x - q * a_
         y, b_ = b_, y - q * b_
     assert a * x + b * y == gcd(a, b)
+
     return x, y, g
-
-
-def miller_rabin_Test(n: int, k: int = 100) -> bool:
-    """Miller-Rabin primality test.
-
-    Args:
-        n (int): A value.
-        k (int, optional): The number of iteration. Defaults to 100.
-
-    Returns:
-        bool: Whether n is prime or not.
-    """
-    if n == 2:
-        return True
-    if n < 2 or n % 2 == 0:
-        return False
-
-    s, t = 0, n - 1
-    while t % 2 == 0:
-        s, t = s + 1, t >> 1
-    a = randint(1, n - 1)
-    if pow(a, t, n) == 1:
-        return True
-    for i in range(s):
-        if pow(a, (1 << i) * t, n) == n - 1:
-            return True
-    return False
 
 
 def legendre(a: int, p: int) -> int:
@@ -247,6 +306,9 @@ def babystep_giantstep(g: int, y: int, p: int, q: int = 0) -> int:
     return -1
 
 
+bsgs = babystep_giantstep
+
+
 def pohlig_hellman(g: int, y: int, factor: list[int]) -> tuple[int, int]:
     p = reduce(mul, factor) + 1
     x = [bsgs(pow(g, (p - 1) // q, p), pow(y, (p - 1) // q, p), p, q) for q in factor]
@@ -266,7 +328,7 @@ def factorize_from_kphi(n: int, kphi: int) -> tuple[int, int]:
     r = (kphi & -kphi).bit_length() - 1
     s = kphi >> r
     g = 1
-    while g := int(gmpy2.next_prime(g)):
+    while g := int(next_prime(g)):
         x = pow(g, s, n)
         for _ in range(r):
             p = gcd(x - 1, n)
@@ -291,12 +353,7 @@ def inverse(a: int, n: int) -> int:
     Returns:
         int: _description_
     """
-    x, _, g = extended_gcd(a, n)
-    if g != 1:
-        logger.error("No inverse for the given modulus.")
-        return 0
-
-    return x % n
+    return pow(a, -1, n)
 
 
 def is_square(n: int):
@@ -305,14 +362,8 @@ def is_square(n: int):
 
 def solve_quadratic_equation(a: int, b: int, c: int) -> tuple[int, int]:
     D = b * b - 4 * a * c
-    x = -b + isqrt(D) // (2 * a)
-    xx = -b - isqrt(D) // (2 * a)
+    x = (-b + isqrt(D)) // (2 * a)
+    xx = (-b - isqrt(D)) // (2 * a)
 
     return x, xx
 
-
-# Aliases
-int_to_bytes = i2b
-bytes_to_int = b2i
-is_prime = miller_rabin_Test
-bsgs = babystep_giantstep

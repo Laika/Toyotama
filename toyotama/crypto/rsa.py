@@ -1,14 +1,14 @@
-"""RSA utility
-"""
+"""RSA utility"""
+
 from collections.abc import Callable
 from functools import reduce
+from logging import getLogger
 from math import ceil, isqrt
 from operator import mul
 
-from ..util.log import get_logger
-from .util import extended_gcd, i2b, inverse, is_square
+from toyotama.crypto.util import extended_gcd, int_to_bytes, inverse, is_square
 
-logger = get_logger()
+logger = getLogger(__name__)
 
 
 def common_modulus_attack(e1: int, e2: int, c1: int, c2: int, n: int) -> int:
@@ -21,6 +21,7 @@ def common_modulus_attack(e1: int, e2: int, c1: int, c2: int, n: int) -> int:
         e2 (int): The second public exponent.
         c1 (int): The first ciphertext.
         c1 (int): The second ciphertext.
+        n (int): The modulus.
     Returns:
         int: The plaintext
     """
@@ -67,13 +68,14 @@ def wieners_attack(e: int, n: int) -> int | None:
         phi = edg // k
 
         x = n - phi + 1
-        if x % 2 == 0 and is_square((x // 2) ** 2 - n):
+        if x % 2 == 0 and is_square(n - (x // 2) ** 2):
             g = edg - phi * k
             return dg // g
+    logger.warning("Wiener's attack failed.")
     return None
 
 
-def lsb_decryption_oracle_attack(n: int, e: int, c: int, oracle: Callable, debug: bool = True) -> int:
+def lsb_decryption_oracle_attack(n: int, e: int, c: int, oracle: Callable) -> int:
     """Perform LSB Decryption oracle attack.
 
     Args:
@@ -104,8 +106,7 @@ def lsb_decryption_oracle_attack(n: int, e: int, c: int, oracle: Callable, debug
     i = 0
     nl = n.bit_length()
     while ub - lb > 1:
-        if debug:
-            logger.info(f"{(100*i//nl):>3}% [{i:>4}/{nl}]")
+        logger.debug("%3d%% [%4d/%d]", (100 * i // nl), i, nl)
 
         mid = Fraction(lb + ub, 2)
         c_ = c_ * pow(2, e, n) % n
@@ -140,7 +141,7 @@ class RSASolver:
             self.d = inverse(self.e, self.phi)
             self.m = pow(self.c, self.d, self.n)
             if plaintext:
-                return i2b(self.m)
+                return int_to_bytes(self.m)
             return self.m
 
         logger.warning("No solution found.")
@@ -151,7 +152,7 @@ class RSASolver:
         m = wieners_attack(self.e, self.n)
         if m:
             logger.info("Wiener's attack succeeded.")
-            m = i2b(m)
+            m = int_to_bytes(m)
             return m
 
     def _check_modulus(self):

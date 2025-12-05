@@ -1,6 +1,15 @@
-from ctypes import c_char, c_int32, c_int64, c_uint16, c_uint32, c_uint64, Structure
+from ctypes import Structure, c_char, c_int32, c_int64, c_uint16, c_uint32, c_uint64
 
-from .const import EI_NIDENT, Elf32_Addr, Elf32_Off, Elf32_Word, Elf64_Addr, Elf64_Off, Elf64_Word, Elf64_Xword
+from toyotama.elf.const import (
+    EI_NIDENT,
+    Elf32_Addr,
+    Elf32_Off,
+    Elf32_Word,
+    Elf64_Addr,
+    Elf64_Off,
+    Elf64_Word,
+    Elf64_Xword,
+)
 
 
 class Elf32_Ehdr(Structure):

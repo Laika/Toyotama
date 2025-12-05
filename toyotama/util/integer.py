@@ -1,6 +1,11 @@
+from typing import Literal
+
+Bits = Literal[8, 16, 32, 64]
+
+
 class Int:
-    def __init__(self, value, bits=32, signed=True):
-        self.bits = bits
+    def __init__(self, value: int, bits: Bits = 32, signed: bool = True):
+        self.bits: Bits = bits
         self.mask = (1 << self.bits) - 1
         self.signed = signed
         self.__x = value & self.mask
@@ -8,8 +13,8 @@ class Int:
     @property
     def x(self):
         if self.signed:
-            sign = self.__x & 1 << self.bits - 1
-            value = self.__x & self.mask >> 1
+            sign = self.__x & (1 << (self.bits - 1))
+            value = self.__x & (self.mask >> 1)
             if sign:
                 return -((~self.__x + 1) & self.mask)
             return value & self.mask
@@ -92,52 +97,55 @@ class Int:
         return self.__lt__(other) or self.__eq__(other)
 
     def __gt__(self, other):
-        return not __self.__le__(other)
+        return not self.__le__(other)
 
     def __ge__(self, other):
-        return not __lt__(other)
+        return not self.__lt__(other)
+
+    def to_bytes(self, byteorder="big"):
+        return self.x.to_bytes(self.bits // 8, byteorder)
 
 
 class UInt8(Int):
     def __init__(self, value):
-        super().__init__(self, value, bits=8, signed=False)
+        super().__init__(value, bits=8, signed=False)
 
 
 class UChar(Int):
     def __init__(self, value):
-        super().__init__(self, value, bits=8, signed=False)
+        super().__init__(value, bits=8, signed=False)
 
 
 class UInt16(Int):
     def __init__(self, value):
-        super().__init__(self, value, bits=16, signed=False)
+        super().__init__(value, bits=16, signed=False)
 
 
 class UInt32(Int):
     def __init__(self, value):
-        super().__init__(self, value, bits=32, signed=False)
+        super().__init__(value, bits=32, signed=False)
 
 
 class UInt64(Int):
     def __init__(self, value):
-        super().__init__(self, value, bits=64, signed=False)
+        super().__init__(value, bits=64, signed=False)
 
 
 class Int8(Int):
     def __init__(self, value):
-        super().__init__(self, value, bits=8, signed=True)
+        super().__init__(value, bits=8, signed=True)
 
 
 class Int16(Int):
     def __init__(self, value):
-        super().__init__(self, value, bits=16, signed=True)
+        super().__init__(value, bits=16, signed=True)
 
 
 class Int32(Int):
     def __init__(self, value):
-        super().__init__(self, value, bits=32, signed=True)
+        super().__init__(value, bits=32, signed=True)
 
 
 class Int64(Int):
     def __init__(self, value):
-        super().__init__(self, value, bits=64, signed=True)
+        super().__init__(value, bits=64, signed=True)

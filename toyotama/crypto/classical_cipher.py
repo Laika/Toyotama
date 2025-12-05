@@ -1,3 +1,8 @@
+from logging import getLogger
+
+logger = getLogger(__name__)
+
+
 def rot(plaintext: str | bytes, rotate: int = 13) -> bytes:
     """ROTxx
 

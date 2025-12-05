@@ -1,11 +1,10 @@
-import code
 import string
 from functools import singledispatch
 from itertools import zip_longest
+from logging import getLogger
+from random import choices
 
-from .log import get_logger
-
-logger = get_logger()
+logger = getLogger(__name__)
 
 
 class MarkdownTable:
@@ -60,8 +59,7 @@ class MarkdownTable:
             lines.append(self.__get_printable_header())
             lines.append(self.__get_printable_border())
 
-        for row in self.rows:
-            lines.append(self.__get_printable_row(row))
+        lines.extend([self.__get_printable_row(row) for row in self.rows])
 
         return lines
 
@@ -112,15 +110,15 @@ def printvall(symboltable, *args):
         if error == "Exception":
             raise ValueError("undefined function is mixed in subspace?")
 
-    names = [getvarname(var, symboltable) for var in args]
-    maxlen_name = max([len(name) for name in names]) + 1
-    maxlen_type = max([len(type(value).__name__) for value in args]) + 3
+    names = [getvarname(var, symboltable) or "" for var in args]
+    maxlen_name = max(len(name) for name in names) + 1
+    maxlen_type = max(len(type(value).__name__) for value in args) + 3
     for name, value in zip(names, args):
         typ = f"<{type(value).__name__}>"
         if name.endswith("_addr"):
-            logger.info(f"{name.ljust(maxlen_name)}{typ.rjust(maxlen_type)}: {value:#x}")
+            logger.info("%s%s: %s", name.ljust(maxlen_name), typ.rjust(maxlen_type), hex(value))
         else:
-            logger.info(f"{name.ljust(maxlen_name)}{typ.rjust(maxlen_type)}: {value}")
+            logger.info("%s%s: %d", name.ljust(maxlen_name), typ.rjust(maxlen_type), value)
 
 
 @singledispatch
@@ -159,7 +157,7 @@ def extract_flag_str(s, head="{", tail="}", unique=True):
     if unique:
         flags = set(flags)
     if not flags:
-        logger.error(f"the pattern {head}.*?{tail} does not exist.")
+        logger.error("the pattern %s.*?%s does not exist.", head, tail)
         return None
     return flags
 
@@ -174,16 +172,12 @@ def extract_flag_bytes(s, head="{", tail="}", unique=True):
     if unique:
         flags = set(flags)
     if not flags:
-        logger.error(f"The pattern {head}.*?{tail} does not exist.")
+        logger.error("The pattern %s.*?%s does not exist.", head, tail)
         return None
     return flags
 
 
-def random_string(
-    length: int,
-    alphabet: str | bytes = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789",
-    byte: bool = True,
-):
+def random_string(length: int, alphabet: bytes = b"") -> bytes:
     """Generate random string
 
     Parameters
@@ -197,25 +191,21 @@ def random_string(
 
     Returns
     -------
-    str
+    bytes
         Randomly picked string
 
     Examples
     --------
     >>> random_string(10, 'abcdefghijklmnopqrstuvwxyz')
-    'jzhmajvqje'
+    b'jzhmajvqje'
     >>> random_string(10, 'abcdefghijklmnopqrstuvwxyz')
-    'aghlqvucdf'
+    b'aghlqvucdf'
     """
 
-    from random import choices
+    alphabet = alphabet or b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
 
     rnd = choices(alphabet, k=length)
-    if isinstance(alphabet, bytes):
-        rnd = bytes(rnd)
-    if isinstance(alphabet, str):
-        rnd = "".join(rnd)
-    return rnd
+    return bytes(rnd)
 
 
 def de_bruijn(length: int, alphabet, *, n: int = 4) -> str:

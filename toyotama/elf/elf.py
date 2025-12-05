@@ -1,28 +1,28 @@
 import re
+from logging import getLogger
 from pathlib import Path
 
 import lief
-import r2pipe
+import rzpipe
 
-from ..util import MarkdownTable
-from ..util.log import get_logger
+from toyotama.pwn.address import Address
+from toyotama.util.util import MarkdownTable
 
-logger = get_logger()
+logger = getLogger(__name__)
 
 
 class ELF:
-    def __init__(self, path: str, level: int = 4):
+    def __init__(self, path: str | Path, level: int = 4):
         self.elf = lief.parse(path)
 
         self.path = Path(path)
 
-        self._base = 0x000000
+        self._base = Address(0x0)
 
-        logger.info('[%s] Open "%s"', self.__class__.__name__, self.path)
-        self._r = r2pipe.open(path)
+        self._rz = rzpipe.open(str(path))
 
         logger.info("[%s] %s", self.__class__.__name__, "a" * level)
-        self._r.cmd("a" * level)
+        self._rz.cmd("a" * level)
 
         self._funcs = self._get_funcs()
         self._relocs = self._get_relocs()
@@ -35,8 +35,11 @@ class ELF:
         return self._base
 
     @base.setter
-    def base(self, value: int) -> None:
+    def base(self, value: Address) -> None:
         self._base = value
+
+    def addr(self, offset: int) -> Address:
+        return Address(self._base + offset)
 
     def rop_gadget(self, pattern: str):
         gadgets = set()
@@ -49,97 +52,92 @@ class ELF:
         return gadgets
 
     def r2(self, cmd: str) -> dict:
-        results = self._r.cmdj(cmd)
-        return results
+        results = self._rz.cmdj(cmd)
+        return results or {}
 
-    def got(self, target: str = "") -> dict[str, int] | int | None:
-        if not target:
-            return {reloc["name"]: self._base + reloc["vaddr"] for reloc in self._relocs if "name" in reloc.keys()}
-
+    def got(self, target: str) -> Address | None:
         for reloc in self._relocs:
             if "name" in reloc.keys() and re.search(target, reloc["name"]):
-                return self._base + reloc["vaddr"]
+                logger.debug("[got] %s: 0x%x", reloc["name"], self._base + reloc["vaddr"])
+                return Address(self._base + reloc["vaddr"])
 
         return None
 
-    def plt(self, target: str = "") -> dict[str, int] | int | None:
-        if not target:
-            return {func["name"]: self._base + func["offset"] for func in self._funcs}
+    def gots(self) -> dict[str, Address]:
+        return {reloc["name"]: Address(self._base + reloc["vaddr"]) for reloc in self._relocs if "vaddr" in reloc.keys()}
 
+    def plt(self, target: str) -> Address | None:
         for func in self._funcs:
             if re.search(target, func["name"]):
-                return self._base + func["offset"]
+                return Address(self._base + func["offset"])
 
         return None
 
-    def str(self, target: str = "") -> dict[str, int] | int | None:
-        if not target:
-            return {str_["string"]: self._base + str_["vaddr"] for str_ in self._strs}
+    def plts(self) -> dict[str, Address]:
+        return {func["name"]: Address(self._base + func["offset"]) for func in self._funcs if "offset" in func.keys()}
 
+    def str(self, target: str) -> Address | None:
         for str_ in self._strs:
             if re.search(target, str_["string"]):
-                return self._base + str_["vaddr"]
+                return Address(self._base + str_["vaddr"])
 
+        logger.warning("Not found %s", target)
         return None
 
-    def sym(self, target: str = "") -> dict[str, int] | int | None:
-        if not target:
-            return {sym["name"]: self._base + sym["vaddr"] for sym in self._syms}
+    def strs(self) -> dict:
+        return {str_["string"]: Address(self._base + str_["vaddr"]) for str_ in self._strs if "vaddr" in str_.keys()}
 
+    def sym(self, target: str) -> Address | None:
         for sym in self._syms:
             if re.search(target, sym["name"]):
-                return self._base + sym["vaddr"]
+                logger.debug("[sym] %s: 0x%x", sym["name"], self._base + sym["vaddr"])
+                return Address(self._base + sym["vaddr"])
 
+        logger.warning("Not found %s", target)
         return None
 
-    def _get_rop_gadget(self, pattern: str):
-        results = self._r.cmdj(f"/Rj {pattern}")
-        return results
+    def syms(self) -> dict:
+        return {sym["name"]: Address(self._base + sym["vaddr"]) for sym in self._syms if "vaddr" in sym.keys()}
 
-    def _get_funcs(self) -> dict[str, int]:
-        results = self._r.cmdj("aflj")
-        return results
+    def _get_rop_gadget(self, pattern: str) -> dict:
+        results = self._rz.cmdj(f"/Rj {pattern}")
+        return results or {}
 
-    def _get_relocs(self) -> dict[str, int]:
-        results = self._r.cmdj("irj")
-        return results
+    def _get_funcs(self) -> dict:
+        results = self._rz.cmdj("aflj")
+        return results or {}
 
-    def _get_strs(self) -> dict[str, int]:
-        results = self._r.cmdj("izj")
-        return results
+    def _get_relocs(self) -> dict:
+        results = self._rz.cmdj("irj")
+        return results or {}
 
-    def _get_info(self) -> dict[str]:
-        results = self._r.cmdj("iIj")
-        return results
+    def _get_strs(self) -> dict:
+        results = self._rz.cmdj("izj")
+        return results or {}
 
-    def _get_syms(self) -> dict[str, int]:
-        results = self._r.cmdj("isj")
-        return results
+    def _get_info(self) -> dict:
+        results = self._rz.cmdj("iIj")
+        return results or {}
+
+    def _get_syms(self) -> dict:
+        results = self._rz.cmdj("isj")
+        return results or {}
 
     def __str__(self):
-        enabled = lambda x: "Enabled" if x else "Disabled"
         result = f"{self.path.resolve()!s}\n"
         mt = MarkdownTable(
             rows=[
                 ["Arch", self._info["arch"]],
                 ["RELRO", self._info["relro"].title()],
-                ["Canary", enabled(self._info["canary"])],
-                ["NX", enabled(self._info["nx"])],
-                ["PIE", enabled(self._info["pic"])],
+                ["Canary", "Enabled" if self._info["canary"] else "Disabled"],
+                ["NX", "Enabled" if self._info["nx"] else "Disabled"],
+                ["PIE", "Enabled" if self._info["pic"] else "Disabled"],
                 ["Lang", self._info["lang"]],
             ]
         )
         result += mt.dump()
 
         return result
-
-    def asm(address: int, assembly):
-        self.bin[address] = assembly
-
-    def save(self, name: str):
-        with open(name, "wb") as f:
-            f.write(self.bin)
-        log.info(f"Saved {name!s}")
 
     def find(self, target) -> dict:
         results = {}
@@ -149,7 +147,12 @@ class ELF:
         results |= {"got": self.got(target)}
         return results
 
+    def close(self): ...
+
     # alias
-    relocs = got
-    funcs = plt
     __repr__ = __str__
+
+
+class Libc(ELF):
+    def __init__(self, path: str, level: int = 2):
+        super().__init__(path, level)

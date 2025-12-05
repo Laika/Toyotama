@@ -1,38 +1,57 @@
 import socket
+import subprocess
+from logging import getLogger
 
-from ..util.log import get_logger
-from .tube import Tube
+from toyotama.connect.tube import Tube
 
-logger = get_logger()
+logger = getLogger(__name__)
 
 
 class Socket(Tube):
-    def __init__(self, target: str, timeout: float = 30.0):
-        super().__init__()
+    def __init__(
+        self,
+        target: str,
+        timeout: float = 30.0,
+        ssl: bool = False,
+        ssl_context=None,
+        ssl_args=None,
+        *args,
+        **kwargs,
+    ):
+        """Create a socket connection to a remote host.
+
+        Args:
+        target (str): The target host and port. Example: "nc localhost 1234"
+        timeout (float, optional): Timeout in seconds. Defaults to 30.0.
+        """
+
+        super().__init__(*args, **kwargs)
         _, host, port = target.split()
         self.host: str = host
         self.port: int = int(port)
         self.timeout: float = timeout
+        self._is_alive: bool = True
+
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.sock.settimeout(timeout)
         self.sock.connect((self.host, self.port))
+        if ssl:
+            import ssl as ssl_
 
-    def _socket(self):
-        return self.sock
+            ssl_args = ssl_args or {}
+            ssl_context = ssl_context or ssl_.SSLContext(ssl_.PROTOCOL_TLSv1_2)
+            self.sock = ssl_context.wrap_socket(self.sock, **ssl_args)
 
-    def recv(self, n: int = 4096, debug: bool = True) -> bytes:
+    def recv(self, n: int = 4096) -> bytes:
         if self.sock is None:
             return b""
         buf = b""
         try:
             buf += self.sock.recv(n)
         except Exception as e:
-            logger.error(e)
+            logger.error("%s", e)
 
         self.recv_bytes += len(buf)
-
-        if debug:
-            logger.debug(f"[> {buf!r}")
 
         return buf
 
@@ -52,24 +71,25 @@ class Socket(Tube):
 
         try:
             self.sock.sendall(payload)
-            logger.debug(f"<] {payload!r}")
         except Exception as e:
-            self.is_alive = False
-            logger.error(e)
+            self._is_alive = False
+            logger.error("%s", e)
 
-    def pow(pattern: bytes, start: str | None = None, end: str | None = None, hash_func: str = "sha256") -> str:
-        command = "pow"
-        args = ["--hash", hash_func]
-        if start:
-            args += ["--start", start]
-        if end:
-            args += ["--end", end]
-        args += [pattern]
-        r = subprocess.run([command, *args], capture_output=True).stdout.decode().strip()
-        return r
+    def solve_hashcash(self, command: str) -> str:
+        commands = command.strip().split()
+        if commands[0] != "hashcash":
+            raise ValueError("Invalid hashcash command.")
+
+        result = subprocess.run(commands, capture_output=True, check=False).stdout.decode().strip()
+        self.sendline(result)
+
+        return result
+
+    def is_alive(self) -> bool:
+        return self._is_alive and self.sock is not None
 
     def close(self):
         if self.sock:
             self.sock.close()
             self.sock = None
-            logger.info(f"Connection to {self.host}:{self.port} closed.")
+            logger.info("Connection to %s:%d closed.", self.host, self.port)

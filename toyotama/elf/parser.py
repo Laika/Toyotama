@@ -1,10 +1,10 @@
+from logging import getLogger
 from pathlib import Path
 
 from toyotama.elf.const import *
 from toyotama.elf.elfstruct import Elf64_Ehdr
-from toyotama.util.log import get_logger
 
-logger = get_logger()
+logger = getLogger(__name__)
 
 
 class ParseError(Exception):
@@ -18,7 +18,6 @@ class ELFParser:
         self.fd = open(self.path, "rb")
 
         self.parse_ehdr()
-
 
     def __repr__(self) -> str:
         return f'ELFParser(path="{self.path.resolve()}")'
@@ -71,9 +70,17 @@ class ELFParser:
             and self.ehdr.e_ident[EI_MAG3] == ELFMAG3
         )
 
+    def __enter__(self):
+        return self
+
     def __exit__(self, exc_type, exc_val, exc_tb):
         if self.fd:
             self.fd.close()
+
+    def close(self):
+        if self.fd:
+            self.fd.close()
+            self.fd = None
 
 
 if __name__ == "__main__":
